@@ -12,6 +12,7 @@ export type Lesson = {
   id: string
   dia: number
   date: string
+  isoDate: string
   weekday: string
   topic: string
   category: CategoryKey
@@ -24,6 +25,7 @@ export const LESSONS: Lesson[] = [
   {
     id: "dia-12",
     dia: 12,
+    isoDate: "2026-07-14",
     date: "14 Jul",
     weekday: "Segunda",
     topic: "Como reverter a objeção 'tá caro' sem parecer desesperada",
@@ -35,6 +37,7 @@ export const LESSONS: Lesson[] = [
   {
     id: "dia-11",
     dia: 11,
+    isoDate: "2026-07-11",
     date: "11 Jul",
     weekday: "Quinta",
     topic: "Análise real: do 'não tenho dinheiro' ao fechamento",
@@ -46,6 +49,7 @@ export const LESSONS: Lesson[] = [
   {
     id: "dia-10",
     dia: 10,
+    isoDate: "2026-07-10",
     date: "10 Jul",
     weekday: "Quarta",
     topic: "Gatilhos de fechamento: quando e como usar sem pressionar",
@@ -57,6 +61,7 @@ export const LESSONS: Lesson[] = [
   {
     id: "dia-9",
     dia: 9,
+    isoDate: "2026-07-09",
     date: "9 Jul",
     weekday: "Terça",
     topic: "Mindset da closer: como não deixar semana difícil virar resultado ruim",
@@ -68,6 +73,7 @@ export const LESSONS: Lesson[] = [
   {
     id: "dia-8",
     dia: 8,
+    isoDate: "2026-07-08",
     date: "8 Jul",
     weekday: "Segunda",
     topic: "Taxa de conversão: o que seus números estão te dizendo",
@@ -79,6 +85,7 @@ export const LESSONS: Lesson[] = [
   {
     id: "dia-7",
     dia: 7,
+    isoDate: "2026-07-04",
     date: "4 Jul",
     weekday: "Quinta",
     topic: "Onde a conexão quebrou: análise de atendimento",
@@ -90,6 +97,7 @@ export const LESSONS: Lesson[] = [
   {
     id: "dia-6",
     dia: 6,
+    isoDate: "2026-07-03",
     date: "3 Jul",
     weekday: "Quarta",
     topic: "'Preciso pensar' — o que realmente está por trás disso",
@@ -101,6 +109,7 @@ export const LESSONS: Lesson[] = [
   {
     id: "dia-5",
     dia: 5,
+    isoDate: "2026-07-02",
     date: "2 Jul",
     weekday: "Terça",
     topic: "A pergunta que antecipa a conversão antes da oferta",

@@ -39,7 +39,7 @@ export default async function LessonPage({
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-5 py-14 space-y-12">
+      <main className="max-w-2xl mx-auto px-5 py-12 space-y-12">
         {/* ── Lesson header ── */}
         <div>
           <div className="flex items-end gap-4 mb-4">

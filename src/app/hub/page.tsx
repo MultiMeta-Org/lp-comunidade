@@ -8,7 +8,6 @@ import {
   Lock,
   ArrowRight,
 } from "lucide-react"
-import Link from "next/link"
 
 export const metadata = {
   title: "Hub da Aluna · DVP",
@@ -17,8 +16,9 @@ export const metadata = {
 
 export default function HubPage() {
   return (
-    <main className="min-h-screen flex flex-col items-center px-5 py-12">
-      <div className="w-full max-w-sm space-y-10">
+    <main className="relative min-h-screen flex flex-col items-center justify-center px-5 py-12 overflow-hidden">
+      <Decor />
+      <div className="relative z-10 w-full max-w-4xl space-y-8">
 
         {/* ── Brand + Avatar ── */}
         <div className="text-center space-y-4">
@@ -38,81 +38,57 @@ export default function HubPage() {
           </div>
         </div>
 
-        {/* ── Comunidade ── */}
-        <div className="space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">
-            Comunidade
-          </p>
+        {/* ── Bento box ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 auto-rows-[140px] gap-3">
 
-          <StandardLink
+          {/* VIP — feature largo */}
+          <BentoTile
+            href="#"
+            icon={Crown}
+            label="Comunidade VIP"
+            description="Seu espaço exclusivo"
+            variant="secondary"
+            className="col-span-2"
+          />
+
+          {/* Aula ao Vivo — feature alto */}
+          <BentoTile
+            href="#"
+            icon={Video}
+            label="Aula ao Vivo"
+            description="Toda sexta às 9h · mesmo link"
+            variant="primary"
+            className="row-span-2"
+          />
+
+          <BentoTile
+            href="#"
             icon={MessageCircle}
-            label="Suporte WhatsApp"
-            description="Fale com a equipe"
-            href="#"
+            label="Suporte"
+            description="WhatsApp"
           />
 
-          <StandardLink
+          <BentoTile
+            href="#"
             icon={Users}
-            label="Grupo de Todas as Alunas"
-            description="Comunidade gratuita"
-            href="#"
+            label="Todas as Alunas"
+            description="Grupo gratuito"
           />
 
-          {/* VIP — destaque */}
-          <a
+          <BentoTile
             href="#"
-            className="flex items-center gap-4 w-full rounded-xl bg-secondary text-secondary-foreground px-5 py-4 hover:opacity-90 transition-opacity"
-          >
-            <Crown className="w-5 h-5 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">Comunidade VIP</p>
-              <p className="text-xs opacity-70 mt-0.5">Seu espaço exclusivo</p>
-            </div>
-            <ArrowRight className="w-4 h-4 opacity-70 flex-shrink-0" />
-          </a>
-        </div>
-
-        {/* ── Ferramentas ── */}
-        <div className="space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">
-            Ferramentas
-          </p>
-
-          <StandardLink
             icon={BookOpen}
             label="Notion"
-            description="Seus materiais e templates"
-            href="#"
+            description="Materiais e templates"
           />
 
           {/* Marketplace — bloqueado */}
-          <div className="flex items-center gap-4 w-full rounded-xl border border-border bg-card px-5 py-4 opacity-50 cursor-not-allowed">
-            <ShoppingBag className="w-5 h-5 flex-shrink-0 text-foreground" />
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm text-foreground">Marketplace</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Disponível no 8º dia</p>
-            </div>
-            <Lock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-          </div>
-        </div>
-
-        {/* ── Ao Vivo ── */}
-        <div className="space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">
-            Ao Vivo
-          </p>
-
-          <a
-            href="#"
-            className="flex items-center gap-4 w-full rounded-xl bg-primary text-primary-foreground px-5 py-4 hover:opacity-90 transition-opacity"
-          >
-            <Video className="w-5 h-5 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">Aula ao Vivo</p>
-              <p className="text-xs opacity-70 mt-0.5">Toda sexta às 9h · mesmo link</p>
-            </div>
-            <ArrowRight className="w-4 h-4 opacity-70 flex-shrink-0" />
-          </a>
+          <BentoTile
+            icon={ShoppingBag}
+            label="Marketplace"
+            description="Disponível no 8º dia"
+            locked
+          />
         </div>
 
         <p className="text-center text-xs text-muted-foreground pt-2">
@@ -123,28 +99,159 @@ export default function HubPage() {
   )
 }
 
-function StandardLink({
+/* ── Arte decorativa (line art botânico) ── */
+function Decor() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 select-none">
+      {/* Galho de folhas — topo esquerdo */}
+      <Sprig className="hidden sm:block absolute -left-6 top-10 w-28 lg:w-36 text-primary opacity-20 -rotate-12" />
+
+      {/* Galho de folhas — base direita (espelhado) */}
+      <Sprig className="hidden sm:block absolute -right-8 bottom-8 w-28 lg:w-40 text-secondary opacity-20 rotate-[195deg]" />
+
+      {/* Sol nascente — topo direito */}
+      <Sun className="hidden md:block absolute right-16 top-24 w-20 lg:w-24 text-secondary opacity-25" />
+
+      {/* Semente / broto — base esquerda */}
+      <Seedhead className="hidden md:block absolute left-16 bottom-20 w-16 lg:w-20 text-primary opacity-25" />
+
+      {/* Rabisco ondulado — sob o cabeçalho */}
+      <Squiggle className="absolute left-1/2 top-6 -translate-x-1/2 w-40 sm:w-56 text-secondary opacity-15" />
+    </div>
+  )
+}
+
+function Sprig({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 140 240"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M70 236C64 196 74 168 68 132 62 96 74 60 70 8" />
+      <path d="M68 128C48 120 34 104 34 82 56 86 68 106 68 128Z" />
+      <path d="M70 88C50 80 36 64 36 42 58 46 70 66 70 88Z" />
+      <path d="M69 150C89 142 103 126 103 104 81 108 69 128 69 150Z" />
+      <path d="M71 106C91 98 105 82 105 60 83 64 71 84 71 106Z" />
+    </svg>
+  )
+}
+
+function Sun({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 120 120"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <circle cx="60" cy="60" r="20" />
+      <path d="M60 12v14M60 94v14M12 60h14M94 60h14M26 26l10 10M84 84l10 10M94 26 84 36M36 84 26 94" />
+    </svg>
+  )
+}
+
+function Seedhead({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 100 160"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M50 156V54" />
+      <path d="M50 54C50 30 66 14 84 10 82 34 68 52 50 54Z" />
+      <path d="M50 78C40 72 30 60 30 44 44 48 52 62 50 78Z" />
+      <path d="M50 104C62 98 74 86 74 70 58 74 50 88 50 104Z" />
+    </svg>
+  )
+}
+
+function Squiggle({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 220 32"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      className={className}
+    >
+      <path d="M6 16C26 2 40 30 62 16S104 2 126 16s44 14 66 0" />
+    </svg>
+  )
+}
+
+function BentoTile({
   icon: Icon,
   label,
   description,
   href,
+  variant = "default",
+  locked = false,
+  className = "",
 }: {
   icon: React.ElementType
   label: string
   description: string
-  href: string
+  href?: string
+  variant?: "default" | "primary" | "secondary"
+  locked?: boolean
+  className?: string
 }) {
-  return (
-    <a
-      href={href}
-      className="flex items-center gap-4 w-full rounded-xl border border-border bg-card px-5 py-4 hover:bg-accent transition-colors"
-    >
-      <Icon className="w-5 h-5 flex-shrink-0 text-foreground" />
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm text-foreground">{label}</p>
-        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+  const surface =
+    variant === "primary"
+      ? "bg-primary text-primary-foreground"
+      : variant === "secondary"
+      ? "bg-secondary text-secondary-foreground"
+      : "border border-border bg-card text-foreground"
+
+  const content = (
+    <>
+      <div className="flex items-center justify-between">
+        <Icon className="w-6 h-6 flex-shrink-0" />
+        {locked ? (
+          <Lock className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <ArrowRight
+            className={`w-4 h-4 ${variant === "default" ? "text-muted-foreground" : "opacity-70"}`}
+          />
+        )}
       </div>
-      <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+      <div>
+        <p className="font-semibold text-sm leading-tight">{label}</p>
+        <p
+          className={`text-xs mt-0.5 leading-tight ${
+            variant === "default" ? "text-muted-foreground" : "opacity-70"
+          }`}
+        >
+          {description}
+        </p>
+      </div>
+    </>
+  )
+
+  const base = `flex flex-col justify-between rounded-2xl p-4 h-full ${surface} ${className}`
+
+  if (locked || !href) {
+    return (
+      <div className={`${base} opacity-50 cursor-not-allowed`}>{content}</div>
+    )
+  }
+
+  return (
+    <a href={href} className={`${base} hover:opacity-90 transition-opacity`}>
+      {content}
     </a>
   )
 }
