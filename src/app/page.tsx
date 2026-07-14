@@ -1,142 +1,106 @@
-import {
-  MessageCircle,
-  Users,
-  Crown,
-  ShoppingBag,
-  BookOpen,
-  Video,
-  Lock,
-} from "lucide-react";
+import { FileText, MessageCircle } from "lucide-react"
+import { LESSONS, TODAY, CATEGORIES } from "@/lib/lessons"
+import { Library } from "@/components/library"
+import { AudioPlayer } from "@/components/audio-player"
 
-const LINKS = [
-  {
-    id: "whatsapp-suporte",
-    icon: MessageCircle,
-    label: "Suporte WhatsApp",
-    description: "Fale com a equipe de suporte",
-    href: "#",
-    variant: "primary" as const,
-    locked: false,
-  },
-  {
-    id: "grupo-alunas",
-    icon: Users,
-    label: "Grupo de Todas as Alunas",
-    description: "Comunidade gratuita com todas as participantes",
-    href: "#",
-    variant: "default" as const,
-    locked: false,
-  },
-  {
-    id: "comunidade-vip",
-    icon: Crown,
-    label: "Comunidade VIP",
-    description: "Seu espaço exclusivo de alunas avançadas",
-    href: "#",
-    variant: "secondary" as const,
-    locked: false,
-  },
-  {
-    id: "marketplace",
-    icon: ShoppingBag,
-    label: "Marketplace",
-    description: "Disponível a partir do 8º dia",
-    href: "#",
-    variant: "default" as const,
-    locked: true,
-  },
-  {
-    id: "notion",
-    icon: BookOpen,
-    label: "Notion — Sua Ferramenta de Trabalho",
-    description: "Acesse seus materiais e templates",
-    href: "#",
-    variant: "default" as const,
-    locked: false,
-  },
-  {
-    id: "aula-ao-vivo",
-    icon: Video,
-    label: "Aula ao Vivo — Sextas às 9h",
-    description: "Link fixo toda sexta-feira",
-    href: "#",
-    variant: "default" as const,
-    locked: false,
-  },
-];
+export default function VIPPage() {
+  const pastLessons = LESSONS.slice(1)
 
-type Variant = "primary" | "secondary" | "default";
-
-const variantClasses: Record<Variant, string> = {
-  primary:
-    "bg-primary text-primary-foreground hover:opacity-90 border-transparent",
-  secondary:
-    "bg-secondary text-secondary-foreground hover:opacity-90 border-transparent",
-  default: "bg-card text-card-foreground hover:bg-accent border-border",
-};
-
-export default function HubPage() {
   return (
-    <main className="flex flex-col items-center min-h-screen py-16 px-4">
-      <div className="w-full max-w-md space-y-10">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <p className="text-sm font-semibold tracking-widest uppercase text-muted-foreground">
-            MultiMeta
-          </p>
-          <h1 className="text-3xl font-bold text-foreground leading-tight">
-            Hub da Aluna DVP
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Tudo que você precisa, num lugar só.
-          </p>
-        </div>
-
-        {/* Avatar placeholder */}
-        <div className="flex justify-center">
-          <div className="w-20 h-20 rounded-full bg-muted border-2 border-border flex items-center justify-center">
-            <span className="text-2xl font-bold text-muted-foreground">A</span>
+    <div className="min-h-screen">
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-10 border-b border-border bg-card backdrop-blur-sm bg-opacity-90">
+        <div className="max-w-4xl mx-auto px-5 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              MultiMeta
+            </span>
+            <span className="text-border">·</span>
+            <span className="text-sm font-semibold text-foreground">
+              Comunidade VIP
+            </span>
           </div>
+          <a
+            href="#"
+            className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-full hover:opacity-90 transition-opacity"
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            WhatsApp VIP
+          </a>
         </div>
+      </header>
 
-        {/* Links */}
-        <div className="space-y-3">
-          {LINKS.map(
-            ({ id, icon: Icon, label, description, href, variant, locked }) => (
-              <a
-                key={id}
-                href={locked ? undefined : href}
-                aria-disabled={locked}
-                className={[
-                  "flex items-center gap-4 w-full rounded-lg border px-4 py-4 transition-all",
-                  variantClasses[variant],
-                  locked
-                    ? "opacity-50 cursor-not-allowed pointer-events-none"
-                    : "cursor-pointer shadow-sm hover:shadow-md",
-                ].join(" ")}
-              >
-                <div className="flex-shrink-0">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm leading-tight">{label}</p>
-                  <p className="text-xs mt-0.5 opacity-70 truncate">
-                    {description}
-                  </p>
-                </div>
-                {locked && (
-                  <Lock className="w-4 h-4 flex-shrink-0 opacity-60" />
-                )}
-              </a>
-            )
-          )}
-        </div>
+      <main className="max-w-4xl mx-auto px-5 py-12 space-y-16">
+        {/* ── Hoje ── */}
+        <section>
+          <div className="flex items-baseline gap-3 mb-5">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-secondary">
+              Hoje
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {TODAY.weekday} · {TODAY.date}
+            </span>
+          </div>
 
-        {/* Footer */}
-        <p className="text-center text-xs text-muted-foreground pt-4">
-          © {new Date().getFullYear()} MultiMeta · DVP
-        </p>
-      </div>
-    </main>
-  );
+          <div className="relative overflow-hidden rounded-2xl border-l-4 border-secondary bg-card p-7 shadow-sm">
+            {/* Signature background number */}
+            <span
+              className="absolute right-4 top-2 font-serif font-bold text-foreground pointer-events-none select-none leading-none"
+              style={{ fontSize: "10rem", opacity: 0.06 }}
+              aria-hidden
+            >
+              {TODAY.dia}
+            </span>
+
+            <div className="relative max-w-lg">
+              <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-secondary-subtle text-secondary mb-4">
+                {CATEGORIES[TODAY.category]}
+              </span>
+
+              <h1 className="font-serif text-2xl font-bold text-foreground leading-snug mb-2">
+                {TODAY.topic}
+              </h1>
+              <p className="text-sm text-muted-foreground mb-6">
+                {TODAY.description}
+              </p>
+
+              <AudioPlayer label={TODAY.topic} />
+
+              <div className="flex items-center gap-4 mt-4">
+                <a
+                  href={TODAY.pdfUrl}
+                  className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  Baixar PDF
+                </a>
+                <span className="text-border">·</span>
+                <a
+                  href="#"
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Grupo ao vivo às 9h
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Biblioteca ── */}
+        <section>
+          <div className="flex items-baseline gap-3 mb-6">
+            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Biblioteca
+            </h2>
+            <span className="text-xs text-muted-foreground">
+              {pastLessons.length} aulas
+            </span>
+          </div>
+
+          <Library lessons={pastLessons} />
+        </section>
+      </main>
+    </div>
+  )
 }

@@ -1,0 +1,114 @@
+export const CATEGORIES = {
+  objecao: "Objeção",
+  conversao: "Conversão",
+  analise: "Análise",
+  mindset: "Mindset",
+  fechamento: "Fechamento",
+} as const
+
+export type CategoryKey = keyof typeof CATEGORIES
+
+export type Lesson = {
+  id: string
+  dia: number
+  date: string
+  weekday: string
+  topic: string
+  category: CategoryKey
+  description: string
+  pdfUrl: string
+  audioUrl: string
+}
+
+export const LESSONS: Lesson[] = [
+  {
+    id: "dia-12",
+    dia: 12,
+    date: "14 Jul",
+    weekday: "Segunda",
+    topic: "Como reverter a objeção 'tá caro' sem parecer desesperada",
+    category: "objecao",
+    description: "Três scripts testados para transformar resistência de preço em urgência de compra.",
+    pdfUrl: "#",
+    audioUrl: "#",
+  },
+  {
+    id: "dia-11",
+    dia: 11,
+    date: "11 Jul",
+    weekday: "Quinta",
+    topic: "Análise real: do 'não tenho dinheiro' ao fechamento",
+    category: "analise",
+    description: "Estudo de caso com transcrição e anotações do que virou o jogo em cada etapa.",
+    pdfUrl: "#",
+    audioUrl: "#",
+  },
+  {
+    id: "dia-10",
+    dia: 10,
+    date: "10 Jul",
+    weekday: "Quarta",
+    topic: "Gatilhos de fechamento: quando e como usar sem pressionar",
+    category: "fechamento",
+    description: "A diferença entre urgência real e urgência fabricada — e por que as clientes percebem.",
+    pdfUrl: "#",
+    audioUrl: "#",
+  },
+  {
+    id: "dia-9",
+    dia: 9,
+    date: "9 Jul",
+    weekday: "Terça",
+    topic: "Mindset da closer: como não deixar semana difícil virar resultado ruim",
+    category: "mindset",
+    description: "Ritual de reset mental para semanas de baixa conversão.",
+    pdfUrl: "#",
+    audioUrl: "#",
+  },
+  {
+    id: "dia-8",
+    dia: 8,
+    date: "8 Jul",
+    weekday: "Segunda",
+    topic: "Taxa de conversão: o que seus números estão te dizendo",
+    category: "conversao",
+    description: "Como calcular e interpretar sua taxa para tomar decisões mais precisas.",
+    pdfUrl: "#",
+    audioUrl: "#",
+  },
+  {
+    id: "dia-7",
+    dia: 7,
+    date: "4 Jul",
+    weekday: "Quinta",
+    topic: "Onde a conexão quebrou: análise de atendimento",
+    category: "analise",
+    description: "Como identificar o momento exato em que a cliente se fechou — e o que fazer diferente.",
+    pdfUrl: "#",
+    audioUrl: "#",
+  },
+  {
+    id: "dia-6",
+    dia: 6,
+    date: "3 Jul",
+    weekday: "Quarta",
+    topic: "'Preciso pensar' — o que realmente está por trás disso",
+    category: "objecao",
+    description: "As 3 razões reais por trás da resposta mais comum na sua call.",
+    pdfUrl: "#",
+    audioUrl: "#",
+  },
+  {
+    id: "dia-5",
+    dia: 5,
+    date: "2 Jul",
+    weekday: "Terça",
+    topic: "A pergunta que antecipa a conversão antes da oferta",
+    category: "conversao",
+    description: "Uma pergunta simples que muda o estado emocional da cliente no momento certo.",
+    pdfUrl: "#",
+    audioUrl: "#",
+  },
+]
+
+export const TODAY = LESSONS[0]
