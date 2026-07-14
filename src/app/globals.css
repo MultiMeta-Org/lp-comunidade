@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+:root {
+  --background: #F5F2ED;
+  --foreground: #2A2A2A;
+  --card: #FCFAF8;
+  --card-foreground: #2A2A2A;
+  --popover: #FCFAF8;
+  --popover-foreground: #2A2A2A;
+  --primary: #758E67;
+  --primary-foreground: #FFFFFF;
+  --secondary: #C76E49;
+  --secondary-foreground: #FFFFFF;
+  --muted: #E9E0D5;
+  --muted-foreground: #5A524A;
+  --accent: #EDE7DD;
+  --accent-foreground: #2A2A2A;
+  --destructive: #B54A4B;
+  --destructive-foreground: #FFFFFF;
+  --success: #758E67;
+  --success-foreground: #FFFFFF;
+  --warning: #E2B04B;
+  --warning-foreground: #2A2A2A;
+  --info: #6B8DAD;
+  --info-foreground: #FFFFFF;
+  --primary-subtle: #D0DEC8;
+  --secondary-subtle: #F0D1C1;
+  --success-subtle: #D0DEC8;
+  --warning-subtle: #F5E4B8;
+  --info-subtle: #C9DBEA;
+  --destructive-subtle: #ECCECE;
+  --muted-subtle: #E9E0D5;
+  --border: #D8CFC4;
+  --input: #D8CFC4;
+  --ring: #758E67;
+  --radius: 0.5rem;
+  --font-sans: var(--font-geist-sans, Geist), ui-sans-serif, sans-serif, system-ui;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --shadow-sm: 0px 4px 12px -3.5px hsl(0 0% 0% / 0.05), 0px 1px 2px -4.5px hsl(0 0% 0% / 0.05);
+  --shadow-md: 0px 4px 12px -3.5px hsl(0 0% 0% / 0.05), 0px 2px 4px -4.5px hsl(0 0% 0% / 0.05);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-secondary-subtle: var(--secondary-subtle);
+  --color-muted-subtle: var(--muted-subtle);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
