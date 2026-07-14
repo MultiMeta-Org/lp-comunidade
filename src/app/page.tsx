@@ -42,7 +42,7 @@ export default function VIPPage() {
             </span>
           </div>
 
-          <div className="relative overflow-hidden rounded-2xl border-l-4 border-secondary bg-card p-7 shadow-sm">
+          <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-7 shadow-sm">
             {/* Signature background number */}
             <span
               className="absolute right-4 top-2 font-serif font-bold text-foreground pointer-events-none select-none leading-none"
