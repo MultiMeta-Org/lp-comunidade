@@ -1,10 +1,16 @@
 import { FileText, MessageCircle } from "lucide-react"
-import { LESSONS, TODAY, CATEGORIES } from "@/lib/lessons"
+import { CATEGORIES } from "@/lib/lessons"
+import { getLessons } from "@/lib/lessons-server"
+import { requireReleasedAccess } from "@/lib/guard"
 import { Library } from "@/components/library"
 import { AudioPlayer } from "@/components/audio-player"
 
-export default function VIPPage() {
-  const pastLessons = LESSONS.slice(1)
+export default async function VIPPage() {
+  await requireReleasedAccess()
+
+  const lessons = await getLessons()
+  const today = lessons[0]
+  const pastLessons = lessons.slice(1)
 
   return (
     <div className="min-h-screen">
@@ -32,13 +38,14 @@ export default function VIPPage() {
 
       <main className="max-w-4xl mx-auto px-5 py-12 space-y-16">
         {/* ── Hoje ── */}
+        {today && (
         <section>
           <div className="flex items-baseline gap-3 mb-5">
             <span className="text-[10px] font-bold uppercase tracking-widest text-secondary">
               Hoje
             </span>
             <span className="text-xs text-muted-foreground">
-              {TODAY.weekday} · {TODAY.date}
+              {today.weekday} · {today.date}
             </span>
           </div>
 
@@ -49,26 +56,26 @@ export default function VIPPage() {
               style={{ fontSize: "10rem", opacity: 0.06 }}
               aria-hidden
             >
-              {TODAY.dia}
+              {today.dia}
             </span>
 
             <div className="relative max-w-lg">
               <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-secondary-subtle text-secondary mb-4">
-                {CATEGORIES[TODAY.category]}
+                {CATEGORIES[today.category]}
               </span>
 
               <h1 className="font-serif text-2xl font-bold text-foreground leading-snug mb-2">
-                {TODAY.topic}
+                {today.topic}
               </h1>
               <p className="text-sm text-muted-foreground mb-6">
-                {TODAY.description}
+                {today.description}
               </p>
 
-              <AudioPlayer label={TODAY.topic} />
+              <AudioPlayer label={today.topic} src={today.audioUrl} />
 
               <div className="flex items-center gap-4 mt-4">
                 <a
-                  href={TODAY.pdfUrl}
+                  href={today.pdfUrl}
                   className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-2"
                 >
                   <FileText className="w-4 h-4" />
@@ -86,6 +93,7 @@ export default function VIPPage() {
             </div>
           </div>
         </section>
+        )}
 
         {/* ── Biblioteca ── */}
         <section>

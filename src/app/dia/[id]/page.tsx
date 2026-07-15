@@ -1,20 +1,20 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, FileText, MessageCircle } from "lucide-react"
-import { LESSONS, CATEGORIES } from "@/lib/lessons"
+import { CATEGORIES } from "@/lib/lessons"
+import { getLesson } from "@/lib/lessons-server"
+import { requireReleasedAccess } from "@/lib/guard"
 import { AudioPlayer } from "@/components/audio-player"
-
-export function generateStaticParams() {
-  return LESSONS.map((l) => ({ id: l.id }))
-}
 
 export default async function LessonPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
+  await requireReleasedAccess()
+
   const { id } = await params
-  const lesson = LESSONS.find((l) => l.id === id)
+  const lesson = await getLesson(id)
   if (!lesson) notFound()
 
   return (
@@ -77,7 +77,7 @@ export default async function LessonPage({
           <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Áudio
           </h2>
-          <AudioPlayer label={lesson.topic} />
+          <AudioPlayer label={lesson.topic} src={lesson.audioUrl} />
         </section>
 
         {/* ── PDF ── */}

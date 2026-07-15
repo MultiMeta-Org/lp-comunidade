@@ -9,12 +9,16 @@ import {
   ArrowRight,
 } from "lucide-react"
 
+import { requireReleasedAccess } from "@/lib/guard"
+
 export const metadata = {
   title: "Hub da Aluna · DVP",
   description: "Tudo que você precisa, num lugar só.",
 }
 
-export default function HubPage() {
+export default async function HubPage() {
+  await requireReleasedAccess()
+
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center px-5 py-12 overflow-hidden">
       <Decor />

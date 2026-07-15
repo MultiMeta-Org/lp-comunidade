@@ -1,3 +1,6 @@
+// Módulo client-safe: constantes, tipos e seed. SEM dependências de servidor.
+// Os fetchers (getLessons/getLesson) ficam em lessons-server.ts.
+
 export const CATEGORIES = {
   objecao: "Objeção",
   conversao: "Conversão",
@@ -21,7 +24,22 @@ export type Lesson = {
   audioUrl: string
 }
 
-export const LESSONS: Lesson[] = [
+const MONTHS = [
+  "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+  "Jul", "Ago", "Set", "Out", "Nov", "Dez",
+]
+
+/** "2026-07-14" → "14 Jul" (formato de exibição usado nos cards). */
+export function displayDate(iso: string): string {
+  const [, m, d] = iso.split("-")
+  return `${Number(d)} ${MONTHS[Number(m) - 1] ?? ""}`
+}
+
+// ─────────────────────────────────────────────────────────────
+// SEED_LESSONS — conteúdo inicial (também em supabase/seed.sql).
+// Serve de fallback quando o Supabase ainda não está configurado.
+// ─────────────────────────────────────────────────────────────
+export const SEED_LESSONS: Lesson[] = [
   {
     id: "dia-12",
     dia: 12,
@@ -119,5 +137,3 @@ export const LESSONS: Lesson[] = [
     audioUrl: "#",
   },
 ]
-
-export const TODAY = LESSONS[0]
