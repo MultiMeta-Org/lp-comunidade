@@ -28,6 +28,13 @@ export async function requireReleasedAccess(): Promise<string> {
   return email
 }
 
+/** True se o e-mail está na allowlist comunidade.admins (não redireciona). */
+export async function isAdmin(email: string): Promise<boolean> {
+  const db = createComunidadeServiceClient()
+  const { data } = await db.from("admins").select("email").eq("email", email).maybeSingle()
+  return Boolean(data)
+}
+
 /** Guard do /admin: exige sessão E e-mail na allowlist comunidade.admins. */
 export async function requireAdmin(): Promise<string> {
   const email = await currentUserEmail()

@@ -12,6 +12,7 @@ import {
 import { requireReleasedAccess } from "@/lib/guard"
 import { getFeatureUnlock } from "@/lib/access"
 import { WHATSAPP_VIP_URL, MARKETPLACE_URL } from "@/lib/links"
+import { SiteHeader } from "@/components/site-header"
 
 /** "Disponível em X dias" para os tiles travados (Marketplace/Notion). */
 function unlockLabel(days: number): string {
@@ -30,7 +31,9 @@ export default async function HubPage() {
   const unlock = await getFeatureUnlock(email)
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-start px-5 py-12 overflow-hidden">
+    <div className="min-h-screen">
+      <SiteHeader page="hub" />
+      <main className="relative flex flex-col items-center justify-start px-5 py-12 overflow-hidden">
       <Decor />
       <div className="relative z-10 w-full max-w-4xl space-y-8">
 
@@ -99,7 +102,8 @@ export default async function HubPage() {
           © {new Date().getFullYear()} MultiMeta
         </p>
       </div>
-    </main>
+      </main>
+    </div>
   )
 }
 

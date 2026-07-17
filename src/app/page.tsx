@@ -5,6 +5,7 @@ import { getLessons } from "@/lib/lessons-server"
 import { requireReleasedAccess } from "@/lib/guard"
 import { Library } from "@/components/library"
 import { AudioPlayer } from "@/components/audio-player"
+import { SiteHeader } from "@/components/site-header"
 
 export default async function VIPPage() {
   await requireReleasedAccess()
@@ -15,29 +16,7 @@ export default async function VIPPage() {
 
   return (
     <div className="min-h-screen">
-      {/* ── Header ── */}
-      <header className="sticky top-0 z-10 border-b border-border bg-card backdrop-blur-sm bg-opacity-90">
-        <div className="max-w-4xl mx-auto px-5 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              MultiMeta
-            </span>
-            <span className="text-border">·</span>
-            <span className="text-sm font-semibold text-foreground">
-              Comunidade VIP
-            </span>
-          </div>
-          <a
-            href={WHATSAPP_VIP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-full hover:opacity-90 transition-opacity"
-          >
-            <MessageCircle className="w-3.5 h-3.5" />
-            WhatsApp VIP
-          </a>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="max-w-4xl mx-auto px-5 py-12 space-y-16">
         {/* ── Hoje ── */}
