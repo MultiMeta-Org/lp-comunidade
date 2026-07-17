@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CATEGORIES, type CategoryKey } from "@/lib/lessons"
+import { CATEGORIES, categoryLabel, weekdayFromIso } from "@/lib/lessons"
 import {
   upsertLesson,
   deleteLesson,
@@ -34,6 +35,16 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
 
   const set = <K extends keyof LessonRow>(key: K, value: LessonRow[K]) =>
     setDraft((d) => (d ? { ...d, [key]: value } : d))
+
+  // Número da próxima aula: incrementa a partir do maior existente (issue #7).
+  const nextDia = rows.reduce((max, r) => Math.max(max, r.dia), 0) + 1
+
+  // Categorias já usadas que não estão no mapa fixo (para sugerir no datalist).
+  const extraCategories = [...new Set(rows.map((r) => r.category))].filter(
+    (c) => !(c in CATEGORIES)
+  )
+
+  const startNew = () => setDraft({ ...EMPTY, dia: nextDia, id: `dia-${nextDia}` })
 
   const save = (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,7 +76,7 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{rows.length} aula(s)</p>
-        <Button onClick={() => setDraft({ ...EMPTY })} disabled={pending}>
+        <Button onClick={startNew} disabled={pending}>
           Nova aula
         </Button>
       </div>
@@ -75,15 +86,11 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
       {draft && (
         <form onSubmit={save} className="grid gap-4 rounded-xl border border-border bg-card p-5">
           <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="ID (ex.: dia-13)">
-              <Input value={draft.id} onChange={(e) => set("id", e.target.value)} required />
-            </Field>
-            <Field label="Dia (número)">
-              <Input
-                type="number"
-                value={draft.dia || ""}
-                onChange={(e) => set("dia", Number(e.target.value))}
-              />
+            <Field label="Aula">
+              <div className="flex h-10 items-center rounded-md border border-input bg-muted/40 px-3 text-sm text-muted-foreground">
+                Dia {draft.dia}
+                {draft.isoDate ? ` · ${weekdayFromIso(draft.isoDate)}` : ""}
+              </div>
             </Field>
             <Field label="Data">
               <Input
@@ -93,25 +100,23 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
                 required
               />
             </Field>
-            <Field label="Dia da semana">
-              <Input
-                placeholder="Segunda"
-                value={draft.weekday}
-                onChange={(e) => set("weekday", e.target.value)}
-              />
-            </Field>
             <Field label="Categoria">
-              <select
-                className="flex h-10 w-full rounded-md border border-input bg-card px-3 text-sm"
+              <Input
+                list="lesson-categories"
                 value={draft.category}
-                onChange={(e) => set("category", e.target.value as CategoryKey)}
-              >
+                onChange={(e) => set("category", e.target.value)}
+                placeholder="Escolha ou digite uma nova"
+              />
+              <datalist id="lesson-categories">
                 {Object.entries(CATEGORIES).map(([k, v]) => (
                   <option key={k} value={k}>
                     {v}
                   </option>
                 ))}
-              </select>
+                {extraCategories.map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
             </Field>
             <Field label="Publicada">
               <label className="flex h-10 items-center gap-2 text-sm">
@@ -177,19 +182,22 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
               </tr>
             )}
             {rows.map((l) => (
-              <tr key={l.id} className="border-b border-border last:border-0">
+              <tr
+                key={l.id}
+                className="border-b border-border last:border-0 hover:bg-accent transition-colors"
+              >
                 <td className="px-4 py-3 text-muted-foreground">{l.dia}</td>
                 <td className="px-4 py-3">
                   <div className="font-medium text-foreground">{l.topic}</div>
                   <div className="text-xs text-muted-foreground">{l.isoDate}</div>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">{CATEGORIES[l.category]}</td>
+                <td className="px-4 py-3 text-muted-foreground">{categoryLabel(l.category)}</td>
                 <td className="px-4 py-3">
                   <button
                     type="button"
                     onClick={() => toggle(l.id, !l.published)}
                     disabled={pending}
-                    className={`rounded px-2 py-0.5 text-[11px] font-semibold ${
+                    className={`cursor-pointer rounded px-2 py-0.5 text-[11px] font-semibold ${
                       l.published
                         ? "bg-primary-subtle text-primary"
                         : "bg-muted text-muted-foreground"
@@ -209,6 +217,7 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
                     disabled={pending}
                     className="text-destructive"
                   >
+                    <Trash2 className="w-4 h-4" />
                     Excluir
                   </Button>
                 </td>

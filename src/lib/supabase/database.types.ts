@@ -99,7 +99,7 @@ export interface Database {
           iso_date: string
           weekday: string
           topic: string
-          category: CategoryKey
+          category: string
           description: string
           pdf_url: string | null
           audio_url: string | null
@@ -114,7 +114,7 @@ export interface Database {
           iso_date: string
           weekday: string
           topic: string
-          category: CategoryKey
+          category: string
           description: string
           pdf_url?: string | null
           audio_url?: string | null

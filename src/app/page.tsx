@@ -1,5 +1,6 @@
 import { FileText, MessageCircle } from "lucide-react"
-import { CATEGORIES } from "@/lib/lessons"
+import { categoryLabel } from "@/lib/lessons"
+import { WHATSAPP_VIP_URL } from "@/lib/links"
 import { getLessons } from "@/lib/lessons-server"
 import { requireReleasedAccess } from "@/lib/guard"
 import { Library } from "@/components/library"
@@ -27,7 +28,9 @@ export default async function VIPPage() {
             </span>
           </div>
           <a
-            href="#"
+            href={WHATSAPP_VIP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-full hover:opacity-90 transition-opacity"
           >
             <MessageCircle className="w-3.5 h-3.5" />
@@ -40,12 +43,9 @@ export default async function VIPPage() {
         {/* ── Hoje ── */}
         {today && (
         <section>
-          <div className="flex items-baseline gap-3 mb-5">
+          <div className="mb-5">
             <span className="text-[10px] font-bold uppercase tracking-widest text-secondary">
               Hoje
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {today.weekday} · {today.date}
             </span>
           </div>
 
@@ -60,9 +60,14 @@ export default async function VIPPage() {
             </span>
 
             <div className="relative max-w-lg">
-              <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-secondary-subtle text-secondary mb-4">
-                {CATEGORIES[today.category]}
-              </span>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4">
+                <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-secondary-subtle text-secondary">
+                  {categoryLabel(today.category)}
+                </span>
+                <span className="text-xs font-medium text-muted-foreground">
+                  {today.weekday} · {today.date}
+                </span>
+              </div>
 
               <h1 className="font-serif text-2xl font-bold text-foreground leading-snug mb-2">
                 {today.topic}
@@ -73,24 +78,41 @@ export default async function VIPPage() {
 
               <AudioPlayer label={today.topic} src={today.audioUrl} />
 
-              <div className="flex items-center gap-4 mt-4">
+              <div className="mt-5">
                 <a
                   href={today.pdfUrl}
-                  className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-2"
+                  download
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity"
                 >
                   <FileText className="w-4 h-4" />
                   Baixar PDF
                 </a>
-                <span className="text-border">·</span>
-                <a
-                  href="#"
-                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Grupo ao vivo às 9h
-                </a>
               </div>
             </div>
+          </div>
+
+          {/* ── Card ao vivo ── */}
+          <div className="mt-4 flex items-center gap-4 rounded-2xl border border-border bg-card px-6 py-5">
+            <div className="w-11 h-11 rounded-full bg-primary-subtle flex items-center justify-center flex-shrink-0">
+              <MessageCircle className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">
+                Grupo ao vivo às 9h
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Tire dúvidas sobre o tema de hoje com a turma
+              </p>
+            </div>
+            <a
+              href={WHATSAPP_VIP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              Entrar
+            </a>
           </div>
         </section>
         )}

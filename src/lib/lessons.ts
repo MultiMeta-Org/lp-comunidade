@@ -18,7 +18,7 @@ export type Lesson = {
   isoDate: string
   weekday: string
   topic: string
-  category: CategoryKey
+  category: string
   description: string
   pdfUrl: string
   audioUrl: string
@@ -33,6 +33,26 @@ const MONTHS = [
 export function displayDate(iso: string): string {
   const [, m, d] = iso.split("-")
   return `${Number(d)} ${MONTHS[Number(m) - 1] ?? ""}`
+}
+
+const WEEKDAYS = [
+  "Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado",
+]
+
+/** "2026-07-14" → "Segunda". Derivado da data (sem depender de input manual). */
+export function weekdayFromIso(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number)
+  if (!y || !m || !d) return ""
+  return WEEKDAYS[new Date(y, m - 1, d).getDay()] ?? ""
+}
+
+/**
+ * Rótulo de exibição da categoria. Usa o mapa CATEGORIES para as conhecidas
+ * e cai para title-case em categorias novas (criadas pelo admin).
+ */
+export function categoryLabel(cat: string): string {
+  if (cat in CATEGORIES) return CATEGORIES[cat as CategoryKey]
+  return cat.charAt(0).toUpperCase() + cat.slice(1)
 }
 
 // ─────────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
 import { requireAdmin } from "@/lib/guard"
-import type { CategoryKey } from "@/lib/lessons"
+import { weekdayFromIso } from "@/lib/lessons"
 
 export type ActionResult = { ok: boolean; error?: string }
 
@@ -13,7 +13,7 @@ export type LessonInput = {
   isoDate: string
   weekday: string
   topic: string
-  category: CategoryKey
+  category: string
   description: string
   pdfUrl: string
   audioUrl: string
@@ -29,25 +29,28 @@ export type LessonInput = {
 export async function upsertLesson(input: LessonInput): Promise<ActionResult> {
   await requireAdmin()
 
-  const id = input.id.trim()
-  if (!id) return { ok: false, error: "ID obrigatório (ex.: dia-13)." }
   if (!input.topic.trim()) return { ok: false, error: "Tópico obrigatório." }
   if (!input.isoDate) return { ok: false, error: "Data obrigatória." }
+
+  const dia = input.dia
+  // id e dia da semana são derivados — o admin não digita mais (issues #5/#6/#7).
+  const id = input.id.trim() || `dia-${dia}`
+  const category = input.category.trim() || "geral"
 
   const db = createComunidadeServiceClient()
   const { error } = await db.from("lessons").upsert(
     {
       id,
-      dia: input.dia,
+      dia,
       iso_date: input.isoDate,
-      weekday: input.weekday.trim(),
+      weekday: weekdayFromIso(input.isoDate),
       topic: input.topic.trim(),
-      category: input.category,
+      category,
       description: input.description.trim(),
       pdf_url: input.pdfUrl.trim() || null,
       audio_url: input.audioUrl.trim() || null,
       published: input.published,
-      sort_order: input.dia,
+      sort_order: dia,
     },
     { onConflict: "id" }
   )

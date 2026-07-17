@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 
 import { requireReleasedAccess } from "@/lib/guard"
+import { WHATSAPP_VIP_URL } from "@/lib/links"
 
 export const metadata = {
   title: "Hub da Aluna · DVP",
@@ -47,7 +48,7 @@ export default async function HubPage() {
 
           {/* VIP — feature largo */}
           <BentoTile
-            href="#"
+            href={WHATSAPP_VIP_URL}
             icon={Crown}
             label="Comunidade VIP"
             description="Seu espaço exclusivo"
@@ -253,8 +254,13 @@ function BentoTile({
     )
   }
 
+  const external = href.startsWith("http")
   return (
-    <a href={href} className={`${base} hover:opacity-90 transition-opacity`}>
+    <a
+      href={href}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      className={`${base} hover:opacity-90 transition-opacity`}
+    >
       {content}
     </a>
   )

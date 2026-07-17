@@ -10,10 +10,10 @@ import {
   List as ListIcon,
   X,
 } from "lucide-react"
-import { type Lesson, type CategoryKey, CATEGORIES } from "@/lib/lessons"
+import { type Lesson, categoryLabel } from "@/lib/lessons"
 
 const ALL = "all"
-type FilterValue = typeof ALL | CategoryKey
+type FilterValue = string
 type ViewMode = "grid" | "list"
 
 function normalize(s: string) {
@@ -40,7 +40,7 @@ export function Library({ lessons }: { lessons: Lesson[] }) {
       if (to && l.isoDate > to) return false
       if (q) {
         const haystack = normalize(
-          `${l.topic} ${l.description} ${CATEGORIES[l.category]}`
+          `${l.topic} ${l.description} ${categoryLabel(l.category)}`
         )
         if (!haystack.includes(q)) return false
       }
@@ -67,7 +67,7 @@ export function Library({ lessons }: { lessons: Lesson[] }) {
             <button
               onClick={() => setQuery("")}
               aria-label="Limpar busca"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -100,27 +100,27 @@ export function Library({ lessons }: { lessons: Lesson[] }) {
         {available.map((cat) => (
           <FilterPill
             key={cat}
-            label={CATEGORIES[cat]}
+            label={categoryLabel(cat)}
             active={filter === cat}
             onClick={() => setFilter(cat)}
           />
         ))}
 
-        <div className="flex items-center gap-1.5 ml-auto text-xs text-muted-foreground">
+        <div className="flex w-full sm:w-auto items-center gap-1.5 sm:ml-auto text-xs text-muted-foreground">
           <input
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
             aria-label="Data inicial"
-            className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-muted-foreground transition-colors"
+            className="min-w-0 flex-1 sm:flex-none rounded-full border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-muted-foreground transition-colors"
           />
-          <span>–</span>
+          <span className="flex-shrink-0">–</span>
           <input
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
             aria-label="Data final"
-            className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-muted-foreground transition-colors"
+            className="min-w-0 flex-1 sm:flex-none rounded-full border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-muted-foreground transition-colors"
           />
           {dateActive && (
             <button
@@ -129,7 +129,7 @@ export function Library({ lessons }: { lessons: Lesson[] }) {
                 setTo("")
               }}
               aria-label="Limpar datas"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="flex-shrink-0 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -177,7 +177,7 @@ function ViewButton({
       onClick={onClick}
       aria-label={label}
       aria-pressed={active}
-      className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
+      className={`flex items-center justify-center w-8 h-8 rounded-full cursor-pointer transition-colors ${
         active
           ? "bg-primary text-primary-foreground"
           : "text-muted-foreground hover:text-foreground"
@@ -200,7 +200,7 @@ function FilterPill({
   return (
     <button
       onClick={onClick}
-      className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+      className={`text-xs font-semibold px-3 py-1.5 rounded-full border cursor-pointer transition-colors ${
         active
           ? "bg-primary text-primary-foreground border-primary"
           : "bg-card text-muted-foreground border-border hover:border-muted-foreground"
@@ -232,7 +232,7 @@ function LessonCard({ lesson }: { lesson: Lesson }) {
         </p>
 
         <span className="inline-block text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-accent text-muted-foreground mb-3">
-          {CATEGORIES[lesson.category]}
+          {categoryLabel(lesson.category)}
         </span>
 
         <h3 className="text-sm font-semibold text-foreground leading-snug mb-5 line-clamp-3">
@@ -271,7 +271,7 @@ function LessonRow({ lesson }: { lesson: Lesson }) {
             {lesson.weekday} · {lesson.date}
           </span>
           <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-accent text-muted-foreground">
-            {CATEGORIES[lesson.category]}
+            {categoryLabel(lesson.category)}
           </span>
         </div>
         <h3 className="text-sm font-semibold text-foreground leading-snug truncate">

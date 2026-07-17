@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, FileText, MessageCircle } from "lucide-react"
-import { CATEGORIES } from "@/lib/lessons"
+import { ArrowLeft, Download, FileText, MessageCircle } from "lucide-react"
+import { categoryLabel } from "@/lib/lessons"
+import { WHATSAPP_VIP_URL } from "@/lib/links"
 import { getLesson } from "@/lib/lessons-server"
 import { requireReleasedAccess } from "@/lib/guard"
 import { AudioPlayer } from "@/components/audio-player"
@@ -30,7 +31,9 @@ export default async function LessonPage({
             Comunidade VIP
           </Link>
           <a
-            href="#"
+            href={WHATSAPP_VIP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-full hover:opacity-90 transition-opacity"
           >
             <MessageCircle className="w-3.5 h-3.5" />
@@ -61,7 +64,7 @@ export default async function LessonPage({
           </div>
 
           <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-accent text-muted-foreground mb-4">
-            {CATEGORIES[lesson.category]}
+            {categoryLabel(lesson.category)}
           </span>
 
           <h1 className="font-serif text-3xl font-bold text-foreground leading-tight mb-3">
@@ -87,17 +90,22 @@ export default async function LessonPage({
           </h2>
           <a
             href={lesson.pdfUrl}
+            download
             className="flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-4 hover:bg-accent transition-colors max-w-sm"
           >
             <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
               <FileText className="w-5 h-5 text-muted-foreground" />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground">
                 Material do Dia {lesson.dia}
               </p>
               <p className="text-xs text-muted-foreground">PDF · clique para baixar</p>
             </div>
+            <span className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-3 py-2 rounded-full flex-shrink-0">
+              <Download className="w-3.5 h-3.5" />
+              Baixar
+            </span>
           </a>
         </section>
 
@@ -116,7 +124,9 @@ export default async function LessonPage({
                 Tire dúvidas sobre o tema de hoje com a turma
               </p>
               <a
-                href="#"
+                href={WHATSAPP_VIP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-xs font-semibold text-primary hover:underline underline-offset-2"
               >
                 Entrar no WhatsApp VIP →
