@@ -11,7 +11,7 @@ import {
 
 import { requireReleasedAccess } from "@/lib/guard"
 import { getFeatureUnlock } from "@/lib/access"
-import { WHATSAPP_VIP_URL } from "@/lib/links"
+import { WHATSAPP_VIP_URL, MARKETPLACE_URL } from "@/lib/links"
 
 /** "Disponível em X dias" para os tiles travados (Marketplace/Notion). */
 function unlockLabel(days: number): string {
@@ -30,26 +30,18 @@ export default async function HubPage() {
   const unlock = await getFeatureUnlock(email)
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center px-5 py-12 overflow-hidden">
+    <main className="relative min-h-screen flex flex-col items-center justify-start px-5 py-12 overflow-hidden">
       <Decor />
       <div className="relative z-10 w-full max-w-4xl space-y-8">
 
-        {/* ── Brand + Avatar ── */}
-        <div className="text-center space-y-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            MultiMeta · DVP
+        {/* ── Título ── */}
+        <div className="space-y-1">
+          <h1 className="font-serif text-3xl font-bold text-foreground leading-tight">
+            Hub
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Tudo que você precisa, num lugar só.
           </p>
-          <div className="mx-auto w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center">
-            <span className="text-xl font-serif font-bold text-muted-foreground">A</span>
-          </div>
-          <div>
-            <h1 className="font-serif text-2xl font-bold text-foreground leading-tight">
-              Hub da Aluna
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Tudo que você precisa, num lugar só.
-            </p>
-          </div>
         </div>
 
         {/* ── Bento box (tiles uniformes) ── */}
@@ -97,7 +89,8 @@ export default async function HubPage() {
             icon={ShoppingBag}
             label="Marketplace"
             description={unlock.unlocked ? "Oportunidades e vagas" : unlockLabel(unlock.daysRemaining)}
-            href={unlock.unlocked ? "#" : undefined}
+            href={unlock.unlocked ? MARKETPLACE_URL : undefined}
+            external
             locked={!unlock.unlocked}
           />
         </div>

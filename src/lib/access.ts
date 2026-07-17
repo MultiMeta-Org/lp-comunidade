@@ -14,10 +14,12 @@ export type AccessState =
 
 /**
  * Fonte única da regra de acesso da Comunidade.
- * Um e-mail tem acesso liberado quando:
- *   • existe em comunidade.authorized_emails,
- *   • status = 'active' (não reembolsado),
- *   • já passaram os 7 dias desde authorized_at (order_date do Hotmart).
+ * Acesso é imediato a partir da compra (dia 1); só se perde no reembolso.
+ * Um e-mail tem acesso quando existe em comunidade.authorized_emails com
+ * status = 'active' (não reembolsado/chargeback).
+ *
+ * A espera de 7 dias NÃO gateia o acesso geral — vale só para Marketplace/
+ * Notion (ver getFeatureUnlock).
  *
  * Usado por: rota send-otp (portão do login) e painel admin (exibição de status).
  */
@@ -27,7 +29,7 @@ export async function getAccessState(email: string): Promise<AccessState> {
 
   const { data, error } = await db
     .from("authorized_emails")
-    .select("status, authorized_at")
+    .select("status")
     .eq("email", normalizedEmail)
     .maybeSingle()
 
@@ -39,13 +41,6 @@ export async function getAccessState(email: string): Promise<AccessState> {
 
   if (!data) return { authorized: false, reason: "not_found" }
   if (data.status === "revoked") return { authorized: false, reason: "revoked" }
-
-  const available = new Date(data.authorized_at)
-  available.setDate(available.getDate() + waitingPeriodDays())
-
-  if (new Date() < available) {
-    return { authorized: false, reason: "waiting", availableAt: available.toISOString() }
-  }
 
   return { authorized: true, reason: "released" }
 }
