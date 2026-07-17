@@ -21,7 +21,7 @@ const EMPTY: LessonRow = {
   isoDate: "",
   weekday: "",
   topic: "",
-  category: "objecao",
+  category: "",
   description: "",
   pdfUrl: "",
   audioUrl: "",
@@ -39,9 +39,10 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
   // Número da próxima aula: incrementa a partir do maior existente (issue #7).
   const nextDia = rows.reduce((max, r) => Math.max(max, r.dia), 0) + 1
 
-  // Categorias já usadas que não estão no mapa fixo (para sugerir no datalist).
+  // Rótulos sugeridos: os fixos + os que já foram criados à mão (issue #8).
+  const knownLabels: string[] = Object.values(CATEGORIES)
   const extraCategories = [...new Set(rows.map((r) => r.category))].filter(
-    (c) => !(c in CATEGORIES)
+    (c) => c && !knownLabels.includes(c)
   )
 
   const startNew = () => setDraft({ ...EMPTY, dia: nextDia, id: `dia-${nextDia}` })
@@ -108,10 +109,8 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
                 placeholder="Escolha ou digite uma nova"
               />
               <datalist id="lesson-categories">
-                {Object.entries(CATEGORIES).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v}
-                  </option>
+                {knownLabels.map((v) => (
+                  <option key={v} value={v} />
                 ))}
                 {extraCategories.map((c) => (
                   <option key={c} value={c} />

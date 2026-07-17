@@ -35,7 +35,7 @@ export async function upsertLesson(input: LessonInput): Promise<ActionResult> {
   const dia = input.dia
   // id e dia da semana são derivados — o admin não digita mais (issues #5/#6/#7).
   const id = input.id.trim() || `dia-${dia}`
-  const category = input.category.trim() || "geral"
+  const category = input.category.trim() || "Geral"
 
   const db = createComunidadeServiceClient()
   const { error } = await db.from("lessons").upsert(

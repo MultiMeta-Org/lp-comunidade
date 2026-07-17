@@ -60,14 +60,12 @@ export default async function VIPPage() {
             </span>
 
             <div className="relative max-w-lg">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4">
-                <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-secondary-subtle text-secondary">
-                  {categoryLabel(today.category)}
-                </span>
-                <span className="text-xs font-medium text-muted-foreground">
-                  {today.weekday} · {today.date}
-                </span>
-              </div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                {today.weekday} · {today.date}
+              </p>
+              <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-secondary-subtle text-secondary mb-4">
+                {categoryLabel(today.category)}
+              </span>
 
               <h1 className="font-serif text-2xl font-bold text-foreground leading-snug mb-2">
                 {today.topic}
@@ -78,7 +76,7 @@ export default async function VIPPage() {
 
               <AudioPlayer label={today.topic} src={today.audioUrl} />
 
-              <div className="mt-5">
+              <div className="mt-8">
                 <a
                   href={today.pdfUrl}
                   download
@@ -93,7 +91,7 @@ export default async function VIPPage() {
 
           {/* ── Card ao vivo ── */}
           <div className="mt-4 flex items-center gap-4 rounded-2xl border border-border bg-card px-6 py-5">
-            <div className="w-11 h-11 rounded-full bg-primary-subtle flex items-center justify-center flex-shrink-0">
+            <div className="w-11 h-11 rounded-xl bg-primary-subtle flex items-center justify-center flex-shrink-0">
               <MessageCircle className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
