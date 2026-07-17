@@ -49,3 +49,35 @@ export async function getAccessState(email: string): Promise<AccessState> {
 
   return { authorized: true, reason: "released" }
 }
+
+export type FeatureUnlock = {
+  unlocked: boolean
+  daysRemaining: number
+  unlockAt: string | null
+}
+
+/**
+ * Desbloqueio das features "no 8º dia" (Marketplace, Notion): liberam
+ * `waitingPeriodDays()` (7) dias após a compra — mesma âncora do acesso
+ * (authorized_at). Contagem regressiva real, por usuário, lida do DB.
+ */
+export async function getFeatureUnlock(email: string): Promise<FeatureUnlock> {
+  const db = createComunidadeServiceClient()
+  const { data } = await db
+    .from("authorized_emails")
+    .select("authorized_at, status")
+    .eq("email", email.toLowerCase().trim())
+    .maybeSingle()
+
+  if (!data || data.status !== "active") {
+    return { unlocked: false, daysRemaining: 0, unlockAt: null }
+  }
+
+  const unlockAt = new Date(data.authorized_at)
+  unlockAt.setDate(unlockAt.getDate() + waitingPeriodDays())
+
+  const msLeft = unlockAt.getTime() - Date.now()
+  const daysRemaining = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)))
+
+  return { unlocked: msLeft <= 0, daysRemaining, unlockAt: unlockAt.toISOString() }
+}

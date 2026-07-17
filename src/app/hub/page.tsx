@@ -10,7 +10,15 @@ import {
 } from "lucide-react"
 
 import { requireReleasedAccess } from "@/lib/guard"
+import { getFeatureUnlock } from "@/lib/access"
 import { WHATSAPP_VIP_URL } from "@/lib/links"
+
+/** "Disponível em X dias" para os tiles travados (Marketplace/Notion). */
+function unlockLabel(days: number): string {
+  if (days <= 0) return "Disponível agora"
+  if (days === 1) return "Disponível amanhã"
+  return `Disponível em ${days} dias`
+}
 
 export const metadata = {
   title: "Hub da Aluna · DVP",
@@ -18,7 +26,8 @@ export const metadata = {
 }
 
 export default async function HubPage() {
-  await requireReleasedAccess()
+  const email = await requireReleasedAccess()
+  const unlock = await getFeatureUnlock(email)
 
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center px-5 py-12 overflow-hidden">
@@ -43,27 +52,21 @@ export default async function HubPage() {
           </div>
         </div>
 
-        {/* ── Bento box ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 auto-rows-[140px] gap-3">
-
-          {/* VIP — feature largo */}
+        {/* ── Bento box (tiles uniformes) ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 auto-rows-[150px] gap-3">
           <BentoTile
             href={WHATSAPP_VIP_URL}
+            external
             icon={Crown}
             label="Comunidade VIP"
             description="Seu espaço exclusivo"
-            variant="secondary"
-            className="col-span-2"
           />
 
-          {/* Aula ao Vivo — feature alto */}
           <BentoTile
             href="#"
             icon={Video}
             label="Aula ao Vivo"
             description="Toda sexta às 9h · mesmo link"
-            variant="primary"
-            className="row-span-2"
           />
 
           <BentoTile
@@ -80,19 +83,22 @@ export default async function HubPage() {
             description="Grupo gratuito"
           />
 
+          {/* Notion — libera 7 dias após a compra */}
           <BentoTile
-            href="#"
             icon={BookOpen}
             label="Notion"
-            description="Materiais e templates"
+            description={unlock.unlocked ? "Materiais e templates" : unlockLabel(unlock.daysRemaining)}
+            href={unlock.unlocked ? "#" : undefined}
+            locked={!unlock.unlocked}
           />
 
-          {/* Marketplace — bloqueado */}
+          {/* Marketplace — libera 7 dias após a compra */}
           <BentoTile
             icon={ShoppingBag}
             label="Marketplace"
-            description="Disponível no 8º dia"
-            locked
+            description={unlock.unlocked ? "Oportunidades e vagas" : unlockLabel(unlock.daysRemaining)}
+            href={unlock.unlocked ? "#" : undefined}
+            locked={!unlock.unlocked}
           />
         </div>
 
@@ -202,64 +208,47 @@ function BentoTile({
   label,
   description,
   href,
-  variant = "default",
+  external = false,
   locked = false,
-  className = "",
 }: {
   icon: React.ElementType
   label: string
   description: string
   href?: string
-  variant?: "default" | "primary" | "secondary"
+  external?: boolean
   locked?: boolean
-  className?: string
 }) {
-  const surface =
-    variant === "primary"
-      ? "bg-primary text-primary-foreground"
-      : variant === "secondary"
-      ? "bg-secondary text-secondary-foreground"
-      : "border border-border bg-card text-foreground"
+  const base =
+    "flex flex-col justify-between rounded-2xl border border-border bg-card p-4 h-full text-foreground"
 
   const content = (
     <>
       <div className="flex items-center justify-between">
-        <Icon className="w-6 h-6 flex-shrink-0" />
+        <Icon className="w-6 h-6 flex-shrink-0 text-primary" />
         {locked ? (
           <Lock className="w-4 h-4 text-muted-foreground" />
         ) : (
-          <ArrowRight
-            className={`w-4 h-4 ${variant === "default" ? "text-muted-foreground" : "opacity-70"}`}
-          />
+          <ArrowRight className="w-4 h-4 text-muted-foreground" />
         )}
       </div>
       <div>
         <p className="font-semibold text-sm leading-tight">{label}</p>
-        <p
-          className={`text-xs mt-0.5 leading-tight ${
-            variant === "default" ? "text-muted-foreground" : "opacity-70"
-          }`}
-        >
+        <p className="text-xs mt-0.5 leading-tight text-muted-foreground">
           {description}
         </p>
       </div>
     </>
   )
 
-  const base = `flex flex-col justify-between rounded-2xl p-4 h-full ${surface} ${className}`
-
   if (locked || !href) {
-    return (
-      <div className={`${base} opacity-50 cursor-not-allowed`}>{content}</div>
-    )
+    return <div className={`${base} opacity-60 cursor-not-allowed`}>{content}</div>
   }
 
-  const external = href.startsWith("http")
   return (
     <a
       href={href}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={`${base} hover:opacity-90 transition-opacity`}
+      className={`${base} cursor-pointer hover:border-muted-foreground hover:shadow-sm transition-all`}
     >
       {content}
     </a>
