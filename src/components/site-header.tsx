@@ -25,7 +25,7 @@ export async function SiteHeader({ page = "vip" }: { page?: "vip" | "hub" }) {
               href="/"
               className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
             >
-              Comunidade VIP
+              Material de Aulas
             </Link>
           ) : (
             <Link

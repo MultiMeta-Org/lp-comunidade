@@ -28,7 +28,7 @@ export default async function LessonPage({
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Comunidade VIP
+            Material de Aulas
           </Link>
           <a
             href={WHATSAPP_VIP_URL}
