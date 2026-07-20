@@ -46,6 +46,11 @@ export function weekdayFromIso(iso: string): string {
   return WEEKDAYS[new Date(y, m - 1, d).getDay()] ?? ""
 }
 
+/** Há mídia de fato? URLs ausentes chegam como "#" (ver mapRow/seed). */
+export function hasMedia(url?: string): boolean {
+  return Boolean(url && url !== "#")
+}
+
 /**
  * Converte links de compartilhamento do Google Drive em URL direta
  * (uc?export=download), que funciona tanto para tocar áudio em <audio>

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, Download, FileText, MessageCircle } from "lucide-react"
-import { type Lesson, categoryLabel } from "@/lib/lessons"
+import { type Lesson, categoryLabel, hasMedia } from "@/lib/lessons"
 import { WHATSAPP_VIP_URL } from "@/lib/links"
 import { getLessonWithNeighbors } from "@/lib/lessons-server"
 import { requireReleasedAccess } from "@/lib/guard"
@@ -76,38 +76,42 @@ export default async function LessonPage({
         </div>
 
         {/* ── Áudio ── */}
-        <section className="space-y-3">
-          <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Áudio
-          </h2>
-          <AudioPlayer label={lesson.topic} src={lesson.audioUrl} />
-        </section>
+        {hasMedia(lesson.audioUrl) && (
+          <section className="space-y-3">
+            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Áudio
+            </h2>
+            <AudioPlayer label={lesson.topic} src={lesson.audioUrl} />
+          </section>
+        )}
 
         {/* ── PDF ── */}
-        <section className="space-y-3">
-          <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Material em PDF
-          </h2>
-          <a
-            href={lesson.pdfUrl}
-            download
-            className="flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-4 hover:bg-accent transition-colors max-w-sm"
-          >
-            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-              <FileText className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">
-                Material do Dia {lesson.dia}
-              </p>
-              <p className="text-xs text-muted-foreground">PDF · clique para baixar</p>
-            </div>
-            <span className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-3 py-2 rounded-full flex-shrink-0">
-              <Download className="w-3.5 h-3.5" />
-              Baixar
-            </span>
-          </a>
-        </section>
+        {hasMedia(lesson.pdfUrl) && (
+          <section className="space-y-3">
+            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Material em PDF
+            </h2>
+            <a
+              href={lesson.pdfUrl}
+              download
+              className="flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-4 hover:bg-accent transition-colors max-w-sm"
+            >
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                <FileText className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground">
+                  Material do Dia {lesson.dia}
+                </p>
+                <p className="text-xs text-muted-foreground">PDF · clique para baixar</p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-3 py-2 rounded-full flex-shrink-0">
+                <Download className="w-3.5 h-3.5" />
+                Baixar
+              </span>
+            </a>
+          </section>
+        )}
 
         {/* ── Ao vivo ── */}
         <section className="space-y-3">

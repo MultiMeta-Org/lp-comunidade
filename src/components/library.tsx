@@ -10,7 +10,7 @@ import {
   List as ListIcon,
   X,
 } from "lucide-react"
-import { type Lesson, categoryLabel } from "@/lib/lessons"
+import { type Lesson, categoryLabel, hasMedia } from "@/lib/lessons"
 
 const ALL = "all"
 type FilterValue = string
@@ -239,16 +239,22 @@ function LessonCard({ lesson }: { lesson: Lesson }) {
           {lesson.topic}
         </h3>
 
-        <div className="flex items-center gap-3 text-muted-foreground">
-          <span className="flex items-center gap-1 text-[11px]">
-            <Headphones className="w-3.5 h-3.5" />
-            Áudio
-          </span>
-          <span className="flex items-center gap-1 text-[11px]">
-            <FileText className="w-3.5 h-3.5" />
-            PDF
-          </span>
-        </div>
+        {(hasMedia(lesson.audioUrl) || hasMedia(lesson.pdfUrl)) && (
+          <div className="flex items-center gap-3 text-muted-foreground">
+            {hasMedia(lesson.audioUrl) && (
+              <span className="flex items-center gap-1 text-[11px]">
+                <Headphones className="w-3.5 h-3.5" />
+                Áudio
+              </span>
+            )}
+            {hasMedia(lesson.pdfUrl) && (
+              <span className="flex items-center gap-1 text-[11px]">
+                <FileText className="w-3.5 h-3.5" />
+                PDF
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </Link>
   )
@@ -280,8 +286,8 @@ function LessonRow({ lesson }: { lesson: Lesson }) {
       </div>
 
       <div className="hidden sm:flex items-center gap-3 text-muted-foreground flex-shrink-0">
-        <Headphones className="w-4 h-4" />
-        <FileText className="w-4 h-4" />
+        {hasMedia(lesson.audioUrl) && <Headphones className="w-4 h-4" />}
+        {hasMedia(lesson.pdfUrl) && <FileText className="w-4 h-4" />}
       </div>
     </Link>
   )

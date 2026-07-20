@@ -1,5 +1,5 @@
 import { FileText } from "lucide-react"
-import { categoryLabel } from "@/lib/lessons"
+import { categoryLabel, hasMedia } from "@/lib/lessons"
 import { getLessons } from "@/lib/lessons-server"
 import { requireReleasedAccess } from "@/lib/guard"
 import { Library } from "@/components/library"
@@ -47,22 +47,28 @@ export default async function VIPPage() {
               <h1 className="font-serif text-2xl font-bold text-foreground leading-snug mb-2">
                 {today.topic}
               </h1>
-              <p className="text-sm text-muted-foreground mb-6">
+              <p className="text-sm text-muted-foreground">
                 {today.description}
               </p>
 
-              <AudioPlayer label={today.topic} src={today.audioUrl} />
+              {hasMedia(today.audioUrl) && (
+                <div className="mt-6">
+                  <AudioPlayer label={today.topic} src={today.audioUrl} />
+                </div>
+              )}
 
-              <div className="mt-8">
-                <a
-                  href={today.pdfUrl}
-                  download
-                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity"
-                >
-                  <FileText className="w-4 h-4" />
-                  Baixar PDF
-                </a>
-              </div>
+              {hasMedia(today.pdfUrl) && (
+                <div className="mt-8">
+                  <a
+                    href={today.pdfUrl}
+                    download
+                    className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Baixar PDF
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </section>
