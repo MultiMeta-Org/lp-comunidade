@@ -1,11 +1,11 @@
-import { FileText, MessageCircle } from "lucide-react"
+import { FileText } from "lucide-react"
 import { categoryLabel } from "@/lib/lessons"
-import { WHATSAPP_VIP_URL } from "@/lib/links"
 import { getLessons } from "@/lib/lessons-server"
 import { requireReleasedAccess } from "@/lib/guard"
 import { Library } from "@/components/library"
 import { AudioPlayer } from "@/components/audio-player"
 import { SiteHeader } from "@/components/site-header"
+import { LiveBanner } from "@/components/live-banner"
 
 export default async function VIPPage() {
   await requireReleasedAccess()
@@ -16,18 +16,13 @@ export default async function VIPPage() {
 
   return (
     <div className="min-h-screen">
+      <LiveBanner />
       <SiteHeader />
 
       <main className="max-w-4xl mx-auto px-5 py-12 space-y-16">
         {/* ── Hoje ── */}
         {today && (
         <section>
-          <div className="mb-5">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-secondary">
-              Hoje
-            </span>
-          </div>
-
           <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-7 shadow-sm">
             {/* Signature background number */}
             <span
@@ -39,10 +34,13 @@ export default async function VIPPage() {
             </span>
 
             <div className="relative max-w-lg">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-3">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-secondary">
+                Hoje
+              </span>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-3 mt-3">
                 {today.weekday} · {today.date}
               </p>
-              <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-secondary-subtle text-secondary mb-4">
+              <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-accent text-muted-foreground mb-4">
                 {categoryLabel(today.category)}
               </span>
 
@@ -66,30 +64,6 @@ export default async function VIPPage() {
                 </a>
               </div>
             </div>
-          </div>
-
-          {/* ── Card ao vivo ── */}
-          <div className="mt-4 flex items-center gap-4 rounded-2xl border border-border bg-card px-6 py-5">
-            <div className="w-11 h-11 rounded-xl bg-primary-subtle flex items-center justify-center flex-shrink-0">
-              <MessageCircle className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">
-                Grupo ao vivo às 9h
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Tire dúvidas sobre o tema de hoje com a turma
-              </p>
-            </div>
-            <a
-              href={WHATSAPP_VIP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap"
-            >
-              <MessageCircle className="w-3.5 h-3.5" />
-              Entrar
-            </a>
           </div>
         </section>
         )}

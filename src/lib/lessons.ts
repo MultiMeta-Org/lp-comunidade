@@ -47,6 +47,20 @@ export function weekdayFromIso(iso: string): string {
 }
 
 /**
+ * Converte links de compartilhamento do Google Drive em URL direta
+ * (uc?export=download), que funciona tanto para tocar áudio em <audio>
+ * quanto para baixar PDF. Um link "de visualização" (…/file/d/ID/view)
+ * não carrega em <audio> nem baixa direto. Outros links passam inalterados.
+ */
+export function toDirectMediaUrl(url: string): string {
+  if (!url || url === "#" || !url.includes("drive.google.com")) return url
+  const match =
+    url.match(/\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/)
+  if (!match) return url
+  return `https://drive.google.com/uc?export=download&id=${match[1]}`
+}
+
+/**
  * Rótulo de exibição da categoria. Usa o mapa CATEGORIES para as conhecidas
  * e cai para title-case em categorias novas (criadas pelo admin).
  */

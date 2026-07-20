@@ -11,7 +11,14 @@ import {
 
 import { requireReleasedAccess } from "@/lib/guard"
 import { getFeatureUnlock } from "@/lib/access"
-import { WHATSAPP_VIP_URL, MARKETPLACE_URL } from "@/lib/links"
+import {
+  WHATSAPP_VIP_URL,
+  WHATSAPP_FREE_URL,
+  LIVE_CLASS_URL,
+  NOTION_URL,
+  SUPPORT_URL,
+  MARKETPLACE_URL,
+} from "@/lib/links"
 import { SiteHeader } from "@/components/site-header"
 
 /** "Disponível em X dias" para os tiles travados (Marketplace/Notion). */
@@ -58,21 +65,24 @@ export default async function HubPage() {
           />
 
           <BentoTile
-            href="#"
+            href={LIVE_CLASS_URL}
+            external
             icon={Video}
             label="Aula ao Vivo"
             description="Toda sexta às 9h · mesmo link"
           />
 
           <BentoTile
-            href="#"
+            href={SUPPORT_URL}
+            external
             icon={MessageCircle}
             label="Suporte"
             description="WhatsApp"
           />
 
           <BentoTile
-            href="#"
+            href={WHATSAPP_FREE_URL}
+            external
             icon={Users}
             label="Todas as Alunas"
             description="Grupo gratuito"
@@ -83,7 +93,8 @@ export default async function HubPage() {
             icon={BookOpen}
             label="Notion"
             description={unlock.unlocked ? "Materiais e templates" : unlockLabel(unlock.daysRemaining)}
-            href={unlock.unlocked ? "#" : undefined}
+            href={unlock.unlocked ? NOTION_URL : undefined}
+            external
             locked={!unlock.unlocked}
           />
 

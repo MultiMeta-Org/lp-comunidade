@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Download, FileText, MessageCircle } from "lucide-react"
-import { categoryLabel } from "@/lib/lessons"
+import { ArrowLeft, ArrowRight, Download, FileText, MessageCircle } from "lucide-react"
+import { type Lesson, categoryLabel } from "@/lib/lessons"
 import { WHATSAPP_VIP_URL } from "@/lib/links"
-import { getLesson } from "@/lib/lessons-server"
+import { getLessonWithNeighbors } from "@/lib/lessons-server"
 import { requireReleasedAccess } from "@/lib/guard"
 import { AudioPlayer } from "@/components/audio-player"
 
@@ -15,7 +15,7 @@ export default async function LessonPage({
   await requireReleasedAccess()
 
   const { id } = await params
-  const lesson = await getLesson(id)
+  const { lesson, older, newer } = await getLessonWithNeighbors(id)
   if (!lesson) notFound()
 
   return (
@@ -134,7 +134,58 @@ export default async function LessonPage({
             </div>
           </div>
         </section>
+
+        {/* ── Navegação entre dias ── */}
+        {(older || newer) && (
+          <nav className="grid grid-cols-2 gap-3 border-t border-border pt-8">
+            {older ? (
+              <NeighborLink lesson={older} direction="prev" />
+            ) : (
+              <span />
+            )}
+            {newer ? (
+              <NeighborLink lesson={newer} direction="next" />
+            ) : (
+              <span />
+            )}
+          </nav>
+        )}
       </main>
     </div>
+  )
+}
+
+function NeighborLink({
+  lesson,
+  direction,
+}: {
+  lesson: Lesson
+  direction: "prev" | "next"
+}) {
+  const next = direction === "next"
+  return (
+    <Link
+      href={`/dia/${lesson.id}`}
+      className={`group flex flex-col gap-1 rounded-xl border border-border bg-card px-4 py-3 hover:border-muted-foreground hover:bg-accent transition-colors ${
+        next ? "items-end text-right col-start-2" : "items-start"
+      }`}
+    >
+      <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {next ? (
+          <>
+            Dia seguinte
+            <ArrowRight className="w-3.5 h-3.5" />
+          </>
+        ) : (
+          <>
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Dia anterior
+          </>
+        )}
+      </span>
+      <span className="text-sm font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+        {lesson.topic}
+      </span>
+    </Link>
   )
 }
