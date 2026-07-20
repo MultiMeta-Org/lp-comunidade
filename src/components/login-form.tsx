@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Mail } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { MultiMetaLogo } from "@/components/multimeta-logo"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -120,12 +121,16 @@ export function LoginForm({ className }: { className?: string }) {
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            MultiMeta
-          </span>
-          <span className="text-border">·</span>
-          <span className="text-sm font-semibold text-foreground">Comunidade VIP</span>
+        <div className="flex items-center gap-2.5">
+          <MultiMetaLogo className="h-9 w-9" />
+          <div className="flex flex-col items-start leading-tight">
+            <span className="text-sm font-bold tracking-tight text-foreground">
+              Conexão Multimeta
+            </span>
+            <span className="text-[11px] font-medium text-muted-foreground">
+              Comunidade VIP
+            </span>
+          </div>
         </div>
         <h1 className="text-2xl font-bold mt-2">
           {step === "email" ? "Entrar" : "Verifique seu e-mail"}

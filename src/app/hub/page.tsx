@@ -1,10 +1,11 @@
+import Link from "next/link"
 import {
   MessageCircle,
   Users,
-  Crown,
-  ShoppingBag,
+  Handshake,
   BookOpen,
-  Video,
+  GraduationCap,
+  HelpCircle,
   Lock,
   ArrowRight,
 } from "lucide-react"
@@ -14,12 +15,12 @@ import { getFeatureUnlock } from "@/lib/access"
 import {
   WHATSAPP_VIP_URL,
   WHATSAPP_FREE_URL,
-  LIVE_CLASS_URL,
   NOTION_URL,
   SUPPORT_URL,
   MARKETPLACE_URL,
 } from "@/lib/links"
 import { SiteHeader } from "@/components/site-header"
+import { LiveBanner } from "@/components/live-banner"
 
 /** "Disponível em X dias" para os tiles travados (Marketplace/Notion). */
 function unlockLabel(days: number): string {
@@ -39,6 +40,7 @@ export default async function HubPage() {
 
   return (
     <div className="min-h-screen">
+      <LiveBanner />
       <SiteHeader page="hub" />
       <main className="relative flex flex-col items-center justify-start px-5 py-12 overflow-hidden">
       <Decor />
@@ -57,25 +59,24 @@ export default async function HubPage() {
         {/* ── Bento box (tiles uniformes) ── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 auto-rows-[150px] gap-3">
           <BentoTile
+            href="/"
+            icon={GraduationCap}
+            label="Material de Aulas"
+            description="Aulas, áudios e PDFs"
+          />
+
+          <BentoTile
             href={WHATSAPP_VIP_URL}
             external
-            icon={Crown}
+            icon={Users}
             label="Comunidade VIP"
             description="Seu espaço exclusivo"
           />
 
           <BentoTile
-            href={LIVE_CLASS_URL}
-            external
-            icon={Video}
-            label="Aula ao Vivo"
-            description="Toda sexta às 9h · mesmo link"
-          />
-
-          <BentoTile
             href={SUPPORT_URL}
             external
-            icon={MessageCircle}
+            icon={HelpCircle}
             label="Suporte"
             description="WhatsApp"
           />
@@ -83,7 +84,7 @@ export default async function HubPage() {
           <BentoTile
             href={WHATSAPP_FREE_URL}
             external
-            icon={Users}
+            icon={MessageCircle}
             label="Todas as Alunas"
             description="Grupo gratuito"
           />
@@ -100,7 +101,7 @@ export default async function HubPage() {
 
           {/* Marketplace — libera 7 dias após a compra */}
           <BentoTile
-            icon={ShoppingBag}
+            icon={Handshake}
             label="Marketplace"
             description={unlock.unlocked ? "Oportunidades e vagas" : unlockLabel(unlock.daysRemaining)}
             href={unlock.unlocked ? MARKETPLACE_URL : undefined}
@@ -252,11 +253,23 @@ function BentoTile({
     return <div className={`${base} opacity-60 cursor-not-allowed`}>{content}</div>
   }
 
+  const cls = `${base} cursor-pointer hover:border-muted-foreground hover:shadow-sm transition-all`
+
+  // Link interno (rota do app) usa Next Link para navegação com prefetch;
+  // links externos seguem como <a> com target/rel.
+  if (!external && href.startsWith("/")) {
+    return (
+      <Link href={href} className={cls}>
+        {content}
+      </Link>
+    )
+  }
+
   return (
     <a
       href={href}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={`${base} cursor-pointer hover:border-muted-foreground hover:shadow-sm transition-all`}
+      className={cls}
     >
       {content}
     </a>

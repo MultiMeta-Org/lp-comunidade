@@ -19,7 +19,17 @@ export default async function VIPPage() {
       <LiveBanner />
       <SiteHeader />
 
-      <main className="max-w-4xl mx-auto px-5 py-12 space-y-16">
+      <main className="max-w-4xl mx-auto px-5 py-12 space-y-12">
+        {/* ── Título ── */}
+        <div className="space-y-1">
+          <h1 className="font-serif text-3xl font-bold text-foreground leading-tight">
+            Material de Aulas
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            A aula de hoje e todo o acervo — áudios e PDFs.
+          </p>
+        </div>
+
         {/* ── Hoje ── */}
         {today && (
         <section>
@@ -44,9 +54,9 @@ export default async function VIPPage() {
                 {categoryLabel(today.category)}
               </span>
 
-              <h1 className="font-serif text-2xl font-bold text-foreground leading-snug mb-2">
+              <h2 className="font-serif text-2xl font-bold text-foreground leading-snug mb-2">
                 {today.topic}
-              </h1>
+              </h2>
               <p className="text-sm text-muted-foreground">
                 {today.description}
               </p>

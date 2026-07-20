@@ -76,7 +76,42 @@ export async function deleteLesson(id: string): Promise<ActionResult> {
   const db = createComunidadeServiceClient()
   const { error } = await db.from("lessons").delete().eq("id", id)
   if (error) return { ok: false, error: error.message }
+
+  // Recompacta os números das aulas (dia) para não deixar buraco: 1, 2, 3, …
+  // O id textual é uma chave estável (não muda), então URLs não quebram.
+  const renumberError = await renumberLessons(db)
+  if (renumberError) return { ok: false, error: renumberError }
+
   revalidatePath("/admin")
   revalidatePath("/")
   return { ok: true }
+}
+
+/**
+ * Reatribui `dia`/`sort_order` sequencialmente (1..N) na ordem atual das aulas,
+ * fechando qualquer buraco deixado por uma exclusão. Atualiza só as que mudaram.
+ * Processa em ordem crescente: como estamos compactando para baixo, o novo número
+ * de cada linha é sempre menor que o número (ainda intacto) das seguintes — sem
+ * colisão, mesmo que exista índice único em dia.
+ */
+async function renumberLessons(
+  db: ReturnType<typeof createComunidadeServiceClient>
+): Promise<string | null> {
+  const { data, error } = await db
+    .from("lessons")
+    .select("id, dia")
+    .order("dia", { ascending: true })
+  if (error) return error.message
+
+  const rows = data ?? []
+  for (let i = 0; i < rows.length; i++) {
+    const newDia = i + 1
+    if (rows[i].dia === newDia) continue
+    const { error: upErr } = await db
+      .from("lessons")
+      .update({ dia: newDia, sort_order: newDia })
+      .eq("id", rows[i].id)
+    if (upErr) return upErr.message
+  }
+  return null
 }

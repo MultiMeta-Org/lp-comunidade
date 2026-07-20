@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { Trash2 } from "lucide-react"
+import { useEffect, useState, useTransition } from "react"
+import { Trash2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -30,14 +30,23 @@ const EMPTY: LessonRow = {
 
 export function LessonsManager({ rows }: { rows: LessonRow[] }) {
   const [draft, setDraft] = useState<LessonRow | null>(null)
+  const [editing, setEditing] = useState(false)
   const [error, setError] = useState("")
   const [pending, startTransition] = useTransition()
 
   const set = <K extends keyof LessonRow>(key: K, value: LessonRow[K]) =>
     setDraft((d) => (d ? { ...d, [key]: value } : d))
 
-  // Número da próxima aula: incrementa a partir do maior existente (issue #7).
+  // Número exibido da próxima aula: incrementa a partir do maior existente (issue #7).
   const nextDia = rows.reduce((max, r) => Math.max(max, r.dia), 0) + 1
+
+  // id é uma chave estável, desacoplada do número exibido (que é recompactado ao
+  // excluir). Deriva do maior sufixo já usado para nunca colidir/reaproveitar.
+  const maxIdNum = rows.reduce((max, r) => {
+    const n = Number(String(r.id).replace(/^dia-/, ""))
+    return Number.isFinite(n) ? Math.max(max, n) : max
+  }, 0)
+  const nextId = `dia-${maxIdNum + 1}`
 
   // Rótulos sugeridos: os fixos + os que já foram criados à mão (issue #8).
   const knownLabels: string[] = Object.values(CATEGORIES)
@@ -45,7 +54,19 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
     (c) => c && !knownLabels.includes(c)
   )
 
-  const startNew = () => setDraft({ ...EMPTY, dia: nextDia, id: `dia-${nextDia}` })
+  const close = () => setDraft(null)
+
+  const startNew = () => {
+    setError("")
+    setEditing(false)
+    setDraft({ ...EMPTY, dia: nextDia, id: nextId })
+  }
+
+  const startEdit = (row: LessonRow) => {
+    setError("")
+    setEditing(true)
+    setDraft(row)
+  }
 
   const save = (e: React.FormEvent) => {
     e.preventDefault()
@@ -54,15 +75,15 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
     startTransition(async () => {
       const res = await upsertLesson(draft)
       if (!res.ok) setError(res.error || "Erro ao salvar.")
-      else setDraft(null)
+      else close()
     })
   }
 
-  const remove = (id: string) => {
-    if (!confirm(`Excluir a aula ${id}?`)) return
+  const remove = (row: LessonRow) => {
+    if (!confirm(`Excluir a Aula ${row.dia}? As demais serão renumeradas.`)) return
     setError("")
     startTransition(async () => {
-      const res = await deleteLesson(id)
+      const res = await deleteLesson(row.id)
       if (!res.ok) setError(res.error || "Erro ao excluir.")
     })
   }
@@ -82,14 +103,19 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
         </Button>
       </div>
 
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {!draft && error && <p className="text-xs text-destructive">{error}</p>}
 
       {draft && (
-        <form onSubmit={save} className="grid gap-4 rounded-xl border border-border bg-card p-5">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="Aula">
+        <Modal
+          title={editing ? `Editar Aula ${draft.dia}` : "Nova aula"}
+          onClose={close}
+        >
+          <form onSubmit={save} className="grid gap-4">
+            {error && <p className="text-xs text-destructive">{error}</p>}
+            <div className="grid gap-4 sm:grid-cols-3">
+            <Field label="Número da aula">
               <div className="flex h-10 items-center rounded-md border border-input bg-muted/40 px-3 text-sm text-muted-foreground">
-                Dia {draft.dia}
+                Aula {draft.dia}
                 {draft.isoDate ? ` · ${weekdayFromIso(draft.isoDate)}` : ""}
               </div>
             </Field>
@@ -150,22 +176,23 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
           </div>
           {/* TODO: upload direto de arquivo para o Storage (buckets pdfs/audios). */}
 
-          <div className="flex gap-3">
-            <Button type="submit" disabled={pending}>
-              {pending ? "Salvando..." : "Salvar aula"}
-            </Button>
-            <Button type="button" variant="outline" onClick={() => setDraft(null)} disabled={pending}>
-              Cancelar
-            </Button>
-          </div>
-        </form>
+            <div className="flex gap-3">
+              <Button type="submit" disabled={pending}>
+                {pending ? "Salvando..." : "Salvar aula"}
+              </Button>
+              <Button type="button" variant="outline" onClick={close} disabled={pending}>
+                Cancelar
+              </Button>
+            </div>
+          </form>
+        </Modal>
       )}
 
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <th className="px-4 py-3 font-semibold">Dia</th>
+              <th className="px-4 py-3 font-semibold">Nº da aula</th>
               <th className="px-4 py-3 font-semibold">Tópico</th>
               <th className="px-4 py-3 font-semibold">Categoria</th>
               <th className="px-4 py-3 font-semibold">Publicada</th>
@@ -206,13 +233,13 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
                   </button>
                 </td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
-                  <Button variant="outline" size="sm" onClick={() => setDraft(l)} disabled={pending}>
+                  <Button variant="outline" size="sm" onClick={() => startEdit(l)} disabled={pending}>
                     Editar
                   </Button>{" "}
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => remove(l.id)}
+                    onClick={() => remove(l)}
                     disabled={pending}
                     className="text-destructive"
                   >
@@ -234,6 +261,57 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div className="grid gap-1.5">
       <Label>{label}</Label>
       {children}
+    </div>
+  )
+}
+
+function Modal({
+  title,
+  onClose,
+  children,
+}: {
+  title: string
+  onClose: () => void
+  children: React.ReactNode
+}) {
+  // Fecha no Esc e trava o scroll do body enquanto o modal está aberto.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose()
+    }
+    document.addEventListener("keydown", onKey)
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.removeEventListener("keydown", onKey)
+      document.body.style.overflow = ""
+    }
+  }, [onClose])
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 sm:p-8"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
+      <div
+        className="relative my-auto w-full max-w-2xl rounded-2xl border border-border bg-card shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fechar"
+            className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="p-5">{children}</div>
+      </div>
     </div>
   )
 }
