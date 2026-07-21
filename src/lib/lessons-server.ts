@@ -1,7 +1,11 @@
 import "server-only"
-import { createSupabaseServer } from "@/lib/supabase/server"
+import { unstable_cache } from "next/cache"
+import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
 import type { Database } from "@/lib/supabase/database.types"
 import { type Lesson, displayDate, toDirectMediaUrl, SEED_LESSONS } from "@/lib/lessons"
+
+/** Tag de cache das aulas — as server actions do admin a invalidam ao publicar/editar. */
+export const LESSONS_CACHE_TAG = "lessons"
 
 type LessonRow = Database["comunidade"]["Tables"]["lessons"]["Row"]
 
@@ -27,46 +31,50 @@ function supabaseConfigured(): boolean {
 }
 
 /**
+ * Leitura das aulas publicadas, cacheada ENTRE requests (unstable_cache).
+ *
+ * Por que service client em vez da sessão + RLS: o conteúdo das aulas é idêntico
+ * para todo aluno autorizado, então não precisa ser por-usuário. As páginas já
+ * gateiam o acesso com requireReleasedAccess() ANTES de chamar isto, então o RLS
+ * era redundante — e, crucial, o service client não lê cookies, o que permite
+ * cachear o resultado entre requests (unstable_cache não pode tocar cookies).
+ *
+ * Antes: uma query em comunidade.lessons a cada navegação (home + cada /dia/[id]).
+ * Agora: uma leitura de memória; só bate no banco quando a tag é revalidada.
+ */
+const readPublishedLessons = unstable_cache(
+  async (): Promise<Lesson[]> => {
+    const db = createComunidadeServiceClient()
+    const { data, error } = await db
+      .from("lessons")
+      .select("*")
+      .eq("published", true)
+      .order("sort_order", { ascending: false })
+
+    if (error) {
+      console.error("[lessons] erro ao carregar:", error.message)
+      return []
+    }
+    return (data ?? []).map(mapRow)
+  },
+  ["published-lessons"],
+  { tags: [LESSONS_CACHE_TAG], revalidate: 3600 }
+)
+
+/**
  * Aulas publicadas, mais recentes primeiro.
- * Lê de comunidade.lessons via sessão (RLS: só usuário com acesso liberado).
  * Sem Supabase configurado (esqueleto/dev), cai para SEED_LESSONS.
  */
 export async function getLessons(): Promise<Lesson[]> {
   if (!supabaseConfigured()) return SEED_LESSONS
-
-  const supabase = await createSupabaseServer()
-  const { data, error } = await supabase
-    .schema("comunidade")
-    .from("lessons")
-    .select("*")
-    .eq("published", true)
-    .order("sort_order", { ascending: false })
-
-  if (error) {
-    console.error("[lessons] erro ao carregar:", error.message)
-    return []
-  }
-  return (data ?? []).map(mapRow)
+  return readPublishedLessons()
 }
 
-/** Uma aula por id (respeita RLS). */
+/** Uma aula por id — servida da lista cacheada (sem query extra). */
 export async function getLesson(id: string): Promise<Lesson | null> {
   if (!supabaseConfigured()) return SEED_LESSONS.find((l) => l.id === id) ?? null
-
-  const supabase = await createSupabaseServer()
-  const { data, error } = await supabase
-    .schema("comunidade")
-    .from("lessons")
-    .select("*")
-    .eq("id", id)
-    .eq("published", true)
-    .maybeSingle()
-
-  if (error) {
-    console.error("[lessons] erro ao carregar aula:", error.message)
-    return null
-  }
-  return data ? mapRow(data) : null
+  const lessons = await getLessons()
+  return lessons.find((l) => l.id === id) ?? null
 }
 
 /** Aula do topo (mais recente). */

@@ -1,4 +1,19 @@
+import { cache } from "react"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
+
+/**
+ * Linha do e-mail em comunidade.authorized_emails, lida UMA vez por request
+ * (React cache). getAccessState e getFeatureUnlock compartilham esta leitura —
+ * antes o /hub batia na mesma tabela duas vezes por navegação.
+ */
+const fetchAuthorizedRow = cache(async (email: string) => {
+  const db = createComunidadeServiceClient()
+  return db
+    .from("authorized_emails")
+    .select("status, authorized_at")
+    .eq("email", email.toLowerCase().trim())
+    .maybeSingle()
+})
 
 /** Janela de liberação após a compra (dias). Padrão 7 (janela de reembolso). */
 export function waitingPeriodDays(): number {
@@ -24,14 +39,7 @@ export type AccessState =
  * Usado por: rota send-otp (portão do login) e painel admin (exibição de status).
  */
 export async function getAccessState(email: string): Promise<AccessState> {
-  const normalizedEmail = email.toLowerCase().trim()
-  const db = createComunidadeServiceClient()
-
-  const { data, error } = await db
-    .from("authorized_emails")
-    .select("status")
-    .eq("email", normalizedEmail)
-    .maybeSingle()
+  const { data, error } = await fetchAuthorizedRow(email)
 
   if (error) {
     console.error("[access] erro ao consultar authorized_emails:", error.message)
@@ -57,12 +65,7 @@ export type FeatureUnlock = {
  * (authorized_at). Contagem regressiva real, por usuário, lida do DB.
  */
 export async function getFeatureUnlock(email: string): Promise<FeatureUnlock> {
-  const db = createComunidadeServiceClient()
-  const { data } = await db
-    .from("authorized_emails")
-    .select("authorized_at, status")
-    .eq("email", email.toLowerCase().trim())
-    .maybeSingle()
+  const { data } = await fetchAuthorizedRow(email)
 
   if (!data || data.status !== "active") {
     return { unlocked: false, daysRemaining: 0, unlockAt: null }

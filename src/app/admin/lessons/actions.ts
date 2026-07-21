@@ -1,9 +1,21 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
 import { requireAdmin } from "@/lib/guard"
+import { LESSONS_CACHE_TAG } from "@/lib/lessons-server"
 import { weekdayFromIso } from "@/lib/lessons"
+
+/**
+ * Invalida o cache das aulas (home + /dia) e revalida as rotas do admin.
+ * `{ expire: 0 }` = expiração imediata: a próxima visita já lê do banco, então
+ * a edição da admin aparece na hora (sem stale-while-revalidate).
+ */
+function revalidateLessons() {
+  revalidateTag(LESSONS_CACHE_TAG, { expire: 0 })
+  revalidatePath("/admin")
+  revalidatePath("/")
+}
 
 export type ActionResult = { ok: boolean; error?: string }
 
@@ -56,8 +68,7 @@ export async function upsertLesson(input: LessonInput): Promise<ActionResult> {
   )
 
   if (error) return { ok: false, error: error.message }
-  revalidatePath("/admin")
-  revalidatePath("/")
+  revalidateLessons()
   return { ok: true }
 }
 
@@ -66,8 +77,7 @@ export async function togglePublished(id: string, published: boolean): Promise<A
   const db = createComunidadeServiceClient()
   const { error } = await db.from("lessons").update({ published }).eq("id", id)
   if (error) return { ok: false, error: error.message }
-  revalidatePath("/admin")
-  revalidatePath("/")
+  revalidateLessons()
   return { ok: true }
 }
 
@@ -82,8 +92,7 @@ export async function deleteLesson(id: string): Promise<ActionResult> {
   const renumberError = await renumberLessons(db)
   if (renumberError) return { ok: false, error: renumberError }
 
-  revalidatePath("/admin")
-  revalidatePath("/")
+  revalidateLessons()
   return { ok: true }
 }
 
