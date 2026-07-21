@@ -17,12 +17,12 @@ import { createProxyClient } from "@/lib/supabase/proxy-client"
 export async function proxy(request: NextRequest) {
   const { supabase, response } = createProxyClient(request)
 
-  // getUser valida o JWT junto ao Supabase (recomendado no SSR).
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // getClaims valida o JWT localmente (JWKS) quando o projeto usa signing keys
+  // assimétricas (ECC/RSA) — sem ida-e-volta de rede por navegação. Com HS256
+  // legado cai no fallback de rede (getUser). getSession interno faz o refresh.
+  const { data } = await supabase.auth.getClaims()
 
-  if (!user) {
+  if (!data?.claims) {
     const loginUrl = new URL("/login", request.url)
     const { pathname, search } = request.nextUrl
     if (pathname !== "/") loginUrl.searchParams.set("redirect_to", pathname + search)

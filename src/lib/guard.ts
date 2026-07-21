@@ -6,15 +6,17 @@ import { getAccessState } from "@/lib/access"
 
 /**
  * E-mail do usuário logado (ou null).
- * Memoizado por request (React cache): página + SiteHeader compartilham
- * o mesmo getUser() em vez de baterem no Supabase Auth várias vezes.
+ * Usa getClaims(): com JWT signing keys assimétricas (ECC/RSA), a verificação
+ * do token é feita LOCALMENTE via JWKS — sem ida-e-volta de rede ao Supabase
+ * Auth a cada navegação. Com o segredo HS256 legado cai no fallback de rede
+ * (mesma latência do getUser), então é seguro trocar antes de rotacionar a chave.
+ * Memoizado por request (React cache): página + SiteHeader compartilham a leitura.
  */
 export const currentUserEmail = cache(async (): Promise<string | null> => {
   const supabase = await createSupabaseServer()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  return user?.email?.toLowerCase().trim() ?? null
+  const { data } = await supabase.auth.getClaims()
+  const email = data?.claims?.email
+  return typeof email === "string" ? email.toLowerCase().trim() : null
 })
 
 /**
