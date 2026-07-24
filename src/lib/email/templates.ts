@@ -46,7 +46,7 @@ function layout(content: string): string {
               <td style="font-family:${ff};padding:24px 0 0 0;text-align:center;">
                 <p style="font-family:${ff};margin:0;font-size:13px;color:${colors.mutedFg};line-height:1.5;">
                   Você recebeu este e-mail porque tem acesso à
-                  <a href="${baseUrl}" style="color:${colors.primary};text-decoration:none;">Comunidade VIP DVP</a>.
+                  <a href="${baseUrl}" style="color:${colors.primary};text-decoration:none;">Comunidade VIP EVP</a>.
                 </p>
               </td>
             </tr>
@@ -67,7 +67,7 @@ export function otpEmail(params: { code: string }) {
                   Seu código de acesso
                 </h1>
                 <p style="font-family:${ff};margin:0 0 28px 0;font-size:15px;color:${colors.mutedFg};line-height:1.6;text-align:center;">
-                  Use o código abaixo para entrar na Comunidade VIP DVP.
+                  Use o código abaixo para entrar na Comunidade VIP EVP.
                 </p>
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                   <tr>
@@ -83,14 +83,14 @@ export function otpEmail(params: { code: string }) {
   `)
 
   const text = [
-    "Seu código de acesso — Comunidade VIP DVP",
+    "Seu código de acesso — Comunidade VIP EVP",
     "",
     `Código: ${code}`,
     "",
     "Este código expira em 10 minutos.",
     "Se você não solicitou este código, ignore este e-mail.",
     "",
-    "— Comunidade VIP DVP",
+    "— Comunidade VIP EVP",
   ].join("\n")
 
   return {

@@ -30,7 +30,7 @@ function unlockLabel(days: number): string {
 }
 
 export const metadata = {
-  title: "Hub da Aluna · DVP",
+  title: "Hub da Aluna · EVP",
   description: "Tudo que você precisa, num lugar só.",
 }
 

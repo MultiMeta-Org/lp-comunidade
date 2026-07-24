@@ -40,7 +40,7 @@ async function sendViaMailpit({
       body: JSON.stringify({
         From: {
           Email: fromAddress.match(/<(.+)>/)?.[1] || fromAddress,
-          Name: fromAddress.match(/^(.+?)\s*</)?.[1] || "Comunidade VIP DVP",
+          Name: fromAddress.match(/^(.+?)\s*</)?.[1] || "Comunidade VIP EVP",
         },
         To: to.map((email) => ({ Email: email, Name: "" })),
         Subject: subject,
@@ -79,7 +79,7 @@ export async function sendEmail({
   const resendKey = (process.env.RESEND_API_KEY || "").trim()
   const fromAddress =
     process.env.RESEND_FROM ||
-    "Comunidade VIP DVP <contato@atualizacoes.crmmultimeta.com.br>"
+    "Comunidade VIP EVP <contato@atualizacoes.crmmultimeta.com.br>"
   const recipients = Array.isArray(to) ? to : [to]
 
   // Dev local: sem Resend, cai no Mailpit do Supabase local.

@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/guard"
 import { LogoutButton } from "@/components/logout-button"
 
 export const metadata = {
-  title: "Admin · Comunidade VIP DVP",
+  title: "Admin · Comunidade VIP EVP",
 }
 
 // Sempre dinâmico — depende de sessão/allowlist.
