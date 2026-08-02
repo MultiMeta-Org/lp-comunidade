@@ -29,8 +29,16 @@ export type LessonInput = {
   description: string
   pdfUrl: string
   audioUrl: string
+  videoUrl: string
   published: boolean
 }
+
+/** Tipo de mídia enviável → bucket privado correspondente. */
+const UPLOAD_BUCKETS = { pdf: "pdfs", audio: "audios" } as const
+export type UploadKind = keyof typeof UPLOAD_BUCKETS
+
+/** Prefixo sentinela usado em pdf_url/audio_url para arquivos no Storage. */
+const STORAGE_PREFIX = "storage://"
 
 /**
  * Cria ou atualiza uma aula (CMS da Paola).
@@ -61,6 +69,7 @@ export async function upsertLesson(input: LessonInput): Promise<ActionResult> {
       description: input.description.trim(),
       pdf_url: input.pdfUrl.trim() || null,
       audio_url: input.audioUrl.trim() || null,
+      video_url: input.videoUrl.trim() || null,
       published: input.published,
       sort_order: dia,
     },
@@ -69,6 +78,66 @@ export async function upsertLesson(input: LessonInput): Promise<ActionResult> {
 
   if (error) return { ok: false, error: error.message }
   revalidateLessons()
+  return { ok: true }
+}
+
+export type UploadUrlResult =
+  | { ok: true; bucket: string; path: string; token: string; ref: string }
+  | { ok: false; error: string }
+
+/**
+ * Gera uma signed upload URL para o navegador enviar o arquivo DIRETO ao
+ * bucket privado (sem passar pelo servidor Next — evita o limite de body das
+ * Server Actions e escala para áudios grandes). O client faz
+ * `storage.from(bucket).uploadToSignedUrl(path, token, file)` e depois grava
+ * `ref` (= `storage://bucket/path`) no campo pdf_url/audio_url da aula.
+ */
+export async function createLessonUploadUrl(
+  kind: UploadKind,
+  lessonId: string,
+  filename: string
+): Promise<UploadUrlResult> {
+  await requireAdmin()
+
+  const bucket = UPLOAD_BUCKETS[kind]
+  if (!bucket) return { ok: false, error: "Tipo de arquivo inválido." }
+
+  const ext = (filename.split(".").pop() || "").toLowerCase().replace(/[^a-z0-9]/g, "")
+  const safeId = (lessonId || "aula").replace(/[^a-z0-9-]/gi, "")
+  const path = `${safeId}/${crypto.randomUUID()}${ext ? `.${ext}` : ""}`
+
+  const db = createComunidadeServiceClient()
+  const { data, error } = await db.storage.from(bucket).createSignedUploadUrl(path)
+  if (error || !data) {
+    return { ok: false, error: error?.message || "Falha ao preparar o upload." }
+  }
+  return {
+    ok: true,
+    bucket,
+    path: data.path,
+    token: data.token,
+    ref: `${STORAGE_PREFIX}${bucket}/${data.path}`,
+  }
+}
+
+/**
+ * Remove um arquivo do Storage a partir do seu `ref` (`storage://bucket/path`).
+ * Chamado quando o admin troca/remove um upload, para não deixar órfãos.
+ * URLs externas (não-storage) são ignoradas silenciosamente.
+ */
+export async function removeLessonUpload(ref: string): Promise<ActionResult> {
+  await requireAdmin()
+  if (!ref?.startsWith(STORAGE_PREFIX)) return { ok: true }
+
+  const rest = ref.slice(STORAGE_PREFIX.length)
+  const slash = rest.indexOf("/")
+  if (slash === -1) return { ok: true }
+  const bucket = rest.slice(0, slash)
+  const path = rest.slice(slash + 1)
+
+  const db = createComunidadeServiceClient()
+  const { error } = await db.storage.from(bucket).remove([path])
+  if (error) return { ok: false, error: error.message }
   return { ok: true }
 }
 

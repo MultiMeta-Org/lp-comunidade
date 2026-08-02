@@ -1,16 +1,19 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
-import { Trash2, X } from "lucide-react"
+import { useEffect, useRef, useState, useTransition } from "react"
+import { Trash2, X, Upload, FileCheck2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CATEGORIES, categoryLabel, weekdayFromIso } from "@/lib/lessons"
+import { supabase } from "@/lib/supabase/client"
 import {
   upsertLesson,
   deleteLesson,
   togglePublished,
+  createLessonUploadUrl,
   type LessonInput,
+  type UploadKind,
 } from "@/app/admin/lessons/actions"
 
 export type LessonRow = LessonInput
@@ -25,8 +28,12 @@ const EMPTY: LessonRow = {
   description: "",
   pdfUrl: "",
   audioUrl: "",
+  videoUrl: "",
   published: true,
 }
+
+const STORAGE_PREFIX = "storage://"
+const isUploadedFile = (v: string) => v.startsWith(STORAGE_PREFIX)
 
 export function LessonsManager({ rows }: { rows: LessonRow[] }) {
   const [draft, setDraft] = useState<LessonRow | null>(null)
@@ -167,14 +174,35 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="URL do PDF">
-              <Input value={draft.pdfUrl} onChange={(e) => set("pdfUrl", e.target.value)} placeholder="https://..." />
-            </Field>
-            <Field label="URL do áudio">
-              <Input value={draft.audioUrl} onChange={(e) => set("audioUrl", e.target.value)} placeholder="https://..." />
-            </Field>
+            <MediaField
+              label="PDF"
+              kind="pdf"
+              accept="application/pdf,.pdf"
+              lessonId={draft.id}
+              value={draft.pdfUrl}
+              onChange={(v) => set("pdfUrl", v)}
+            />
+            <MediaField
+              label="Áudio"
+              kind="audio"
+              accept="audio/*"
+              lessonId={draft.id}
+              value={draft.audioUrl}
+              onChange={(v) => set("audioUrl", v)}
+            />
           </div>
-          {/* TODO: upload direto de arquivo para o Storage (buckets pdfs/audios). */}
+
+          <Field label="URL do vídeo (Google Drive ou YouTube)">
+            <Input
+              value={draft.videoUrl}
+              onChange={(e) => set("videoUrl", e.target.value)}
+              placeholder="https://drive.google.com/file/d/.../view"
+            />
+            <p className="text-xs text-muted-foreground">
+              O vídeo fica hospedado no link (não ocupa espaço). Cole o link de
+              compartilhamento do Drive — funciona direto.
+            </p>
+          </Field>
 
             <div className="flex gap-3">
               <Button type="submit" disabled={pending}>
@@ -253,6 +281,117 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
         </table>
       </div>
     </div>
+  )
+}
+
+/**
+ * Campo de mídia (PDF ou áudio): envia um arquivo direto para o bucket privado
+ * OU aceita uma URL externa. Arquivo enviado vira `storage://bucket/path` no valor.
+ * O upload usa signed upload URL → vai do navegador direto ao Storage (não passa
+ * pelo servidor Next, então não esbarra no limite de body das Server Actions).
+ */
+function MediaField({
+  label,
+  kind,
+  accept,
+  lessonId,
+  value,
+  onChange,
+}: {
+  label: string
+  kind: UploadKind
+  accept: string
+  lessonId: string
+  value: string
+  onChange: (v: string) => void
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [err, setErr] = useState("")
+
+  const uploaded = isUploadedFile(value)
+
+  const pick = () => inputRef.current?.click()
+
+  const onFile = async (file: File | undefined) => {
+    if (!file) return
+    setErr("")
+    setUploading(true)
+    try {
+      const res = await createLessonUploadUrl(kind, lessonId, file.name)
+      if (!res.ok) {
+        setErr(res.error)
+        return
+      }
+      const { error } = await supabase.storage
+        .from(res.bucket)
+        .uploadToSignedUrl(res.path, res.token, file)
+      if (error) {
+        setErr(error.message)
+        return
+      }
+      onChange(res.ref)
+    } finally {
+      setUploading(false)
+      if (inputRef.current) inputRef.current.value = ""
+    }
+  }
+
+  return (
+    <Field label={label}>
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={(e) => onFile(e.target.files?.[0])}
+      />
+
+      {uploaded ? (
+        <div className="flex h-10 items-center justify-between gap-2 rounded-md border border-input bg-muted/40 px-3 text-sm">
+          <span className="flex items-center gap-1.5 text-foreground">
+            <FileCheck2 className="h-4 w-4 text-primary" />
+            Arquivo enviado
+          </span>
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="cursor-pointer text-xs text-muted-foreground hover:text-destructive"
+          >
+            Remover
+          </button>
+        </div>
+      ) : (
+        <>
+          <Input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Cole uma URL ou envie um arquivo"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={pick}
+            disabled={uploading}
+            className="w-fit"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Enviando…
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4" />
+                Enviar arquivo
+              </>
+            )}
+          </Button>
+        </>
+      )}
+      {err && <p className="text-xs text-destructive">{err}</p>}
+    </Field>
   )
 }
 

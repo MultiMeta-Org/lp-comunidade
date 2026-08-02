@@ -103,6 +103,7 @@ export interface Database {
           description: string
           pdf_url: string | null
           audio_url: string | null
+          video_url: string | null
           published: boolean
           sort_order: number
           created_at: string
@@ -118,6 +119,7 @@ export interface Database {
           description: string
           pdf_url?: string | null
           audio_url?: string | null
+          video_url?: string | null
           published?: boolean
           sort_order?: number
           created_at?: string

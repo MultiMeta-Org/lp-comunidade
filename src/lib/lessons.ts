@@ -22,6 +22,7 @@ export type Lesson = {
   description: string
   pdfUrl: string
   audioUrl: string
+  videoUrl: string
 }
 
 const MONTHS = [
@@ -66,6 +67,33 @@ export function toDirectMediaUrl(url: string): string {
 }
 
 /**
+ * URL de EMBED para vídeo (iframe). Diferente do download: um vídeo grande
+ * não deve ser baixado, e sim tocado em stream.
+ *   • Google Drive  → …/file/d/ID/preview  (player embutido do Drive)
+ *   • YouTube       → …/embed/ID
+ * Outras URLs passam inalteradas (usadas direto em <iframe> ou <video>).
+ */
+export function toVideoEmbedUrl(url: string): string {
+  if (!url || url === "#") return url
+  if (url.includes("drive.google.com")) {
+    const match = url.match(/\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/)
+    if (match) return `https://drive.google.com/file/d/${match[1]}/preview`
+    return url
+  }
+  const yt =
+    url.match(/youtube\.com\/watch\?v=([^&]+)/) ||
+    url.match(/youtu\.be\/([^?/]+)/) ||
+    url.match(/youtube\.com\/embed\/([^?/]+)/)
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`
+  return url
+}
+
+/** A URL aponta para um arquivo de vídeo direto (streamável em <video>)? */
+export function isDirectVideoFile(url: string): boolean {
+  return /\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(url)
+}
+
+/**
  * Rótulo de exibição da categoria. Usa o mapa CATEGORIES para as conhecidas
  * e cai para title-case em categorias novas (criadas pelo admin).
  */
@@ -90,6 +118,7 @@ export const SEED_LESSONS: Lesson[] = [
     description: "Três scripts testados para transformar resistência de preço em urgência de compra.",
     pdfUrl: "#",
     audioUrl: "#",
+    videoUrl: "#",
   },
   {
     id: "dia-11",
@@ -102,6 +131,7 @@ export const SEED_LESSONS: Lesson[] = [
     description: "Estudo de caso com transcrição e anotações do que virou o jogo em cada etapa.",
     pdfUrl: "#",
     audioUrl: "#",
+    videoUrl: "#",
   },
   {
     id: "dia-10",
@@ -114,6 +144,7 @@ export const SEED_LESSONS: Lesson[] = [
     description: "A diferença entre urgência real e urgência fabricada — e por que as clientes percebem.",
     pdfUrl: "#",
     audioUrl: "#",
+    videoUrl: "#",
   },
   {
     id: "dia-9",
@@ -126,6 +157,7 @@ export const SEED_LESSONS: Lesson[] = [
     description: "Ritual de reset mental para semanas de baixa conversão.",
     pdfUrl: "#",
     audioUrl: "#",
+    videoUrl: "#",
   },
   {
     id: "dia-8",
@@ -138,6 +170,7 @@ export const SEED_LESSONS: Lesson[] = [
     description: "Como calcular e interpretar sua taxa para tomar decisões mais precisas.",
     pdfUrl: "#",
     audioUrl: "#",
+    videoUrl: "#",
   },
   {
     id: "dia-7",
@@ -150,6 +183,7 @@ export const SEED_LESSONS: Lesson[] = [
     description: "Como identificar o momento exato em que a cliente se fechou — e o que fazer diferente.",
     pdfUrl: "#",
     audioUrl: "#",
+    videoUrl: "#",
   },
   {
     id: "dia-6",
@@ -162,6 +196,7 @@ export const SEED_LESSONS: Lesson[] = [
     description: "As 3 razões reais por trás da resposta mais comum na sua call.",
     pdfUrl: "#",
     audioUrl: "#",
+    videoUrl: "#",
   },
   {
     id: "dia-5",
@@ -174,5 +209,6 @@ export const SEED_LESSONS: Lesson[] = [
     description: "Uma pergunta simples que muda o estado emocional da cliente no momento certo.",
     pdfUrl: "#",
     audioUrl: "#",
+    videoUrl: "#",
   },
 ]

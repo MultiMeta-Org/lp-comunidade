@@ -9,7 +9,49 @@ export const LESSONS_CACHE_TAG = "lessons"
 
 type LessonRow = Database["comunidade"]["Tables"]["lessons"]["Row"]
 
-function mapRow(row: LessonRow): Lesson {
+/** Prefixo sentinela dos arquivos enviados pelo admin: `storage://<bucket>/<path>`. */
+const STORAGE_PREFIX = "storage://"
+/** Validade das signed URLs. Longa o bastante para sobreviver à janela de cache (1h). */
+const SIGNED_URL_TTL = 60 * 60 * 24 * 7 // 7 dias
+
+/**
+ * Resolve o valor guardado em pdf_url/audio_url para uma URL utilizável:
+ *   • `storage://bucket/path` → signed URL do bucket privado (service client).
+ *     `download` força o nome do arquivo ao baixar (relevante para PDF).
+ *   • qualquer outra coisa → tratada como URL externa (Drive vira link direto).
+ */
+async function resolveMedia(
+  db: ReturnType<typeof createComunidadeServiceClient>,
+  value: string | null,
+  download: boolean
+): Promise<string> {
+  if (!value) return "#"
+  if (!value.startsWith(STORAGE_PREFIX)) return toDirectMediaUrl(value)
+
+  const rest = value.slice(STORAGE_PREFIX.length)
+  const slash = rest.indexOf("/")
+  if (slash === -1) return "#"
+  const bucket = rest.slice(0, slash)
+  const path = rest.slice(slash + 1)
+
+  const { data, error } = await db.storage
+    .from(bucket)
+    .createSignedUrl(path, SIGNED_URL_TTL, download ? { download: true } : undefined)
+  if (error || !data) {
+    console.error("[lessons] falha ao assinar URL:", error?.message)
+    return "#"
+  }
+  return data.signedUrl
+}
+
+async function mapRow(
+  db: ReturnType<typeof createComunidadeServiceClient>,
+  row: LessonRow
+): Promise<Lesson> {
+  const [pdfUrl, audioUrl] = await Promise.all([
+    resolveMedia(db, row.pdf_url, true),
+    resolveMedia(db, row.audio_url, false),
+  ])
   return {
     id: row.id,
     dia: row.dia,
@@ -19,8 +61,9 @@ function mapRow(row: LessonRow): Lesson {
     topic: row.topic,
     category: row.category,
     description: row.description,
-    pdfUrl: toDirectMediaUrl(row.pdf_url ?? "#"),
-    audioUrl: toDirectMediaUrl(row.audio_url ?? "#"),
+    pdfUrl,
+    audioUrl,
+    videoUrl: row.video_url ?? "#",
   }
 }
 
@@ -55,7 +98,7 @@ const readPublishedLessons = unstable_cache(
       console.error("[lessons] erro ao carregar:", error.message)
       return []
     }
-    return (data ?? []).map(mapRow)
+    return Promise.all((data ?? []).map((row) => mapRow(db, row)))
   },
   ["published-lessons"],
   { tags: [LESSONS_CACHE_TAG], revalidate: 3600 }

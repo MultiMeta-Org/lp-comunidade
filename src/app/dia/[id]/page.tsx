@@ -6,6 +6,7 @@ import { WHATSAPP_VIP_URL } from "@/lib/links"
 import { getLessonWithNeighbors } from "@/lib/lessons-server"
 import { requireReleasedAccess } from "@/lib/guard"
 import { AudioPlayer } from "@/components/audio-player"
+import { VideoPlayer } from "@/components/video-player"
 
 export default async function LessonPage({
   params,
@@ -74,6 +75,16 @@ export default async function LessonPage({
             {lesson.description}
           </p>
         </div>
+
+        {/* ── Vídeo ── */}
+        {hasMedia(lesson.videoUrl) && (
+          <section className="space-y-3">
+            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Vídeo
+            </h2>
+            <VideoPlayer src={lesson.videoUrl} title={lesson.topic} />
+          </section>
+        )}
 
         {/* ── Áudio ── */}
         {hasMedia(lesson.audioUrl) && (

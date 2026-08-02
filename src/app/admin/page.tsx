@@ -40,6 +40,7 @@ function toLessonRows(lessons: LessonDbRow[]): LessonRow[] {
     description: l.description,
     pdfUrl: l.pdf_url ?? "",
     audioUrl: l.audio_url ?? "",
+    videoUrl: l.video_url ?? "",
     published: l.published,
   }))
 }
