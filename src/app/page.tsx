@@ -4,6 +4,7 @@ import { getLessons } from "@/lib/lessons-server"
 import { requireReleasedAccess } from "@/lib/guard"
 import { Library } from "@/components/library"
 import { AudioPlayer } from "@/components/audio-player"
+import { VideoPlayer } from "@/components/video-player"
 import { SiteHeader } from "@/components/site-header"
 import { LiveBanner } from "@/components/live-banner"
 
@@ -60,6 +61,12 @@ export default async function VIPPage() {
               <p className="text-sm text-muted-foreground">
                 {today.description}
               </p>
+
+              {hasMedia(today.videoUrl) && (
+                <div className="mt-6">
+                  <VideoPlayer src={today.videoUrl} title={today.topic} />
+                </div>
+              )}
 
               {hasMedia(today.audioUrl) && (
                 <div className="mt-6">
