@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CATEGORIES, categoryLabel, weekdayFromIso } from "@/lib/lessons"
 import { supabase } from "@/lib/supabase/client"
+import { compressAudioToMp3 } from "@/lib/audio-compress"
 import {
   upsertLesson,
   deleteLesson,
@@ -307,17 +308,41 @@ function MediaField({
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  // Fase da compressão de áudio (null = não está comprimindo). 0..100 = %.
+  const [compressPct, setCompressPct] = useState<number | null>(null)
   const [err, setErr] = useState("")
 
   const uploaded = isUploadedFile(value)
 
   const pick = () => inputRef.current?.click()
 
-  const onFile = async (file: File | undefined) => {
-    if (!file) return
+  const MAX_BYTES = 50 * 1024 * 1024
+
+  const onFile = async (original: File | undefined) => {
+    if (!original) return
     setErr("")
     setUploading(true)
     try {
+      let file = original
+
+      // Áudio de aula é fala: comprime pra MP3 mono 48 kbps no navegador antes de
+      // subir, pra caber no cap de 50 MB do bucket. PDF passa direto.
+      if (kind === "audio") {
+        setCompressPct(0)
+        try {
+          file = await compressAudioToMp3(original, (r) => setCompressPct(Math.round(r * 100)))
+        } catch (e) {
+          setErr(e instanceof Error ? `Falha ao comprimir o áudio: ${e.message}` : "Falha ao comprimir o áudio.")
+          return
+        } finally {
+          setCompressPct(null)
+        }
+        if (file.size > MAX_BYTES) {
+          setErr("Áudio ainda passa de 50 MB após comprimir — divida em partes.")
+          return
+        }
+      }
+
       const res = await createLessonUploadUrl(kind, lessonId, file.name)
       if (!res.ok) {
         setErr(res.error)
@@ -379,7 +404,7 @@ function MediaField({
             {uploading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Enviando…
+                {compressPct !== null ? `Comprimindo áudio… ${compressPct}%` : "Enviando…"}
               </>
             ) : (
               <>
