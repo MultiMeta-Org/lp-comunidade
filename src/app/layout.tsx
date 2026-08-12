@@ -19,7 +19,7 @@ const enriqueta = Enriqueta({
 });
 
 export const metadata: Metadata = {
-  title: "Comunidade VIP · EVP",
+  title: "Portal EVP",
   description: "Seu espaço diário de conteúdo e evolução.",
 };
 

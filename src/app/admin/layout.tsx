@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/guard"
 import { LogoutButton } from "@/components/logout-button"
 
 export const metadata = {
-  title: "Admin · Comunidade VIP EVP",
+  title: "Admin · Portal EVP",
 }
 
 // Sempre dinâmico — depende de sessão/allowlist.
@@ -26,7 +26,7 @@ export default async function AdminLayout({
             </span>
             <span className="text-border">·</span>
             <Link href="/" className="text-sm font-semibold text-foreground hover:text-primary">
-              Comunidade VIP
+              Portal EVP
             </Link>
           </div>
           <div className="flex items-center gap-4">

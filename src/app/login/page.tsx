@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import { LoginForm } from "@/components/login-form"
 
 export const metadata = {
-  title: "Entrar · Comunidade VIP EVP",
+  title: "Entrar · Portal EVP",
 }
 
 export default function LoginPage() {

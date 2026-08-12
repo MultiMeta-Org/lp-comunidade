@@ -128,7 +128,7 @@ export function LoginForm({ className }: { className?: string }) {
               Conexão Multimeta
             </span>
             <span className="text-[11px] font-medium text-muted-foreground">
-              Comunidade VIP
+              Portal EVP
             </span>
           </div>
         </div>

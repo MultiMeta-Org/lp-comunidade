@@ -1,7 +1,7 @@
-// Links externos da comunidade (client-safe).
+// Links externos do Portal EVP (client-safe).
 
 /** Grupo VIP no WhatsApp — comunidade exclusiva das alunas. */
-export const WHATSAPP_VIP_URL = "https://chat.whatsapp.com/HN6nH5ppJCO9XgsZKpPtUN"
+export const WHATSAPP_VIP_URL = "https://chat.whatsapp.com/GEZztwbmW8T4ant862BGCc"
 
 /** Grupo gratuito no WhatsApp — "Todas as Alunas". */
 export const WHATSAPP_FREE_URL = "https://chat.whatsapp.com/DuLpwAf5ICkBjjCrY2Pluy"

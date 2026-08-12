@@ -1,6 +1,6 @@
 # Área de membros — setup (quando o Supabase existir)
 
-Este repositório já tem o **esqueleto** da área de membros da Comunidade VIP EVP:
+Este repositório já tem o **esqueleto** da área de membros do Portal EVP:
 login passwordless (e-mail + código via Resend), gate de acesso de 7 dias pós-compra
 com revogação por reembolso (Hotmart) e um admin com gestão de acesso + CMS de aulas.
 

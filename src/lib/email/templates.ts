@@ -37,7 +37,7 @@ function layout(content: string): string {
             <tr>
               <td style="font-family:${ff};background-color:${colors.card};border-radius:12px;padding:40px 32px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
                 <p style="font-family:${ff};margin:0 0 24px 0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${colors.mutedFg};text-align:center;">
-                  MultiMeta · Comunidade VIP
+                  MultiMeta · Portal EVP
                 </p>
                 ${content}
               </td>
@@ -46,7 +46,7 @@ function layout(content: string): string {
               <td style="font-family:${ff};padding:24px 0 0 0;text-align:center;">
                 <p style="font-family:${ff};margin:0;font-size:13px;color:${colors.mutedFg};line-height:1.5;">
                   Você recebeu este e-mail porque tem acesso à
-                  <a href="${baseUrl}" style="color:${colors.primary};text-decoration:none;">Comunidade VIP EVP</a>.
+                  <a href="${baseUrl}" style="color:${colors.primary};text-decoration:none;">Portal EVP</a>.
                 </p>
               </td>
             </tr>
@@ -67,7 +67,7 @@ export function otpEmail(params: { code: string }) {
                   Seu código de acesso
                 </h1>
                 <p style="font-family:${ff};margin:0 0 28px 0;font-size:15px;color:${colors.mutedFg};line-height:1.6;text-align:center;">
-                  Use o código abaixo para entrar na Comunidade VIP EVP.
+                  Use o código abaixo para entrar no Portal EVP.
                 </p>
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                   <tr>
@@ -83,14 +83,14 @@ export function otpEmail(params: { code: string }) {
   `)
 
   const text = [
-    "Seu código de acesso — Comunidade VIP EVP",
+    "Seu código de acesso — Portal EVP",
     "",
     `Código: ${code}`,
     "",
     "Este código expira em 10 minutos.",
     "Se você não solicitou este código, ignore este e-mail.",
     "",
-    "— Comunidade VIP EVP",
+    "— Portal EVP",
   ].join("\n")
 
   return {

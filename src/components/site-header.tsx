@@ -5,7 +5,7 @@ import { MultiMetaLogo } from "@/components/multimeta-logo"
 
 /**
  * Header compartilhado das páginas autenticadas: marca + navegação
- * entre páginas (Hub / Comunidade VIP, Admin quando for admin) e logout.
+ * entre páginas (Hub / Portal EVP, Admin quando for admin) e logout.
  */
 export async function SiteHeader({ page = "vip" }: { page?: "vip" | "hub" }) {
   const email = await currentUserEmail()
