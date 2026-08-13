@@ -15,18 +15,29 @@ const STORAGE_PREFIX = "storage://"
 const SIGNED_URL_TTL = 60 * 60 * 24 * 7 // 7 dias
 
 /**
- * Resolve o valor guardado em pdf_url/audio_url para uma URL utilizável:
+ * Como tratar uma URL EXTERNA (arquivo no Storage sempre vira signed URL):
+ *   • "download" → link direto de download (PDF).
+ *   • "stream"   → link direto para tocar em <audio> (Drive vira uc?export=…).
+ *   • "raw"      → inalterada. É o caso do vídeo: o player precisa do link
+ *     original para montar o embed do Drive/YouTube (ver toVideoEmbedUrl).
+ */
+type MediaMode = "download" | "stream" | "raw"
+
+/**
+ * Resolve o valor guardado em pdf_url/audio_url/video_url para uma URL utilizável:
  *   • `storage://bucket/path` → signed URL do bucket privado (service client).
  *     `download` força o nome do arquivo ao baixar (relevante para PDF).
- *   • qualquer outra coisa → tratada como URL externa (Drive vira link direto).
+ *   • qualquer outra coisa → URL externa, tratada conforme `mode`.
  */
 async function resolveMedia(
   db: ReturnType<typeof createComunidadeServiceClient>,
   value: string | null,
-  download: boolean
+  mode: MediaMode
 ): Promise<string> {
   if (!value) return "#"
-  if (!value.startsWith(STORAGE_PREFIX)) return toDirectMediaUrl(value)
+  if (!value.startsWith(STORAGE_PREFIX)) {
+    return mode === "raw" ? value : toDirectMediaUrl(value)
+  }
 
   const rest = value.slice(STORAGE_PREFIX.length)
   const slash = rest.indexOf("/")
@@ -36,7 +47,7 @@ async function resolveMedia(
 
   const { data, error } = await db.storage
     .from(bucket)
-    .createSignedUrl(path, SIGNED_URL_TTL, download ? { download: true } : undefined)
+    .createSignedUrl(path, SIGNED_URL_TTL, mode === "download" ? { download: true } : undefined)
   if (error || !data) {
     console.error("[lessons] falha ao assinar URL:", error?.message)
     return "#"
@@ -48,9 +59,10 @@ async function mapRow(
   db: ReturnType<typeof createComunidadeServiceClient>,
   row: LessonRow
 ): Promise<Lesson> {
-  const [pdfUrl, audioUrl] = await Promise.all([
-    resolveMedia(db, row.pdf_url, true),
-    resolveMedia(db, row.audio_url, false),
+  const [pdfUrl, audioUrl, videoUrl] = await Promise.all([
+    resolveMedia(db, row.pdf_url, "download"),
+    resolveMedia(db, row.audio_url, "stream"),
+    resolveMedia(db, row.video_url, "raw"),
   ])
   return {
     id: row.id,
@@ -63,7 +75,7 @@ async function mapRow(
     description: row.description,
     pdfUrl,
     audioUrl,
-    videoUrl: row.video_url ?? "#",
+    videoUrl,
   }
 }
 

@@ -1,13 +1,15 @@
 "use client"
 
 import { useEffect, useRef, useState, useTransition } from "react"
-import { Trash2, X, Upload, FileCheck2, Loader2 } from "lucide-react"
+import { Trash2, Upload, FileCheck2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Modal } from "@/components/ui/modal"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CATEGORIES, categoryLabel, weekdayFromIso } from "@/lib/lessons"
 import { supabase } from "@/lib/supabase/client"
 import { compressAudioToMp3 } from "@/lib/audio-compress"
+import { useUploads } from "@/components/admin/uploads-provider"
 import {
   upsertLesson,
   deleteLesson,
@@ -193,17 +195,12 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
             />
           </div>
 
-          <Field label="URL do vídeo (Google Drive ou YouTube)">
-            <Input
-              value={draft.videoUrl}
-              onChange={(e) => set("videoUrl", e.target.value)}
-              placeholder="https://drive.google.com/file/d/.../view"
-            />
-            <p className="text-xs text-muted-foreground">
-              O vídeo fica hospedado no link (não ocupa espaço). Cole o link de
-              compartilhamento do Drive — funciona direto.
-            </p>
-          </Field>
+          <VideoField
+            lessonId={draft.id}
+            lessonLabel={editing ? `Aula ${draft.dia}` : "Nova aula"}
+            value={draft.videoUrl}
+            onChange={(v) => set("videoUrl", v)}
+          />
 
             <div className="flex gap-3">
               <Button type="submit" disabled={pending}>
@@ -420,6 +417,125 @@ function MediaField({
   )
 }
 
+/**
+ * Campo de vídeo: aceita URL externa (Drive/YouTube — não ocupa Storage) OU
+ * upload do arquivo para o bucket privado `videos`.
+ *
+ * O upload NÃO acontece aqui: é delegado ao UploadsProvider, que vive no layout
+ * do admin. Assim o envio (que pode levar muitos minutos) continua com o modal
+ * fechado, e o progresso aparece no painel flutuante. Este campo só dispara o
+ * envio e adota a referência quando ela fica pronta.
+ */
+function VideoField({
+  lessonId,
+  lessonLabel,
+  value,
+  onChange,
+}: {
+  lessonId: string
+  lessonLabel: string
+  value: string
+  onChange: (v: string) => void
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const { startVideoUpload, uploadFor, dismissUpload } = useUploads()
+
+  const upload = uploadFor(lessonId)
+  const uploaded = isUploadedFile(value)
+  const busy =
+    upload?.status === "probing" ||
+    upload?.status === "compressing" ||
+    upload?.status === "uploading"
+
+  // Upload concluído enquanto o modal estava aberto: adota a referência no draft,
+  // senão um "Salvar" depois disso apagaria o vídeo que acabou de subir.
+  const ref = upload?.status === "done" ? upload.ref : undefined
+  useEffect(() => {
+    if (ref && ref !== value) onChange(ref)
+    // `value`/`onChange` mudam a cada tecla do formulário — só o ref importa aqui.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref])
+
+  const onFile = async (file: File | undefined) => {
+    if (inputRef.current) inputRef.current.value = ""
+    if (!file) return
+    // Sem checagem de tamanho aqui: o provider mede a duração e comprime o que
+    // não couber. O único corte é por DURAÇÃO (2 h), e ele reporta no painel.
+    await startVideoUpload({ lessonId, lessonLabel, file })
+  }
+
+  const remove = () => {
+    // Descarta também o envio concluído, senão o efeito acima o readota.
+    if (upload?.status === "done") dismissUpload(lessonId)
+    onChange("")
+  }
+
+  return (
+    <Field label="Vídeo da aula">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="video/*"
+        className="hidden"
+        onChange={(e) => onFile(e.target.files?.[0])}
+      />
+
+      {uploaded ? (
+        <div className="flex h-10 items-center justify-between gap-2 rounded-md border border-input bg-muted/40 px-3 text-sm">
+          <span className="flex items-center gap-1.5 text-foreground">
+            <FileCheck2 className="h-4 w-4 text-primary" />
+            Vídeo enviado
+          </span>
+          <button
+            type="button"
+            onClick={remove}
+            className="cursor-pointer text-xs text-muted-foreground hover:text-destructive"
+          >
+            Remover
+          </button>
+        </div>
+      ) : (
+        <>
+          <Input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="https://drive.google.com/file/d/.../view"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => inputRef.current?.click()}
+            disabled={busy}
+            className="w-fit"
+          >
+            {busy ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {upload?.status === "probing" && "Analisando vídeo…"}
+                {upload?.status === "compressing" && `Comprimindo… ${upload.pct}%`}
+                {upload?.status === "uploading" && `Enviando… ${upload.pct}%`}
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4" />
+                Enviar vídeo
+              </>
+            )}
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Cole um link do Drive/YouTube (não ocupa espaço) ou envie o arquivo
+            (até 2 h de duração). Vídeo acima de 500 MB é comprimido aqui no
+            navegador para caber — o que leva tempo, então deixe a aba aberta. O
+            trabalho continua mesmo se você fechar esta janela; acompanhe no
+            canto da tela.
+          </p>
+        </>
+      )}
+    </Field>
+  )
+}
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="grid gap-1.5">
@@ -429,53 +545,3 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   )
 }
 
-function Modal({
-  title,
-  onClose,
-  children,
-}: {
-  title: string
-  onClose: () => void
-  children: React.ReactNode
-}) {
-  // Fecha no Esc e trava o scroll do body enquanto o modal está aberto.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
-    }
-    document.addEventListener("keydown", onKey)
-    document.body.style.overflow = "hidden"
-    return () => {
-      document.removeEventListener("keydown", onKey)
-      document.body.style.overflow = ""
-    }
-  }, [onClose])
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 sm:p-8"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-    >
-      <div
-        className="relative my-auto w-full max-w-2xl rounded-2xl border border-border bg-card shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Fechar"
-            className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="p-5">{children}</div>
-      </div>
-    </div>
-  )
-}

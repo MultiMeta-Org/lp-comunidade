@@ -34,8 +34,15 @@ export type LessonInput = {
 }
 
 /** Tipo de mídia enviável → bucket privado correspondente. */
-const UPLOAD_BUCKETS = { pdf: "pdfs", audio: "audios" } as const
+const UPLOAD_BUCKETS = { pdf: "pdfs", audio: "audios", video: "videos" } as const
 export type UploadKind = keyof typeof UPLOAD_BUCKETS
+
+/** Coluna de `lessons` que guarda a referência de cada tipo de mídia. */
+const MEDIA_COLUMNS = {
+  pdf: "pdf_url",
+  audio: "audio_url",
+  video: "video_url",
+} as const
 
 /** Prefixo sentinela usado em pdf_url/audio_url para arquivos no Storage. */
 const STORAGE_PREFIX = "storage://"
@@ -81,6 +88,22 @@ export async function upsertLesson(input: LessonInput): Promise<ActionResult> {
   return { ok: true }
 }
 
+/** Caminho novo (único) dentro do bucket: `<aula>/<uuid>.<ext>`. */
+function uploadPath(lessonId: string, filename: string): string {
+  const ext = (filename.split(".").pop() || "").toLowerCase().replace(/[^a-z0-9]/g, "")
+  const safeId = (lessonId || "aula").replace(/[^a-z0-9-]/gi, "")
+  return `${safeId}/${crypto.randomUUID()}${ext ? `.${ext}` : ""}`
+}
+
+/** `storage://bucket/path` → `{ bucket, path }` (null para URL externa/inválida). */
+function parseStorageRef(ref: string): { bucket: string; path: string } | null {
+  if (!ref?.startsWith(STORAGE_PREFIX)) return null
+  const rest = ref.slice(STORAGE_PREFIX.length)
+  const slash = rest.indexOf("/")
+  if (slash === -1) return null
+  return { bucket: rest.slice(0, slash), path: rest.slice(slash + 1) }
+}
+
 export type UploadUrlResult =
   | { ok: true; bucket: string; path: string; token: string; ref: string }
   | { ok: false; error: string }
@@ -91,6 +114,9 @@ export type UploadUrlResult =
  * Server Actions e escala para áudios grandes). O client faz
  * `storage.from(bucket).uploadToSignedUrl(path, token, file)` e depois grava
  * `ref` (= `storage://bucket/path`) no campo pdf_url/audio_url da aula.
+ *
+ * Vídeo NÃO usa este caminho: arquivo grande sobe por TUS (resumable), que não
+ * aceita signed URL — ver `createLessonUploadTicket` e `src/lib/video-upload.ts`.
  */
 export async function createLessonUploadUrl(
   kind: UploadKind,
@@ -102,9 +128,7 @@ export async function createLessonUploadUrl(
   const bucket = UPLOAD_BUCKETS[kind]
   if (!bucket) return { ok: false, error: "Tipo de arquivo inválido." }
 
-  const ext = (filename.split(".").pop() || "").toLowerCase().replace(/[^a-z0-9]/g, "")
-  const safeId = (lessonId || "aula").replace(/[^a-z0-9-]/gi, "")
-  const path = `${safeId}/${crypto.randomUUID()}${ext ? `.${ext}` : ""}`
+  const path = uploadPath(lessonId, filename)
 
   const db = createComunidadeServiceClient()
   const { data, error } = await db.storage.from(bucket).createSignedUploadUrl(path)
@@ -120,6 +144,80 @@ export async function createLessonUploadUrl(
   }
 }
 
+export type UploadTicketResult =
+  | { ok: true; bucket: string; path: string }
+  | { ok: false; error: string }
+
+/**
+ * Reserva bucket + caminho para um upload resumável (TUS). Diferente da signed
+ * upload URL, não há token aqui: o envio é autorizado pelo access token do
+ * próprio admin, e a RLS do bucket restringe a escrita à allowlist de admins.
+ * Esta action existe para (a) revalidar que quem pede é admin e (b) manter a
+ * convenção de nomes dos caminhos num lugar só.
+ */
+export async function createLessonUploadTicket(
+  kind: UploadKind,
+  lessonId: string,
+  filename: string
+): Promise<UploadTicketResult> {
+  await requireAdmin()
+
+  const bucket = UPLOAD_BUCKETS[kind]
+  if (!bucket) return { ok: false, error: "Tipo de arquivo inválido." }
+
+  return { ok: true, bucket, path: uploadPath(lessonId, filename) }
+}
+
+export type AttachResult =
+  | { ok: true; attached: boolean }
+  | { ok: false; attached: false; error: string }
+
+/**
+ * Grava a referência de um upload concluído na aula.
+ *
+ * Existe porque o upload de vídeo é longo e independente do formulário: ele
+ * continua mesmo com o modal fechado, então ao terminar não há draft para
+ * receber o valor. Quando a aula já existe, escrevemos direto no banco
+ * (`attached: true`) e apagamos o arquivo antigo. Quando a aula ainda não foi
+ * salva, devolvemos `attached: false` — o painel de uploads avisa que falta
+ * salvar, e o formulário adota a referência ao ser reaberto.
+ */
+export async function attachLessonMedia(
+  lessonId: string,
+  kind: UploadKind,
+  ref: string
+): Promise<AttachResult> {
+  await requireAdmin()
+
+  const parsed = parseStorageRef(ref)
+  if (!parsed || parsed.bucket !== UPLOAD_BUCKETS[kind]) {
+    return { ok: false, attached: false, error: "Referência de arquivo inválida." }
+  }
+  const column = MEDIA_COLUMNS[kind]
+
+  const db = createComunidadeServiceClient()
+  const { data: existing, error: readError } = await db
+    .from("lessons")
+    .select("pdf_url, audio_url, video_url")
+    .eq("id", lessonId)
+    .maybeSingle()
+  if (readError) return { ok: false, attached: false, error: readError.message }
+  if (!existing) return { ok: true, attached: false }
+
+  const { error } = await db
+    .from("lessons")
+    .update({ [column]: ref } as Record<typeof column, string>)
+    .eq("id", lessonId)
+  if (error) return { ok: false, attached: false, error: error.message }
+
+  // Substituiu um arquivo nosso? Apaga o antigo — vídeo pesa, não pode virar órfão.
+  const previous = existing[column]
+  if (previous && previous !== ref) await removeLessonUpload(previous)
+
+  revalidateLessons()
+  return { ok: true, attached: true }
+}
+
 /**
  * Remove um arquivo do Storage a partir do seu `ref` (`storage://bucket/path`).
  * Chamado quando o admin troca/remove um upload, para não deixar órfãos.
@@ -127,16 +225,12 @@ export async function createLessonUploadUrl(
  */
 export async function removeLessonUpload(ref: string): Promise<ActionResult> {
   await requireAdmin()
-  if (!ref?.startsWith(STORAGE_PREFIX)) return { ok: true }
 
-  const rest = ref.slice(STORAGE_PREFIX.length)
-  const slash = rest.indexOf("/")
-  if (slash === -1) return { ok: true }
-  const bucket = rest.slice(0, slash)
-  const path = rest.slice(slash + 1)
+  const parsed = parseStorageRef(ref)
+  if (!parsed) return { ok: true }
 
   const db = createComunidadeServiceClient()
-  const { error } = await db.storage.from(bucket).remove([path])
+  const { error } = await db.storage.from(parsed.bucket).remove([parsed.path])
   if (error) return { ok: false, error: error.message }
   return { ok: true }
 }

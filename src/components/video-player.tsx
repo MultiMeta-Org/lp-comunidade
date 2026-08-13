@@ -1,9 +1,11 @@
 import { toVideoEmbedUrl, isDirectVideoFile } from "@/lib/lessons"
 
 /**
- * Player de vídeo da aula. Vídeo é grande, então é sempre uma URL externa
- * (Google Drive / YouTube), nunca ocupa Storage.
- *   • arquivo direto (.mp4/.webm/…) → <video> nativo com controles;
+ * Player de vídeo da aula. A URL pode ser externa (Google Drive / YouTube) ou
+ * uma signed URL do bucket privado `videos`, quando o admin sobe o arquivo.
+ *   • arquivo direto (.mp4/.webm/…) → <video> nativo com controles. Cobre o
+ *     upload nosso: a signed URL preserva a extensão antes do `?token=`, e o
+ *     Storage responde a Range requests, então dá pra buscar no meio do vídeo;
  *   • Drive/YouTube/outros          → <iframe> de embed (streaming).
  * O container mantém proporção 16:9.
  */

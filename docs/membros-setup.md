@@ -11,6 +11,12 @@ de auth/admin não funcionam. Para ligar tudo:
 - Criar o projeto no Supabase.
 - Aplicar `supabase/migrations/0001_init.sql` (schema `comunidade`) e depois `supabase/seed.sql`.
 - Criar os buckets de Storage `pdfs` e `audios` (privados) — ver comentário no fim do `0001_init.sql`.
+- Aplicar `supabase/migrations/0006_video_bucket.sql` (bucket `videos` + policies de
+  upload do admin). O teto de vídeo é **500 MB**, e mora em três lugares que
+  precisam concordar: o limite global do projeto (**Storage → Settings → Upload
+  file size limit**, que tem precedência), o `file_size_limit` do bucket na
+  migration, e `MAX_VIDEO_BYTES` em `src/components/admin/uploads-provider.tsx`.
+  Vídeo maior que isso vai por link do Drive/YouTube — o mesmo campo aceita os dois.
 - Cadastrar os admins:
   `insert into comunidade.admins (email) values ('gabriel.multimeta@gmail.com');`
 
@@ -35,6 +41,18 @@ de auth/admin não funcionam. Para ligar tudo:
 - **Proteção de rotas**: `src/proxy.ts` (Next 16 — antigo middleware) exige sessão; `src/lib/guard.ts` faz o gate fino (acesso liberado nas páginas de conteúdo, allowlist no `/admin`).
 - **Hotmart**: `src/app/api/hotmart/webhook/route.ts` mantém `authorized_emails` (autoriza ancorando no `order_date`, revoga em reembolso/chargeback).
 - **Admin** (`/admin`): gestão de acessos + CMS de aulas (`comunidade.lessons`), server actions em `src/app/admin/*/actions.ts`.
+- **Uploads**: PDF e áudio vão por *signed upload URL* (navegador → Storage direto).
+  Vídeo vai por **TUS/resumable** (`src/lib/video-upload.ts`), em chunks de 6 MB, com
+  progresso e retomada se a conexão cair. O estado dos envios vive no
+  `UploadsProvider` (layout do `/admin`), então fechar o modal da aula não
+  interrompe o upload; ao terminar, `attachLessonMedia` grava a referência na aula.
+- **Compressão de vídeo** (`src/lib/video-compress.ts`): vídeo acima de 500 MB é
+  reencodado no navegador (ffmpeg.wasm) só o necessário para caber — o bitrate sai
+  da duração, e a resolução só cai quando o bitrate não sustenta a original
+  (~25 min → 1080p, ~1 h → 720p, 2 h → 480p). Até 500 MB sobe sem reencodar.
+  Limite de **2 h**: acima disso não sobra bitrate e o caminho é o link do Drive.
+  É lento (1x–3x a duração do vídeo) e precisa da aba aberta; roda em Web Worker,
+  então não trava a tela.
 - **Conteúdo**: `src/lib/lessons-server.ts` (`getLessons`/`getLesson`) lê as aulas via RLS; `src/lib/lessons.ts` guarda constantes/tipos/seed (client-safe).
 
 ## Verificação
