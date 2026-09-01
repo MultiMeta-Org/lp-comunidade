@@ -61,7 +61,7 @@ export function Library({ lessons }: { lessons: Lesson[] }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar aula por tema…"
-            className="w-full rounded-full border border-border bg-card pl-9 pr-9 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground transition-colors"
+            className="w-full rounded-full border border-border bg-card pl-9 pr-9 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
           />
           {query && (
             <button
@@ -112,7 +112,7 @@ export function Library({ lessons }: { lessons: Lesson[] }) {
             value={from}
             onChange={(e) => setFrom(e.target.value)}
             aria-label="Data inicial"
-            className="min-w-0 flex-1 sm:flex-none rounded-full border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-muted-foreground transition-colors"
+            className="min-w-0 flex-1 sm:flex-none rounded-full border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary/50 transition-colors"
           />
           <span className="flex-shrink-0">–</span>
           <input
@@ -120,7 +120,7 @@ export function Library({ lessons }: { lessons: Lesson[] }) {
             value={to}
             onChange={(e) => setTo(e.target.value)}
             aria-label="Data final"
-            className="min-w-0 flex-1 sm:flex-none rounded-full border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-muted-foreground transition-colors"
+            className="min-w-0 flex-1 sm:flex-none rounded-full border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary/50 transition-colors"
           />
           {dateActive && (
             <button
@@ -146,7 +146,7 @@ export function Library({ lessons }: { lessons: Lesson[] }) {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col divide-y divide-border rounded-xl border border-border bg-card overflow-hidden">
+          <div className="flex flex-col divide-y divide-border rounded-2xl border border-border bg-card overflow-hidden">
             {filtered.map((lesson) => (
               <LessonRow key={lesson.id} lesson={lesson} />
             ))}
@@ -203,7 +203,7 @@ function FilterPill({
       className={`text-xs font-semibold px-3 py-1.5 rounded-full border cursor-pointer transition-colors ${
         active
           ? "bg-primary text-primary-foreground border-primary"
-          : "bg-card text-muted-foreground border-border hover:border-muted-foreground"
+          : "bg-card text-muted-foreground border-border hover:border-primary/45 hover:text-foreground"
       }`}
     >
       {label}
@@ -215,12 +215,18 @@ function LessonCard({ lesson }: { lesson: Lesson }) {
   return (
     <Link
       href={`/dia/${lesson.id}`}
-      className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 hover:shadow-md hover:border-muted-foreground transition-all"
+      className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/45 transition-all duration-300"
     >
-      {/* Signature: giant faded day number */}
+      {/* Brilho sage que acende no hover — mesma linguagem dos tiles do Hub. */}
       <span
-        className="absolute right-2 bottom-0 font-serif font-bold text-foreground pointer-events-none select-none leading-none"
-        style={{ fontSize: "7rem", opacity: 0.07 }}
+        aria-hidden
+        className="pointer-events-none absolute inset-0 transition-colors duration-300 group-hover:bg-primary-subtle/35"
+      />
+
+      {/* Assinatura: numeral gigante do dia */}
+      <span
+        className="absolute right-2 bottom-0 font-serif font-bold text-primary pointer-events-none select-none leading-none opacity-[0.1] transition-transform duration-500 group-hover:scale-105"
+        style={{ fontSize: "7rem" }}
         aria-hidden
       >
         {lesson.dia}
@@ -231,7 +237,7 @@ function LessonCard({ lesson }: { lesson: Lesson }) {
           {lesson.weekday} · {lesson.date}
         </p>
 
-        <span className="inline-block text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-accent text-muted-foreground mb-3">
+        <span className="inline-block text-[10px] font-bold uppercase tracking-[0.12em] px-2.5 py-1 rounded-full border border-border bg-card/70 text-muted-foreground mb-3">
           {categoryLabel(lesson.category)}
         </span>
 
@@ -264,10 +270,10 @@ function LessonRow({ lesson }: { lesson: Lesson }) {
   return (
     <Link
       href={`/dia/${lesson.id}`}
-      className="group flex items-center gap-4 px-4 py-3.5 hover:bg-accent transition-colors"
+      className="group flex items-center gap-4 px-4 py-3.5 hover:bg-primary-subtle/40 transition-colors"
     >
-      {/* Day number */}
-      <span className="font-serif font-bold text-lg text-muted-foreground w-8 text-center flex-shrink-0 leading-none">
+      {/* Numeral do dia */}
+      <span className="font-serif font-bold text-lg text-primary w-8 text-center flex-shrink-0 leading-none">
         {lesson.dia}
       </span>
 

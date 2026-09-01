@@ -1,6 +1,5 @@
-import Link from "next/link"
 import { requireAdmin } from "@/lib/guard"
-import { LogoutButton } from "@/components/logout-button"
+import { SiteHeader } from "@/components/site-header"
 import { UploadsProvider } from "@/components/admin/uploads-provider"
 
 export const metadata = {
@@ -22,29 +21,11 @@ export default async function AdminLayout({
     // interrompido ao fechar o modal da aula (ver uploads-provider.tsx).
     <UploadsProvider>
       <div className="min-h-screen">
-        <header className="sticky top-0 z-10 border-b border-border bg-card">
-          <div className="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                MultiMeta · Admin
-              </span>
-              <span className="text-border">·</span>
-              <Link href="/" className="text-sm font-semibold text-foreground hover:text-primary">
-                Portal EVP
-              </Link>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/hub"
-                className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Hub
-              </Link>
-              <span className="hidden sm:inline text-xs text-muted-foreground">{email}</span>
-              <LogoutButton />
-            </div>
-          </div>
-        </header>
+        <SiteHeader wide>
+          <span className="hidden lg:inline max-w-[16rem] truncate text-xs text-muted-foreground">
+            {email}
+          </span>
+        </SiteHeader>
         <main className="max-w-5xl mx-auto px-5 py-10 space-y-14">{children}</main>
       </div>
     </UploadsProvider>

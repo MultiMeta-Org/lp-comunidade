@@ -10,7 +10,7 @@ const fetchAuthorizedRow = cache(async (email: string) => {
   const db = createComunidadeServiceClient()
   return db
     .from("authorized_emails")
-    .select("status, authorized_at")
+    .select("status, authorized_at, buyer_name")
     .eq("email", email.toLowerCase().trim())
     .maybeSingle()
 })
@@ -78,4 +78,16 @@ export async function getFeatureUnlock(email: string): Promise<FeatureUnlock> {
   const daysRemaining = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)))
 
   return { unlocked: msLeft <= 0, daysRemaining, unlockAt: unlockAt.toISOString() }
+}
+
+/**
+ * Primeiro nome da aluna (de authorized_emails.buyer_name), para a saudação
+ * do Hub. Sai da MESMA leitura memoizada do acesso — sem query extra.
+ * Retorna null quando a Hotmart não mandou nome.
+ */
+export async function getMemberFirstName(email: string): Promise<string | null> {
+  const { data } = await fetchAuthorizedRow(email)
+  const first = data?.buyer_name?.trim().split(/\s+/)[0]
+  if (!first) return null
+  return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()
 }
