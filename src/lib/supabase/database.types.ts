@@ -40,6 +40,7 @@ export interface Database {
           hotmart_product_id: string | null
           buyer_name: string | null
           phone: string | null
+          has_comunidade_vip: boolean
           created_at: string
         }
         Insert: {
@@ -53,6 +54,7 @@ export interface Database {
           hotmart_product_id?: string | null
           buyer_name?: string | null
           phone?: string | null
+          has_comunidade_vip?: boolean
           created_at?: string
         }
         Update: Partial<Database["comunidade"]["Tables"]["authorized_emails"]["Insert"]>

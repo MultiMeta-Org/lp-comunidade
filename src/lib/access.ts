@@ -10,7 +10,7 @@ const fetchAuthorizedRow = cache(async (email: string) => {
   const db = createComunidadeServiceClient()
   return db
     .from("authorized_emails")
-    .select("status, authorized_at, buyer_name")
+    .select("status, authorized_at, buyer_name, has_comunidade_vip")
     .eq("email", email.toLowerCase().trim())
     .maybeSingle()
 })
@@ -78,6 +78,22 @@ export async function getFeatureUnlock(email: string): Promise<FeatureUnlock> {
   const daysRemaining = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)))
 
   return { unlocked: msLeft <= 0, daysRemaining, unlockAt: unlockAt.toISOString() }
+}
+
+/**
+ * Aluna tem a Comunidade VIP — hoje, o grupo VIP no WhatsApp.
+ *
+ * O portal e as aulas são do Método EVP e valem para toda aluna autorizada; a
+ * Comunidade é o grupo à parte. A posse é fato explícito no banco
+ * (`has_comunidade_vip`), porque não há como inferi-la das compras: no Hotmart
+ * tudo é o mesmo produto Método. Default true mantém quem entrou pela regra
+ * atual, em que comprar o Método dá o grupo.
+ *
+ * Sai da MESMA leitura memoizada do acesso — sem query extra.
+ */
+export async function hasComunidadeVip(email: string): Promise<boolean> {
+  const { data } = await fetchAuthorizedRow(email)
+  return data?.status === "active" && data.has_comunidade_vip === true
 }
 
 /**

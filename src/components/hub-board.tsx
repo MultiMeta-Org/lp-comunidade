@@ -73,6 +73,7 @@ export function HubBoard({
   lessonCount,
   unlock,
   waitingDays,
+  hasComunidadeVip,
   now = new Date(),
 }: {
   name: string | null
@@ -80,6 +81,8 @@ export function HubBoard({
   lessonCount: number
   unlock: FeatureUnlock
   waitingDays: number
+  /** Aluna tem a Comunidade VIP (o grupo no WhatsApp). */
+  hasComunidadeVip: boolean
   now?: Date
 }) {
   const unlockDate = unlockDateLabel(unlock.unlockAt)
@@ -137,12 +140,18 @@ export function HubBoard({
           <Tile
             className="row-span-2"
             size="tall"
-            href={WHATSAPP_VIP_URL}
+            href={hasComunidadeVip ? WHATSAPP_VIP_URL : undefined}
             icon={Users}
             tone="sage"
             label="Comunidade VIP"
-            description="Seu grupo exclusivo no WhatsApp — dúvidas, trocas e a aula ao vivo, todo dia às 9h."
+            description={
+              hasComunidadeVip
+                ? "Seu grupo exclusivo no WhatsApp — dúvidas, trocas e a aula ao vivo, todo dia às 9h."
+                : "O grupo VIP não faz parte do seu acesso. Fale com a equipe para entrar."
+            }
             cta="Entrar no grupo"
+            // Sem barra: esta trava não tem contagem, não é questão de esperar.
+            locked={!hasComunidadeVip}
             delay={160}
           />
           <Tile
@@ -349,7 +358,7 @@ function Tile({
   cta,
   size = "sm",
   locked = false,
-  progress = 0,
+  progress,
   delay = 0,
   className = "",
 }: {
@@ -361,6 +370,7 @@ function Tile({
   cta?: string
   size?: "sm" | "tall"
   locked?: boolean
+  /** Progresso da espera dos 7 dias. Ausente = trava sem contagem, sem barra. */
   progress?: number
   delay?: number
   className?: string
@@ -424,7 +434,7 @@ function Tile({
           </span>
         )}
 
-        {locked && (
+        {locked && progress !== undefined && (
           <div
             className="mt-3 h-1 overflow-hidden rounded-full bg-muted"
             role="progressbar"

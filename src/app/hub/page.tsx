@@ -1,5 +1,10 @@
 import { requireReleasedAccess } from "@/lib/guard"
-import { getFeatureUnlock, getMemberFirstName, waitingPeriodDays } from "@/lib/access"
+import {
+  getFeatureUnlock,
+  getMemberFirstName,
+  hasComunidadeVip,
+  waitingPeriodDays,
+} from "@/lib/access"
 import { getLessons } from "@/lib/lessons-server"
 import { SiteHeader } from "@/components/site-header"
 import { LiveBanner } from "@/components/live-banner"
@@ -12,9 +17,10 @@ export const metadata = {
 
 export default async function HubPage() {
   const email = await requireReleasedAccess()
-  const [unlock, name, lessons] = await Promise.all([
+  const [unlock, name, vip, lessons] = await Promise.all([
     getFeatureUnlock(email),
     getMemberFirstName(email),
+    hasComunidadeVip(email),
     getLessons(),
   ])
 
@@ -28,6 +34,7 @@ export default async function HubPage() {
         lessonCount={lessons.length}
         unlock={unlock}
         waitingDays={waitingPeriodDays()}
+        hasComunidadeVip={vip}
       />
     </div>
   )
