@@ -130,9 +130,21 @@ export interface Database {
         Update: Partial<Database["comunidade"]["Tables"]["lessons"]["Insert"]>
         Relationships: []
       }
+      vip_products: {
+        Row: { hotmart_product_id: string; label: string | null; created_at: string }
+        Insert: { hotmart_product_id: string; label?: string | null; created_at?: string }
+        Update: { hotmart_product_id?: string; label?: string | null; created_at?: string }
+        Relationships: []
+      }
     }
     Views: Record<never, never>
-    Functions: Record<never, never>
+    Functions: {
+      /** Recalcula has_comunidade_vip a partir das compras (ver migration do CRM). */
+      refresh_vip_entitlement: {
+        Args: { p_email?: string | null }
+        Returns: number
+      }
+    }
     Enums: {
       access_status: AccessStatus
       category_key: CategoryKey

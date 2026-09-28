@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { getAccessState } from "@/lib/access"
+import { getAccessState, refreshVipEntitlement } from "@/lib/access"
 
 export const runtime = "nodejs"
 
@@ -44,6 +44,9 @@ export async function GET(request: NextRequest) {
     await supabase.auth.signOut()
     return back(request, `/login?status=${access.reason}`)
   }
+
+  // Quem assinou a Comunidade VIP agora há pouco já entra com ela liberada.
+  await refreshVipEntitlement(email)
 
   return back(request, redirectTo)
 }

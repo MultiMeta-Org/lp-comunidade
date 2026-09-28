@@ -28,7 +28,7 @@ export function VipSection() {
       href: WHATSAPP_VIP_URL,
     },
     {
-      label: "Material de aulas",
+      label: "Material de Aulas VIP",
       description: "Vídeos, áudios e PDFs de todas as aulas",
       icon: BookOpen,
       href: "/aulas",

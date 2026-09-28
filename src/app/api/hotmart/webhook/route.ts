@@ -16,23 +16,12 @@ export const runtime = "nodejs"
  *
  * A Comunidade VIP é produto à parte na Hotmart: compra dela liga
  * `has_comunidade_vip`, reembolso dela SÓ desliga a flag — o acesso ao portal
- * é do Método e não cai junto. Quais ids são a VIP vem de
- * HOTMART_VIP_PRODUCT_IDS (ver vipProductIds).
+ * é do Método e não cai junto. Quais ids são a VIP está em
+ * comunidade.vip_products, a mesma tabela que a derivação do banco consulta
+ * (comunidade.refresh_vip_entitlement) — uma fonte só para os dois caminhos.
  *
  * Configurar no Hotmart o header `x-hotmart-hottok` = HOTMART_HOTTOK.
  */
-
-/**
- * Ids de produto da Hotmart que valem como Comunidade VIP (separados por
- * vírgula). Fica em env, e não no código, porque a Nati pode criar uma nova
- * oferta da assinatura sem que isso vire deploy.
- */
-function vipProductIds(): string[] {
-  return (process.env.HOTMART_VIP_PRODUCT_IDS ?? "")
-    .split(",")
-    .map((id) => id.trim())
-    .filter(Boolean)
-}
 
 interface HotmartPayload {
   id?: string
@@ -86,16 +75,26 @@ export async function POST(req: NextRequest) {
       ? new Date(orderDateMs).toISOString()
       : new Date().toISOString()
 
-  // A compra é da assinatura VIP? Decide o que o evento mexe.
-  const isVipProduct = Boolean(productId && vipProductIds().includes(productId))
+  const db = createComunidadeServiceClient()
 
-  // O id do produto sai no log de todo evento: é assim que se descobre o número
-  // de uma oferta nova para pôr em HOTMART_VIP_PRODUCT_IDS.
+  // A compra é da assinatura VIP? Decide o que o evento mexe. A lista mora em
+  // comunidade.vip_products: id de produto é dado, não código, e a Nati
+  // cadastra uma oferta nova sem deploy.
+  let isVipProduct = false
+  if (productId) {
+    const { data: vip } = await db
+      .from("vip_products")
+      .select("hotmart_product_id")
+      .eq("hotmart_product_id", productId)
+      .maybeSingle()
+    isVipProduct = Boolean(vip)
+  }
+
+  // O id do produto sai no log de todo evento: é assim que se descobre o
+  // número de uma oferta nova para cadastrar em comunidade.vip_products.
   console.log(
     `[hotmart] ${body.event} · produto ${productId ?? "?"}${isVipProduct ? " (VIP)" : ""} · ${buyerEmail}`
   )
-
-  const db = createComunidadeServiceClient()
 
   try {
     switch (body.event) {

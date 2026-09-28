@@ -10,7 +10,7 @@ import { LiveBanner } from "@/components/live-banner"
 import { Atmosphere } from "@/components/atmosphere"
 
 export const metadata = {
-  title: "Material de Aulas · Portal EVP",
+  title: "Material de Aulas VIP · Portal EVP",
   description: "A aula de hoje e todo o acervo — vídeos, áudios e PDFs.",
 }
 
@@ -33,10 +33,10 @@ export default async function AulasPage() {
           {/* ── Título ── */}
           <header className="animate-rise" style={{ "--d": "0ms" } as React.CSSProperties}>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-secondary">
-              Acervo
+              Comunidade VIP
             </p>
             <h1 className="mt-3 font-serif text-4xl sm:text-5xl font-bold leading-[1.05] text-foreground">
-              Material de Aulas
+              Material de Aulas VIP
               <span className="text-secondary">.</span>
             </h1>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">

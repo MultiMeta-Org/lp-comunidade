@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
 import { createComunidadeServiceClient, createSupabaseAdmin } from "@/lib/supabase/comunidade"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { getAccessState } from "@/lib/access"
+import { getAccessState, refreshVipEntitlement } from "@/lib/access"
 
 export const runtime = "nodejs"
 
@@ -116,6 +116,9 @@ export async function POST(request: NextRequest) {
       console.error("[verify-otp] verifyOtp error:", verifyError.message)
       return NextResponse.json({ error: "Falha ao criar sessão" }, { status: 500 })
     }
+
+    // Quem assinou a Comunidade VIP agora há pouco já entra com ela liberada.
+    await refreshVipEntitlement(normalizedEmail)
 
     console.log(`[verify-otp] sessão criada para ${normalizedEmail}`)
     return NextResponse.json({ verified: true })
