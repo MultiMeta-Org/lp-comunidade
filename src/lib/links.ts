@@ -11,7 +11,7 @@ export const WHATSAPP_VIP_URL =
 /** Grupo gratuito no WhatsApp — "Todas as Alunas". */
 export const WHATSAPP_FREE_URL = "https://chat.whatsapp.com/DuLpwAf5ICkBjjCrY2Pluy"
 
-/** Aula ao vivo (Google Meet) — mesmo link toda semana. */
+/** Aula ao vivo (Google Meet) — toda sexta às 9h, mesmo link toda semana. */
 export const LIVE_CLASS_URL = "https://meet.google.com/kgp-mkqc-ryt"
 
 /** Notion — materiais e templates (libera 7 dias após a compra). */

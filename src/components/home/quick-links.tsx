@@ -47,7 +47,7 @@ export function QuickLinks({
   const links: QuickLink[] = [
     {
       label: "Aula ao vivo",
-      description: "Todo dia às 9h, no Meet",
+      description: "Toda sexta às 9h, no Meet",
       icon: Video,
       href: LIVE_CLASS_URL,
     },

@@ -39,10 +39,11 @@ export type Product = {
 }
 
 /**
- * Os produtos como esta aluna os vê. A Comunidade VIP é a única que varia: é o
- * grupo VIP no WhatsApp, produto à parte do Método. Sem ela o card perde o
- * destino e cai na fileira de cadeado. O material de aulas anda junto: é do
- * grupo VIP, e quem não o tem nem vê a aba.
+ * Os produtos como esta aluna os vê. A Comunidade VIP é a única que varia — e
+ * de um jeito diferente das outras: quando é dela, SAI da estante e vira a
+ * seção de duas portas (grupo + material de aulas), porque é o único produto
+ * com ambiente dentro do portal. Quando não é, fica na estante como capa com
+ * cadeado, igual aos demais. Produto travado é capa; produto seu se abre.
  */
 export function buildProducts({
   hasComunidadeVip,
@@ -55,8 +56,10 @@ export function buildProducts({
   /** "Libera em 3 dias · 5 de out", quando ainda falta. */
   marketplaceNote: string | null
 }): Product[] {
-  return PRODUCTS.map((product) => {
-    if (product.slug === "comunidade-vip" && !hasComunidadeVip) {
+  return PRODUCTS.filter(
+    (product) => product.slug !== "comunidade-vip" || !hasComunidadeVip
+  ).map((product) => {
+    if (product.slug === "comunidade-vip") {
       return {
         ...product,
         state: "locked",
@@ -169,9 +172,9 @@ export function buildHighlights(lesson: Lesson | null): Highlight[] {
   highlights.push(
     {
       id: "ao-vivo",
-      eyebrow: "Todo dia",
+      eyebrow: "Toda sexta",
       title: "Aula ao vivo às 9h da manhã",
-      text: "A Nati tira dúvidas ao vivo com a gente. Entra uns minutinhos antes para não perder o começo.",
+      text: "Toda sexta a Nati tira dúvidas ao vivo com a gente. Entra uns minutinhos antes para não perder o começo.",
       cta: "Entrar na aula ao vivo",
       href: LIVE_CLASS_URL,
       art: "linear-gradient(112deg,#2A2A2A 0%,#3f4436 46%,#5d7452 100%)",

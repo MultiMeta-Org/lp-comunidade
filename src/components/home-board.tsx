@@ -5,6 +5,7 @@ import { Atmosphere } from "@/components/atmosphere"
 import { NewsCarousel } from "@/components/home/news-carousel"
 import { ProductShelf } from "@/components/home/product-shelf"
 import { QuickLinks } from "@/components/home/quick-links"
+import { VipSection } from "@/components/home/vip-section"
 
 const TZ = "America/Sao_Paulo"
 
@@ -115,6 +116,21 @@ export function HomeBoard({
           <div className="animate-rise mt-4" style={{ "--d": "90ms" } as React.CSSProperties}>
             <ProductShelf products={owned} />
           </div>
+
+          {/* ── Comunidade VIP: o único produto com ambiente dentro do portal ── */}
+          {hasComunidadeVip && (
+            <>
+              <SectionLabel className="mt-12" delay={110} hint="sua assinatura">
+                Comunidade VIP
+              </SectionLabel>
+              <div
+                className="animate-rise mt-4"
+                style={{ "--d": "140ms" } as React.CSSProperties}
+              >
+                <VipSection />
+              </div>
+            </>
+          )}
 
           {/* ── O que ela ainda vai conhecer ── */}
           {soon.length > 0 && (

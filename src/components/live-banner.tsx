@@ -4,19 +4,24 @@ import { useEffect, useState } from "react"
 import { Video } from "lucide-react"
 import { LIVE_CLASS_URL } from "@/lib/links"
 
-// Janela da aula ao vivo (America/Sao_Paulo): começa 9h e dura 1 hora.
+// Janela da aula ao vivo (America/Sao_Paulo): sexta, começa 9h e dura 1 hora.
+const LIVE_WEEKDAY = "sexta-feira"
 const LIVE_START_HOUR = 9
 const LIVE_END_HOUR = 10
 
 function isLiveNow(): boolean {
-  const hour = Number(
-    new Intl.DateTimeFormat("pt-BR", {
-      timeZone: "America/Sao_Paulo",
-      hour: "numeric",
-      hour12: false,
-    }).format(new Date())
-  )
-  return hour >= LIVE_START_HOUR && hour < LIVE_END_HOUR
+  // Dia e hora no fuso de São Paulo — não no do navegador da aluna.
+  const parts = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    weekday: "long",
+    hour: "numeric",
+    hour12: false,
+  }).formatToParts(new Date())
+
+  const weekday = parts.find((p) => p.type === "weekday")?.value
+  const hour = Number(parts.find((p) => p.type === "hour")?.value)
+
+  return weekday === LIVE_WEEKDAY && hour >= LIVE_START_HOUR && hour < LIVE_END_HOUR
 }
 
 /**

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { House, BookOpen, Settings } from "lucide-react"
+import { House, Settings } from "lucide-react"
 
 type Item = {
   href: string
@@ -16,17 +16,11 @@ type Item = {
  * estado ativo real (usePathname), em vez de esconder o link da página atual.
  * A aluna sempre vê para onde pode ir — e onde está.
  *
- * "Material" só aparece para quem tem a Comunidade VIP (`material`); sem ela a
- * navegação é só o Início, e as rotas de material ficam fechadas no servidor
- * (requireComunidadeVip) — esconder o link não é a trava, é a consequência.
+ * O material de aulas não entra aqui: é uma porta de dentro da Comunidade VIP,
+ * e vive na seção dela na home. Quem não tem a assinatura nem a enxerga — e a
+ * rota fica fechada no servidor (requireComunidadeVip) de todo jeito.
  */
-export function MainNav({
-  admin = false,
-  material = false,
-}: {
-  admin?: boolean
-  material?: boolean
-}) {
+export function MainNav({ admin = false }: { admin?: boolean }) {
   const pathname = usePathname() ?? "/"
 
   const items: Item[] = [
@@ -36,17 +30,6 @@ export function MainNav({
       icon: House,
       isActive: (p) => p === "/",
     },
-    ...(material
-      ? [
-          {
-            href: "/aulas",
-            label: "Material",
-            icon: BookOpen,
-            // A página de uma aula (/dia/[id]) pertence a "Material".
-            isActive: (p: string) => p.startsWith("/aulas") || p.startsWith("/dia"),
-          },
-        ]
-      : []),
     ...(admin
       ? [
           {
