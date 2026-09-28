@@ -1,26 +1,22 @@
 import {
   ArrowUpRight,
   BookOpen,
-  Handshake,
   ListMusic,
   Lock,
   Video,
   MessageCircle,
   MessageCircleQuestionMark,
   Podcast,
-  Users,
 } from "lucide-react"
 
 import {
   INSTAGRAM_NATI_URL,
   LIVE_CLASS_URL,
   LOUVORES_URL,
-  MARKETPLACE_URL,
   NOTION_URL,
   PODCAST_URL,
   SUPPORT_URL,
   WHATSAPP_FREE_URL,
-  WHATSAPP_VIP_URL,
 } from "@/lib/links"
 
 type QuickLink = {
@@ -34,29 +30,21 @@ type QuickLink = {
 
 /**
  * Os links que a aluna usa sempre, numa superfície só, separados por fios de
- * 1px. Notion e Marketplace entram travados até a liberação do 8º dia —
- * `lockedNote` mostra quanto falta.
+ * 1px. O Notion entra travado até a liberação do 8º dia — `lockedNote` mostra
+ * quanto falta.
+ *
+ * Comunidade VIP e Marketplace não vivem aqui: são produtos, e aparecem como
+ * capa na estante lá em cima. Repetir o mesmo destino nas duas superfícies só
+ * dobrava a tela sem dar nada novo.
  */
 export function QuickLinks({
   unlocked,
   lockedNote,
-  hasComunidadeVip,
 }: {
   unlocked: boolean
   lockedNote: string | null
-  hasComunidadeVip: boolean
 }) {
   const links: QuickLink[] = [
-    {
-      // O grupo VIP é parte da Comunidade — trava com ela.
-      label: "Comunidade VIP",
-      description: hasComunidadeVip
-        ? "Seu grupo no WhatsApp"
-        : "Não faz parte do seu acesso",
-      icon: Users,
-      href: hasComunidadeVip ? WHATSAPP_VIP_URL : undefined,
-      locked: !hasComunidadeVip,
-    },
     {
       label: "Aula ao vivo",
       description: "Todo dia às 9h, no Meet",
@@ -76,15 +64,6 @@ export function QuickLinks({
         : (lockedNote ?? "Libera em alguns dias"),
       icon: BookOpen,
       href: unlocked ? NOTION_URL : undefined,
-      locked: !unlocked,
-    },
-    {
-      label: "Marketplace",
-      description: unlocked
-        ? "Vagas e oportunidades"
-        : (lockedNote ?? "Libera em alguns dias"),
-      icon: Handshake,
-      href: unlocked ? MARKETPLACE_URL : undefined,
       locked: !unlocked,
     },
     {

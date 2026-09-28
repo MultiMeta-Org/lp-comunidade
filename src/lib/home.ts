@@ -1,8 +1,11 @@
 import type { Lesson } from "@/lib/lessons"
 import {
+  CRM_URL,
   LIVE_CLASS_URL,
   LOUVORES_URL,
+  MARKETPLACE_URL,
   METODO_EVP_URL,
+  MULTIQUIZ_URL,
   PODCAST_URL,
   WHATSAPP_VIP_URL,
 } from "@/lib/links"
@@ -41,12 +44,36 @@ export type Product = {
  * destino e cai na fileira de cadeado. As aulas não entram nessa conta — são do
  * Método e valem para toda aluna autorizada.
  */
-export function buildProducts(hasComunidadeVip: boolean): Product[] {
-  return PRODUCTS.map((product) =>
-    product.slug === "comunidade-vip" && !hasComunidadeVip
-      ? { ...product, state: "locked", href: undefined, meta: "Não faz parte do seu acesso" }
-      : product
-  )
+export function buildProducts({
+  hasComunidadeVip,
+  marketplaceUnlocked,
+  marketplaceNote,
+}: {
+  hasComunidadeVip: boolean
+  /** Marketplace libera 7 dias após a compra — mesma regra do link rápido. */
+  marketplaceUnlocked: boolean
+  /** "Libera em 3 dias · 5 de out", quando ainda falta. */
+  marketplaceNote: string | null
+}): Product[] {
+  return PRODUCTS.map((product) => {
+    if (product.slug === "comunidade-vip" && !hasComunidadeVip) {
+      return {
+        ...product,
+        state: "locked",
+        href: undefined,
+        meta: "Não faz parte do seu acesso",
+      }
+    }
+    if (product.slug === "marketplace" && !marketplaceUnlocked) {
+      return {
+        ...product,
+        state: "locked",
+        href: undefined,
+        meta: marketplaceNote ?? "Libera alguns dias após a compra",
+      }
+    }
+    return product
+  })
 }
 
 const PRODUCTS: Product[] = [
@@ -79,12 +106,22 @@ const PRODUCTS: Product[] = [
     state: "soon",
   },
   {
+    slug: "marketplace",
+    name: "Marketplace",
+    kicker: "Oportunidades",
+    meta: "Vagas e empresas contratando",
+    art: "linear-gradient(160deg,#C08A5B,#8a5a33)",
+    href: MARKETPLACE_URL,
+    state: "owned",
+  },
+  {
     slug: "multiquiz",
     name: "MultiQuiz",
     kicker: "Ferramenta",
     meta: "Quizzes que trazem clientes",
     art: "linear-gradient(160deg,#6B8DAD,#4d6a86)",
-    state: "soon",
+    href: MULTIQUIZ_URL,
+    state: "owned",
   },
   {
     slug: "crm",
@@ -92,15 +129,8 @@ const PRODUCTS: Product[] = [
     kicker: "Ferramenta",
     meta: "Seus contatos organizados",
     art: "linear-gradient(160deg,#E2B04B,#b9852c)",
-    state: "soon",
-  },
-  {
-    slug: "ebook-abordagem",
-    name: "Guia da Abordagem",
-    kicker: "Ebook",
-    meta: "Em breve",
-    art: "linear-gradient(160deg,#5A524A,#3a352f)",
-    state: "soon",
+    href: CRM_URL,
+    state: "owned",
   },
 ]
 

@@ -60,9 +60,6 @@ export function HomeBoard({
   now?: Date
 }) {
   const highlights = buildHighlights(lesson)
-  const products = buildProducts(hasComunidadeVip)
-  const owned = products.filter((p) => p.state === "owned")
-  const soon = products.filter((p) => p.state !== "owned")
 
   const unlockDate = unlockDateLabel(unlock.unlockAt)
   const lockedNote = unlock.unlocked
@@ -70,6 +67,14 @@ export function HomeBoard({
     : unlock.daysRemaining <= 1
       ? "Libera amanhã"
       : `Libera em ${unlock.daysRemaining} dias${unlockDate ? ` · ${unlockDate}` : ""}`
+
+  const products = buildProducts({
+    hasComunidadeVip,
+    marketplaceUnlocked: unlock.unlocked,
+    marketplaceNote: lockedNote,
+  })
+  const owned = products.filter((p) => p.state === "owned")
+  const soon = products.filter((p) => p.state !== "owned")
 
   return (
     <>
@@ -131,11 +136,7 @@ export function HomeBoard({
             Links que você usa sempre
           </SectionLabel>
           <div className="animate-rise mt-4" style={{ "--d": "230ms" } as React.CSSProperties}>
-            <QuickLinks
-              unlocked={unlock.unlocked}
-              lockedNote={lockedNote}
-              hasComunidadeVip={hasComunidadeVip}
-            />
+            <QuickLinks unlocked={unlock.unlocked} lockedNote={lockedNote} />
           </div>
 
           <footer className="mt-14 flex items-center justify-center gap-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">

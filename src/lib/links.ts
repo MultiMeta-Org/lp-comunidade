@@ -22,6 +22,12 @@ export const SUPPORT_URL = "https://wa.me/message/2BXZEO5TDW4QN1"
 /** Marketplace (libera 7 dias após a compra). */
 export const MARKETPLACE_URL = "https://www.conexaomultimeta.com.br/"
 
+/** CRM da MultiMeta — contatos e follow-up das alunas. */
+export const CRM_URL = "https://www.crmmultimeta.com.br"
+
+/** MultiQuiz — quizzes que captam clientes. */
+export const MULTIQUIZ_URL = "https://multi-quiz.com/pt-BR"
+
 /** Podcast PodProsperar no Spotify. */
 export const PODCAST_URL = "https://open.spotify.com/show/5JOusoAR3ufe62i8Z86OEg"
 
