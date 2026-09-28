@@ -41,8 +41,8 @@ export type Product = {
 /**
  * Os produtos como esta aluna os vê. A Comunidade VIP é a única que varia: é o
  * grupo VIP no WhatsApp, produto à parte do Método. Sem ela o card perde o
- * destino e cai na fileira de cadeado. As aulas não entram nessa conta — são do
- * Método e valem para toda aluna autorizada.
+ * destino e cai na fileira de cadeado. O material de aulas anda junto: é do
+ * grupo VIP, e quem não o tem nem vê a aba.
  */
 export function buildProducts({
   hasComunidadeVip,

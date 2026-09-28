@@ -83,8 +83,8 @@ export async function getFeatureUnlock(email: string): Promise<FeatureUnlock> {
 /**
  * Aluna tem a Comunidade VIP — hoje, o grupo VIP no WhatsApp.
  *
- * O portal e as aulas são do Método EVP e valem para toda aluna autorizada; a
- * Comunidade é o grupo à parte. A posse é fato explícito no banco
+ * Manda no grupo VIP e no material de aulas (/aulas, /dia/[id]); o restante do
+ * portal é do Método e vale para toda aluna autorizada. A posse é fato no banco
  * (`has_comunidade_vip`), porque não há como inferi-la das compras: no Hotmart
  * tudo é o mesmo produto Método. Default true mantém quem entrou pela regra
  * atual, em que comprar o Método dá o grupo.

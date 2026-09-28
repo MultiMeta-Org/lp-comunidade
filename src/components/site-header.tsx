@@ -1,12 +1,14 @@
 import Link from "next/link"
 import { currentUserEmail, isAdmin } from "@/lib/guard"
+import { hasComunidadeVip } from "@/lib/access"
 import { LogoutButton } from "@/components/logout-button"
 import { MultiMetaLogo } from "@/components/multimeta-logo"
 import { MainNav } from "@/components/main-nav"
 
 /**
  * Header compartilhado das páginas autenticadas: marca + navegação principal
- * (Início / Aulas / Admin, com o item atual destacado) + logout.
+ * (Início / Material / Admin, com o item atual destacado) + logout.
+ * "Material" só entra para quem tem a Comunidade VIP.
  *
  * `wide` alinha o header ao container mais largo do /admin (max-w-5xl).
  */
@@ -19,7 +21,9 @@ export async function SiteHeader({
   children?: React.ReactNode
 }) {
   const email = await currentUserEmail()
-  const admin = email ? await isAdmin(email) : false
+  const [admin, material] = email
+    ? await Promise.all([isAdmin(email), hasComunidadeVip(email)])
+    : [false, false]
 
   return (
     <header className="sticky top-0 z-30 border-b border-border/80 bg-card/85 backdrop-blur-md supports-[backdrop-filter]:bg-card/70">
@@ -39,7 +43,7 @@ export async function SiteHeader({
 
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {children}
-          <MainNav admin={admin} />
+          <MainNav admin={admin} material={material} />
           <span className="h-5 w-px bg-border hidden sm:block" />
           <LogoutButton />
         </div>

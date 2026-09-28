@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Download, FileText, MessageCircle } from "lucide
 import { type Lesson, categoryLabel, hasMedia } from "@/lib/lessons"
 import { WHATSAPP_VIP_URL } from "@/lib/links"
 import { getLessonWithNeighbors } from "@/lib/lessons-server"
-import { requireReleasedAccess } from "@/lib/guard"
+import { requireComunidadeVip } from "@/lib/guard"
 import { AudioPlayer } from "@/components/audio-player"
 import { SiteHeader } from "@/components/site-header"
 import { LiveBanner } from "@/components/live-banner"
@@ -16,7 +16,7 @@ export default async function LessonPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  await requireReleasedAccess()
+  await requireComunidadeVip()
 
   const { id } = await params
   const { lesson, older, newer } = await getLessonWithNeighbors(id)

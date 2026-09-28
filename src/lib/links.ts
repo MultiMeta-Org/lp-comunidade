@@ -5,7 +5,8 @@ export const METODO_EVP_URL =
   "https://hotmart.com/pt-br/marketplace/produtos/hagsxd-metodo-evp-920q0/S104764925D"
 
 /** Grupo VIP no WhatsApp — comunidade exclusiva das alunas. */
-export const WHATSAPP_VIP_URL = "https://chat.whatsapp.com/GEZztwbmW8T4ant862BGCc"
+export const WHATSAPP_VIP_URL =
+  "https://chat.whatsapp.com/ClfrOZ05MY2K2pOwnxvHDd?s=cl&p=i&mlu=0&ilr=4"
 
 /** Grupo gratuito no WhatsApp — "Todas as Alunas". */
 export const WHATSAPP_FREE_URL = "https://chat.whatsapp.com/DuLpwAf5ICkBjjCrY2Pluy"

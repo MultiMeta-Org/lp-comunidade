@@ -25,7 +25,9 @@ export default async function HomePage() {
       <SiteHeader />
       <HomeBoard
         name={name}
-        lesson={lessons[0] ?? null}
+        // A novidade da aula leva a /dia/[id], rota da VIP: sem ela, o carrossel
+        // abre nas novidades que valem para todas.
+        lesson={vip ? (lessons[0] ?? null) : null}
         unlock={unlock}
         hasComunidadeVip={vip}
       />
