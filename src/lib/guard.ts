@@ -37,13 +37,17 @@ export async function requireReleasedAccess(): Promise<string> {
 
 /**
  * Guard das páginas de material (/aulas, /dia/[id]): além do acesso liberado,
- * exige a Comunidade VIP. O material é do grupo VIP — quem não o tem só vê a
- * home, e a navegação nem mostra a aba. Esconder o link não bastaria: a URL
- * digitada à mão passaria por cima dele.
+ * exige a Comunidade VIP. O material é da assinatura — quem não a tem só vê a
+ * home. Esconder o link não bastaria: a URL digitada à mão passaria por cima.
+ *
+ * Admin entra por ser admin, sem comprar: é ela quem publica a aula, e precisa
+ * ver o resultado do jeito que a aluna vê. Não é posse do produto — a home
+ * segue sem a seção da Comunidade para ela; o caminho é o link do /admin.
  */
 export async function requireComunidadeVip(): Promise<string> {
   const email = await requireReleasedAccess()
-  if (!(await hasComunidadeVip(email))) redirect("/")
+  const [vip, admin] = await Promise.all([hasComunidadeVip(email), isAdmin(email)])
+  if (!vip && !admin) redirect("/")
   return email
 }
 

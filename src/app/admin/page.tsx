@@ -1,3 +1,5 @@
+import Link from "next/link"
+import { ArrowUpRight } from "lucide-react"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
 import { waitingPeriodDays } from "@/lib/access"
 import { AccessManager, type AuthorizedRow } from "@/components/admin/access-manager"
@@ -79,6 +81,15 @@ export default async function AdminPage() {
           <p className="text-sm text-muted-foreground mt-1">
             Crie e edite as aulas da comunidade sem precisar de código.
           </p>
+          {/* Admin não tem a assinatura, mas precisa conferir o que publicou —
+              o guard de /aulas abre para admin justamente por isso. */}
+          <Link
+            href="/aulas"
+            className="group mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Ver o Material de Aulas VIP como a aluna vê
+            <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </Link>
         </div>
         <LessonsManager rows={lessonRows} />
       </section>
