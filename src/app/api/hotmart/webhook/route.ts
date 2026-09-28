@@ -28,6 +28,20 @@ export const runtime = "nodejs"
  * Configurar no Hotmart o header `x-hotmart-hottok` = HOTMART_HOTTOK.
  */
 
+/**
+ * Evento de teste do painel da Hotmart (o botão "enviar evento de teste").
+ *
+ * Eles vêm com comprador e produto fictícios e passam pelo hottok igual a um
+ * evento real — já criaram uma aluna fantasma na base uma vez. Como o portal
+ * cria acesso a partir do webhook, teste precisa morrer na porta.
+ */
+function ehEventoDeTeste(email: string, productId: string | null): boolean {
+  if (/@example\.com$/i.test(email)) return true
+  if (/^teste?@hotmart\.com(\.br)?$/i.test(email)) return true
+  // Ids que a Hotmart usa nos disparos de teste.
+  return productId !== null && ["0", "123456", "99999"].includes(productId)
+}
+
 interface HotmartPayload {
   id?: string
   event?: string
@@ -79,6 +93,11 @@ export async function POST(req: NextRequest) {
     typeof orderDateMs === "number" && orderDateMs > 0
       ? new Date(orderDateMs).toISOString()
       : new Date().toISOString()
+
+  if (ehEventoDeTeste(buyerEmail, productId)) {
+    console.log(`[hotmart] evento de teste ignorado: ${body.event} · ${buyerEmail}`)
+    return NextResponse.json({ received: true, ignored: true, reason: "test event" })
+  }
 
   const db = createComunidadeServiceClient()
 
