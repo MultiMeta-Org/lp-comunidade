@@ -130,6 +130,31 @@ export interface Database {
         Update: Partial<Database["comunidade"]["Tables"]["lessons"]["Insert"]>
         Relationships: []
       }
+      vip_sync_runs: {
+        Row: {
+          id: string
+          ran_at: string
+          ok: boolean
+          vendas_lidas: number
+          acessos_alterados: number
+          alunas_criadas: number
+          /** Produtos da Hotmart com cara de VIP que ninguém cadastrou. */
+          produtos_desconhecidos: { id: string; nome: string }[]
+          erro: string | null
+        }
+        Insert: {
+          id?: string
+          ran_at?: string
+          ok: boolean
+          vendas_lidas?: number
+          acessos_alterados?: number
+          alunas_criadas?: number
+          produtos_desconhecidos?: { id: string; nome: string }[]
+          erro?: string | null
+        }
+        Update: Partial<Database["comunidade"]["Tables"]["vip_sync_runs"]["Insert"]>
+        Relationships: []
+      }
       vip_purchases: {
         Row: {
           id: string

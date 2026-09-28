@@ -28,6 +28,8 @@ export type VendaHotmart = {
   valida: boolean
 }
 
+export type ProdutoHotmart = { id: string; nome: string; status: string }
+
 type TokenCache = { token: string; expiraEm: number }
 let cache: TokenCache | null = null
 
@@ -128,4 +130,34 @@ export async function listarVendas(productId: string): Promise<VendaHotmart[]> {
   } while (pageToken)
 
   return vendas
+}
+
+/**
+ * Catálogo de produtos da conta. Serve para desconfiar de produto novo: uma
+ * oferta "Comunidade VIP 2027" criada amanhã e não cadastrada em
+ * vip_products venderia sem ninguém ver.
+ */
+export async function listarProdutos(): Promise<ProdutoHotmart[]> {
+  const token = await getToken()
+  const url = new URL("https://developers.hotmart.com/products/api/v1/products")
+  url.searchParams.set("max_results", "100")
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+  })
+  if (!res.ok) throw new Error(`products falhou (${res.status}): ${await res.text()}`)
+
+  const json = (await res.json()) as {
+    items?: Array<{ id?: number; name?: string; status?: string }>
+  }
+  return (json.items ?? []).map((p) => ({
+    id: String(p.id ?? ""),
+    nome: p.name ?? "",
+    status: p.status ?? "",
+  }))
+}
+
+/** Produto cujo nome cheira a Comunidade VIP — usado só para alertar. */
+export function pareceComunidadeVip(nome: string): boolean {
+  return /comunidade\s*vip/i.test(nome)
 }

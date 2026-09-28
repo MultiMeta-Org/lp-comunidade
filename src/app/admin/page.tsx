@@ -4,6 +4,7 @@ import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
 import { waitingPeriodDays } from "@/lib/access"
 import { AccessManager, type AuthorizedRow } from "@/components/admin/access-manager"
 import { LessonsManager, type LessonRow } from "@/components/admin/lessons-manager"
+import { SyncStatus, type SyncRun } from "@/components/admin/sync-status"
 import type { Database } from "@/lib/supabase/database.types"
 
 type EmailRow = Pick<
@@ -50,12 +51,20 @@ function toLessonRows(lessons: LessonDbRow[]): LessonRow[] {
 export default async function AdminPage() {
   const db = createComunidadeServiceClient()
 
-  const [{ data: emails }, { data: lessons }] = await Promise.all([
+  const [{ data: emails }, { data: lessons }, { data: syncRun }] = await Promise.all([
     db
       .from("authorized_emails")
       .select("email, status, source, authorized_at, revoked_at, buyer_name")
       .order("authorized_at", { ascending: false }),
     db.from("lessons").select("*").order("sort_order", { ascending: false }),
+    // Última rodada do sync com a Hotmart — é o que prova que o acesso das
+    // compradoras está sendo conferido contra a fonte.
+    db
+      .from("vip_sync_runs")
+      .select("ran_at, ok, vendas_lidas, acessos_alterados, alunas_criadas, produtos_desconhecidos, erro")
+      .order("ran_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ])
 
   const waitDays = waitingPeriodDays()
@@ -64,6 +73,8 @@ export default async function AdminPage() {
 
   return (
     <>
+      <SyncStatus run={(syncRun as SyncRun | null) ?? null} />
+
       <section className="space-y-5">
         <div>
           <h2 className="font-serif text-2xl font-bold text-foreground">Acessos</h2>
