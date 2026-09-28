@@ -1,5 +1,6 @@
 import type { Lesson } from "@/lib/lessons"
 import {
+  COMUNIDADE_VIP_HOTMART_URL,
   CRM_URL,
   LIVE_CLASS_URL,
   LOUVORES_URL,
@@ -35,6 +36,11 @@ export type Product = {
   art: string
   /** Destino. Ausente = card inerte (ambiente ainda não existe no portal). */
   href?: string
+  /**
+   * Produto travado que dá para comprar: o rótulo do convite ("Assinar na
+   * Hotmart"), no lugar do selo "Não incluído". Sem isto, travado é só travado.
+   */
+  cta?: string
   state: ProductState
 }
 
@@ -60,11 +66,14 @@ export function buildProducts({
     (product) => product.slug !== "comunidade-vip" || !hasComunidadeVip
   ).map((product) => {
     if (product.slug === "comunidade-vip") {
+      // Travada, mas à venda: a capa leva para a página da assinatura na
+      // Hotmart. Comprou, o acesso chega pelo postback (ver rota do webhook).
       return {
         ...product,
         state: "locked",
-        href: undefined,
-        meta: "Não faz parte do seu acesso",
+        href: COMUNIDADE_VIP_HOTMART_URL,
+        cta: "Assinar na Hotmart",
+        meta: "Grupo no WhatsApp e material das aulas",
       }
     }
     if (product.slug === "marketplace" && !marketplaceUnlocked) {

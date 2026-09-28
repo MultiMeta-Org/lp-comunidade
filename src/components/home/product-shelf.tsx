@@ -1,11 +1,15 @@
 import Link from "next/link"
-import { Lock } from "lucide-react"
+import { ArrowUpRight, Lock } from "lucide-react"
 import type { Product } from "@/lib/home"
 
 /**
  * Fileira de capas de produto. Uma fileira para o que a aluna já tem, outra
  * para o que ela ainda vai conhecer (com cadeado). Produto sem `href` fica
  * inerte — o ambiente dele ainda não existe no portal.
+ *
+ * Travado com `href` + `cta` é o terceiro caso: existe, não é dela, mas está à
+ * venda. A capa continua com cadeado (não é mentira: ela ainda não tem), só que
+ * clica e leva para a compra.
  */
 export function ProductShelf({ products }: { products: Product[] }) {
   return (
@@ -57,7 +61,12 @@ function ProductCard({ product }: { product: Product }) {
     <>
       {poster}
       <span className="text-sm font-semibold text-foreground">{product.name}</span>
-      {locked ? (
+      {locked && product.cta ? (
+        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-secondary transition-all duration-200 group-hover:gap-1.5">
+          {product.cta}
+          <ArrowUpRight className="h-3 w-3" />
+        </span>
+      ) : locked ? (
         <span className="inline-flex w-fit items-center rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
           {product.state === "soon" ? "Em breve" : "Não incluído"}
         </span>

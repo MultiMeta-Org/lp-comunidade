@@ -14,8 +14,26 @@ export const runtime = "nodejs"
  *
  * PURCHASE_REFUNDED / PURCHASE_CHARGEBACK → status='revoked' (perde o acesso).
  *
+ * A Comunidade VIP é produto à parte na Hotmart: compra dela liga
+ * `has_comunidade_vip`, reembolso dela SÓ desliga a flag — o acesso ao portal
+ * é do Método e não cai junto. Quais ids são a VIP vem de
+ * HOTMART_VIP_PRODUCT_IDS (ver vipProductIds).
+ *
  * Configurar no Hotmart o header `x-hotmart-hottok` = HOTMART_HOTTOK.
  */
+
+/**
+ * Ids de produto da Hotmart que valem como Comunidade VIP (separados por
+ * vírgula). Fica em env, e não no código, porque a Nati pode criar uma nova
+ * oferta da assinatura sem que isso vire deploy.
+ */
+function vipProductIds(): string[] {
+  return (process.env.HOTMART_VIP_PRODUCT_IDS ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean)
+}
+
 interface HotmartPayload {
   id?: string
   event?: string
@@ -68,6 +86,15 @@ export async function POST(req: NextRequest) {
       ? new Date(orderDateMs).toISOString()
       : new Date().toISOString()
 
+  // A compra é da assinatura VIP? Decide o que o evento mexe.
+  const isVipProduct = Boolean(productId && vipProductIds().includes(productId))
+
+  // O id do produto sai no log de todo evento: é assim que se descobre o número
+  // de uma oferta nova para pôr em HOTMART_VIP_PRODUCT_IDS.
+  console.log(
+    `[hotmart] ${body.event} · produto ${productId ?? "?"}${isVipProduct ? " (VIP)" : ""} · ${buyerEmail}`
+  )
+
   const db = createComunidadeServiceClient()
 
   try {
@@ -98,6 +125,40 @@ export async function POST(req: NextRequest) {
           buyer_name: buyerName,
           phone: buyerPhone,
           revoked_at: null,
+          // Compra da VIP liga a assinatura. Compra de outro produto não
+          // mexe na flag: quem já tem o grupo não o perde comprando mais.
+          ...(isVipProduct ? { has_comunidade_vip: true } : {}),
+        }
+
+        // Aluna que já tinha o Método e agora assinou a VIP: só liga a flag.
+        // Sobrescrever transação e produto apagaria o registro da compra do
+        // Método, que é o que ancora o acesso dela.
+        if (isVipProduct && existing) {
+          const { error } = await db
+            .from("authorized_emails")
+            .update({
+              status: "active",
+              revoked_at: null,
+              has_comunidade_vip: true,
+              // Linha revogada que volta pela VIP recomeça a contagem dos 7
+              // dias — senão Marketplace e Notion abririam de cara.
+              ...(existing.status === "revoked"
+                ? { authorized_at: purchaseTimestamp }
+                : {}),
+              ...(buyerName ? { buyer_name: buyerName } : {}),
+              ...(buyerPhone ? { phone: buyerPhone } : {}),
+            })
+            .eq("email", buyerEmail)
+          if (error) {
+            console.error("[hotmart] update VIP error:", error.message)
+            return NextResponse.json({ error: "Database error" }, { status: 500 })
+          }
+          console.log(`[hotmart] Comunidade VIP liberada: ${buyerEmail}`)
+          return NextResponse.json({
+            received: true,
+            status: "vip_granted",
+            email: buyerEmail,
+          })
         }
 
         if (shouldSetAuthorizedAt) {
@@ -133,6 +194,25 @@ export async function POST(req: NextRequest) {
 
       case "PURCHASE_REFUNDED":
       case "PURCHASE_CHARGEBACK": {
+        // Reembolso da assinatura VIP: perde o grupo e o material, mantém o
+        // portal — o acesso dela vem da compra do Método, que segue de pé.
+        if (isVipProduct) {
+          const { error } = await db
+            .from("authorized_emails")
+            .update({ has_comunidade_vip: false })
+            .eq("email", buyerEmail)
+          if (error) {
+            console.error("[hotmart] revoke VIP error:", error.message)
+            return NextResponse.json({ error: "Database error" }, { status: 500 })
+          }
+          console.log(`[hotmart] Comunidade VIP revogada: ${buyerEmail}`)
+          return NextResponse.json({
+            received: true,
+            status: "vip_revoked",
+            email: buyerEmail,
+          })
+        }
+
         const { error } = await db
           .from("authorized_emails")
           .update({ status: "revoked", revoked_at: new Date().toISOString() })
