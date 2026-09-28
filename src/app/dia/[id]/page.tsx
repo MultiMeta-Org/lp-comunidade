@@ -33,7 +33,7 @@ export default async function LessonPage({
         <div className="relative z-10 mx-auto w-full max-w-2xl space-y-12">
           {/* ── Volta para o acervo ── */}
           <Link
-            href="/"
+            href="/aulas"
             className="group -mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors animate-rise"
             style={{ "--d": "0ms" } as React.CSSProperties}
           >

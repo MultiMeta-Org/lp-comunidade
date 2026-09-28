@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Mail } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { supabase } from "@/lib/supabase/client"
 import { MultiMetaLogo } from "@/components/multimeta-logo"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,12 +36,39 @@ export function LoginForm({ className }: { className?: string }) {
   )
   const [info, setInfo] = useState("")
   const [resendCooldown, setResendCooldown] = useState(0)
+  const [googleLoading, setGoogleLoading] = useState(false)
 
   useEffect(() => {
     if (resendCooldown <= 0) return
     const t = setInterval(() => setResendCooldown((p) => Math.max(0, p - 1)), 1000)
     return () => clearInterval(t)
   }, [resendCooldown])
+
+  /**
+   * Login com Google (OAuth/PKCE do Supabase). O portão de acesso roda no
+   * retorno, em /api/auth/callback: e-mail sem compra ativa não vira sessão.
+   */
+  const signInWithGoogle = useCallback(async () => {
+    setGoogleLoading(true)
+    setError("")
+    setInfo("")
+    const callback = new URL("/api/auth/callback", window.location.origin)
+    callback.searchParams.set("redirect_to", redirectTo)
+
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: callback.toString(),
+        queryParams: { prompt: "select_account" },
+      },
+    })
+
+    if (oauthError) {
+      setGoogleLoading(false)
+      setError("Não foi possível abrir o login do Google. Tente novamente.")
+    }
+    // Sem erro o browser sai desta página — mantém o botão em "Abrindo…".
+  }, [redirectTo])
 
   const requestCode = useCallback(async () => {
     const normalized = email.toLowerCase().trim()
@@ -154,24 +182,45 @@ export function LoginForm({ className }: { className?: string }) {
       )}
 
       {step === "email" ? (
-        <form onSubmit={handleEmailSubmit} className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">E-mail</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={loading}
-              autoFocus
-            />
-          </div>
-          <Button type="submit" disabled={loading}>
-            {loading ? "Enviando..." : "Enviar código"}
+        <div className="grid gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={signInWithGoogle}
+            disabled={googleLoading || loading}
+            className="w-full"
+          >
+            <GoogleGlyph className="h-4 w-4" />
+            {googleLoading ? "Abrindo o Google..." : "Continuar com Google"}
           </Button>
-        </form>
+
+          <div className="flex items-center gap-3">
+            <span className="h-px flex-1 bg-border" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              ou pelo e-mail
+            </span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <form onSubmit={handleEmailSubmit} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+                autoFocus
+              />
+            </div>
+            <Button type="submit" disabled={loading || googleLoading}>
+              {loading ? "Enviando..." : "Enviar código"}
+            </Button>
+          </form>
+        </div>
       ) : (
         <div className="flex flex-col items-center gap-5">
           <InputOTP maxLength={6} value={code} onChange={handleCodeChange} disabled={loading}>
@@ -245,7 +294,35 @@ function statusMessage(status: string): string {
       return "Não encontramos uma compra ativa com este e-mail."
     case "admin_only":
       return "Área restrita ao administrador."
+    case "oauth_error":
+      return "Não conseguimos concluir o login com o Google. Tente de novo."
+    case "oauth_no_email":
+      return "A conta do Google não liberou o e-mail. Entre pelo código."
     default:
       return "Faça login para continuar."
   }
+}
+
+/** "G" do Google, nas cores oficiais (lucide não traz ícones de marca). */
+function GoogleGlyph({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={className}>
+      <path
+        fill="#4285F4"
+        d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.4a5.5 5.5 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.6-5.2 3.6-8.8z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.9-3a7.2 7.2 0 0 1-10.7-3.8H1.3v3.1A12 12 0 0 0 12 24z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6H1.3a12 12 0 0 0 0 10.8l4-3.1z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.8c1.8 0 3.4.6 4.6 1.8l3.5-3.5A12 12 0 0 0 1.3 6.6l4 3.1A7.2 7.2 0 0 1 12 4.8z"
+      />
+    </svg>
+  )
 }

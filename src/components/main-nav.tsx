@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutGrid, GraduationCap, Settings } from "lucide-react"
+import { House, GraduationCap, Settings } from "lucide-react"
 
 type Item = {
   href: string
@@ -21,17 +21,17 @@ export function MainNav({ admin = false }: { admin?: boolean }) {
 
   const items: Item[] = [
     {
-      href: "/hub",
-      label: "Hub",
-      icon: LayoutGrid,
-      isActive: (p) => p === "/hub",
+      href: "/",
+      label: "Início",
+      icon: House,
+      isActive: (p) => p === "/",
     },
     {
-      href: "/",
+      href: "/aulas",
       label: "Aulas",
       icon: GraduationCap,
       // A página de uma aula (/dia/[id]) pertence a "Aulas".
-      isActive: (p) => p === "/" || p.startsWith("/dia"),
+      isActive: (p) => p.startsWith("/aulas") || p.startsWith("/dia"),
     },
     ...(admin
       ? [

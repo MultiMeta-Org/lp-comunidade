@@ -27,16 +27,48 @@ de auth/admin não funcionam. Para ligar tudo:
 - `HOTMART_HOTTOK` (token do webhook)
 - `ACCESS_WAITING_PERIOD_DAYS` (padrão 7)
 
-## 3. Configurar o webhook do Hotmart
+## 3. Ligar o login com Google
+O botão "Continuar com Google" do `/login` usa o OAuth do Supabase. O projeto
+hospedado é o **MultiMeta_CRM_1** (`kmikrdilqeimgdczgmzl`), compartilhado com o CRM,
+e o provider **Google já está habilitado lá** — com o mesmo OAuth client
+(`302365822240-…apps.googleusercontent.com`). Então não há o que configurar em
+*Providers*; o que falta é a lista de redirect e o Google Cloud:
+
+1. **Supabase** → *Authentication* → *URL Configuration* → *Redirect URLs*:
+   **acrescentar** (sem apagar as do CRM/Marketplace)
+   - `https://comunidade.conexaomultimeta.com.br/api/auth/callback`
+   - `https://comunidade.conexaomultimeta.com.br/**` (previews do mesmo domínio)
+   - `http://localhost:3000/api/auth/callback` (dev apontando para o projeto hospedado)
+2. **Google Cloud Console** → *APIs & Services* → *Credentials* → o OAuth client acima →
+   *Authorized redirect URIs*: já tem `https://kmikrdilqeimgdczgmzl.supabase.co/auth/v1/callback`.
+   Para usar Google com o **Supabase local**, acrescentar também
+   `http://127.0.0.1:55321/auth/v1/callback`.
+3. Local (`supabase start`): o provider já vem ligado em `supabase/config.toml`
+   (`[auth.external.google]`) e as credenciais estão no `.env.local`
+   (`SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` / `_SECRET`) — reiniciar o Supabase
+   depois de mexer nelas. Sem o passo 2, o Google local recusa o redirect.
+
+O portão de acesso continua sendo o mesmo: `GET /api/auth/callback` troca o `code`
+pela sessão e, se o e-mail do Google não estiver liberado em
+`comunidade.authorized_emails`, encerra a sessão na hora e devolve a aluna ao
+`/login` com o motivo. Ou seja, entrar com Google só funciona com o **mesmo e-mail
+da compra**.
+
+## 4. Configurar o webhook do Hotmart
 - Apontar para `POST https://<app>/api/hotmart/webhook`.
 - Enviar o header `x-hotmart-hottok` = `HOTMART_HOTTOK`.
 - Eventos: `PURCHASE_APPROVED`, `PURCHASE_COMPLETE`, `PURCHASE_REFUNDED`, `PURCHASE_CHARGEBACK`.
 
-## 4. Regenerar os tipos (opcional, recomendado)
+## 5. Regenerar os tipos (opcional, recomendado)
 `npx supabase gen types typescript --project-id <ref> --schema comunidade > src/lib/supabase/database.types.ts`
 
 ## Como funciona (mapa rápido)
-- **Login** (`/login`): `src/components/login-form.tsx` → `POST /api/auth/send-otp` (checa acesso liberado + envia código Resend) → `POST /api/auth/verify-otp` (valida código e cria sessão).
+- **Páginas**: `/` é a **home** do portal (`src/components/home-board.tsx`: carrossel de
+  novidades, produtos da aluna, produtos para conhecer e os links de sempre),
+  `/aulas` é o acervo, `/dia/[id]` é a aula. `/hub` redireciona para `/` (link antigo).
+  O conteúdo da home — produtos e novidades — mora em `src/lib/home.ts`; os links
+  externos, em `src/lib/links.ts`.
+- **Login** (`/login`): `src/components/login-form.tsx` → `POST /api/auth/send-otp` (checa acesso liberado + envia código Resend) → `POST /api/auth/verify-otp` (valida código e cria sessão). O mesmo formulário oferece **Google** (`signInWithOAuth`), que volta em `GET /api/auth/callback` — troca o code pela sessão e aplica o gate de acesso.
 - **Gate de acesso**: `src/lib/access.ts` (`getAccessState`) é a regra única dos 7 dias; fonte de verdade em `comunidade.authorized_emails`.
 - **Proteção de rotas**: `src/proxy.ts` (Next 16 — antigo middleware) exige sessão; `src/lib/guard.ts` faz o gate fino (acesso liberado nas páginas de conteúdo, allowlist no `/admin`).
 - **Hotmart**: `src/app/api/hotmart/webhook/route.ts` mantém `authorized_emails` (autoriza ancorando no `order_date`, revoga em reembolso/chargeback).

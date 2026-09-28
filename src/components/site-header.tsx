@@ -6,7 +6,7 @@ import { MainNav } from "@/components/main-nav"
 
 /**
  * Header compartilhado das páginas autenticadas: marca + navegação principal
- * (Hub / Aulas / Admin, com o item atual destacado) + logout.
+ * (Início / Aulas / Admin, com o item atual destacado) + logout.
  *
  * `wide` alinha o header ao container mais largo do /admin (max-w-5xl).
  */
@@ -27,8 +27,8 @@ export async function SiteHeader({
         className={`${wide ? "max-w-5xl" : "max-w-4xl"} mx-auto px-5 h-14 flex items-center justify-between gap-3`}
       >
         <Link
-          href="/hub"
-          aria-label="Ir para o Hub"
+          href="/"
+          aria-label="Ir para o início"
           className="group flex items-center gap-2 min-w-0 shrink-0"
         >
           <MultiMetaLogo className="h-6 w-6 transition-transform duration-300 group-hover:-rotate-6" />
