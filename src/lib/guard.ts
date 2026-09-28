@@ -2,7 +2,7 @@ import { cache } from "react"
 import { redirect } from "next/navigation"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
-import { getAccessState } from "@/lib/access"
+import { getAccessState, hasComunidadeVip } from "@/lib/access"
 
 /**
  * E-mail do usuário logado (ou null).
@@ -32,6 +32,18 @@ export async function requireReleasedAccess(): Promise<string> {
   if (!access.authorized) {
     redirect(`/login?status=${access.reason}`)
   }
+  return email
+}
+
+/**
+ * Guard das páginas de material (/aulas, /dia/[id]): além do acesso liberado,
+ * exige a Comunidade VIP. O material é do grupo VIP — quem não o tem só vê a
+ * home, e a navegação nem mostra a aba. Esconder o link não bastaria: a URL
+ * digitada à mão passaria por cima dele.
+ */
+export async function requireComunidadeVip(): Promise<string> {
+  const email = await requireReleasedAccess()
+  if (!(await hasComunidadeVip(email))) redirect("/")
   return email
 }
 

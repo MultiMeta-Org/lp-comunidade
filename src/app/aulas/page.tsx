@@ -1,7 +1,7 @@
 import { FileText, Play, Headphones } from "lucide-react"
 import { categoryLabel, hasMedia } from "@/lib/lessons"
 import { getLessons } from "@/lib/lessons-server"
-import { requireReleasedAccess } from "@/lib/guard"
+import { requireComunidadeVip } from "@/lib/guard"
 import { Library } from "@/components/library"
 import { AudioPlayer } from "@/components/audio-player"
 import { VideoPlayer } from "@/components/video-player"
@@ -15,7 +15,7 @@ export const metadata = {
 }
 
 export default async function AulasPage() {
-  await requireReleasedAccess()
+  await requireComunidadeVip()
 
   const lessons = await getLessons()
   const today = lessons[0]

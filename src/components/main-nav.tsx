@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { House, GraduationCap, Settings } from "lucide-react"
+import { House, BookOpen, Settings } from "lucide-react"
 
 type Item = {
   href: string
@@ -15,8 +15,18 @@ type Item = {
  * Navegação principal das páginas autenticadas: um controle segmentado com
  * estado ativo real (usePathname), em vez de esconder o link da página atual.
  * A aluna sempre vê para onde pode ir — e onde está.
+ *
+ * "Material" só aparece para quem tem a Comunidade VIP (`material`); sem ela a
+ * navegação é só o Início, e as rotas de material ficam fechadas no servidor
+ * (requireComunidadeVip) — esconder o link não é a trava, é a consequência.
  */
-export function MainNav({ admin = false }: { admin?: boolean }) {
+export function MainNav({
+  admin = false,
+  material = false,
+}: {
+  admin?: boolean
+  material?: boolean
+}) {
   const pathname = usePathname() ?? "/"
 
   const items: Item[] = [
@@ -26,13 +36,17 @@ export function MainNav({ admin = false }: { admin?: boolean }) {
       icon: House,
       isActive: (p) => p === "/",
     },
-    {
-      href: "/aulas",
-      label: "Aulas",
-      icon: GraduationCap,
-      // A página de uma aula (/dia/[id]) pertence a "Aulas".
-      isActive: (p) => p.startsWith("/aulas") || p.startsWith("/dia"),
-    },
+    ...(material
+      ? [
+          {
+            href: "/aulas",
+            label: "Material",
+            icon: BookOpen,
+            // A página de uma aula (/dia/[id]) pertence a "Material".
+            isActive: (p: string) => p.startsWith("/aulas") || p.startsWith("/dia"),
+          },
+        ]
+      : []),
     ...(admin
       ? [
           {
