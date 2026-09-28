@@ -139,6 +139,8 @@ export interface Database {
           event_type: string
           occurred_at: string
           created_at: string
+          /** 'postback' | 'hotmart_api' | 'closer' — de onde veio o fato. */
+          origem: string
         }
         Insert: {
           id?: string
@@ -148,6 +150,7 @@ export interface Database {
           event_type: string
           occurred_at?: string
           created_at?: string
+          origem?: string
         }
         Update: Partial<Database["comunidade"]["Tables"]["vip_purchases"]["Insert"]>
         Relationships: []
