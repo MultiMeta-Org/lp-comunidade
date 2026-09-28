@@ -161,3 +161,50 @@ export async function listarProdutos(): Promise<ProdutoHotmart[]> {
 export function pareceComunidadeVip(nome: string): boolean {
   return /comunidade\s*vip/i.test(nome)
 }
+
+/**
+ * Vendas de UMA compradora, para os produtos da Comunidade VIP.
+ *
+ * É a consulta barata que responde "essa pessoa pagou?" na hora — usada no
+ * login e no botão "já assinei". Uma chamada, filtrada por e-mail, em vez de
+ * varrer o histórico inteiro.
+ */
+export async function vendasDoEmail(
+  email: string,
+  productIds: string[]
+): Promise<VendaHotmart[]> {
+  const token = await getToken()
+  const vendas: VendaHotmart[] = []
+
+  for (const productId of productIds) {
+    const url = new URL(`${API_BASE}/sales/history`)
+    url.searchParams.set("product_id", productId)
+    url.searchParams.set("buyer_email", email)
+    url.searchParams.set("max_results", "50")
+    for (const s of [...STATUS_POSITIVOS, ...STATUS_NEGATIVOS]) {
+      url.searchParams.append("transaction_status", s)
+    }
+
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    })
+    if (!res.ok) throw new Error(`sales/history por e-mail (${res.status})`)
+
+    const json = (await res.json()) as SalesResponse
+    for (const item of json.items ?? []) {
+      const transaction = item.purchase?.transaction
+      const status = item.purchase?.status
+      if (!transaction || !status) continue
+      vendas.push({
+        email: item.buyer?.email?.toLowerCase().trim() ?? email,
+        transaction,
+        productId: String(item.product?.id ?? productId),
+        orderDate: new Date(item.purchase?.order_date ?? Date.now()),
+        status,
+        valida: (STATUS_POSITIVOS as readonly string[]).includes(status),
+      })
+    }
+  }
+
+  return vendas
+}

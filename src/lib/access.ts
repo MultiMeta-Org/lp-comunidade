@@ -113,6 +113,17 @@ export async function refreshVipEntitlement(email: string): Promise<void> {
   if (error) {
     console.error("[access] refresh_vip_entitlement falhou:", error.message)
   }
+
+  // Ainda sem a Comunidade? Pergunta à Hotmart por esta aluna antes de deixá-la
+  // entrar. É o caso de quem assinou há dois minutos: o postback pode não ter
+  // chegado e a varredura periódica só passa mais tarde. Uma consulta, e ela
+  // entra com o acesso que pagou. Só roda para quem NÃO tem — quem já tem não
+  // paga esse custo.
+  const { data } = await fetchAuthorizedRow(email)
+  if (data?.status === "active" && data.has_comunidade_vip !== true) {
+    const { verificarCompraVip } = await import("@/lib/vip-check")
+    await verificarCompraVip(email)
+  }
 }
 
 /**

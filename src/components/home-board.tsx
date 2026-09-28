@@ -6,6 +6,7 @@ import { NewsCarousel } from "@/components/home/news-carousel"
 import { ProductShelf } from "@/components/home/product-shelf"
 import { QuickLinks } from "@/components/home/quick-links"
 import { VipSection } from "@/components/home/vip-section"
+import { VerificarAssinatura } from "@/components/home/verificar-assinatura"
 
 const TZ = "America/Sao_Paulo"
 
@@ -143,6 +144,9 @@ export function HomeBoard({
                 style={{ "--d": "160ms" } as React.CSSProperties}
               >
                 <ProductShelf products={soon} />
+                {/* Quem assinou com a aba já aberta não passa por nenhuma das
+                    verificações automáticas — este botão é a saída dela. */}
+                {!hasComunidadeVip && <VerificarAssinatura />}
               </div>
             </>
           )}
