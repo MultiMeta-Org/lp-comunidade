@@ -92,26 +92,34 @@ export function QuickLinks({
     },
   ]
 
-  // Número ímpar de links deixaria um buraco na grade de 2 colunas — o último
-  // ocupa a linha inteira ali, e volta ao normal em 3 colunas.
-  const fillLastRow = links.length % 2 === 1
+  // A grade é "sem gap": o fundo do container é o fio de 1px que separa os
+  // cartões. Buraco na última linha, então, não fica vazio — vira um bloco
+  // chapado da cor do fio. Estas células cegas tapam o buraco com a cor do
+  // cartão. Quantas faltam depende do número de colunas, que muda por
+  // breakpoint, então cada uma só aparece onde é necessária.
+  const missing2 = (2 - (links.length % 2)) % 2
+  const missing3 = (3 - (links.length % 3)) % 3
+  const fillers = Array.from({ length: Math.max(missing2, missing3) }, (_, i) =>
+    i < missing2
+      ? i < missing3
+        ? "hidden sm:block"
+        : "hidden sm:block lg:hidden"
+      : "hidden lg:block"
+  )
 
   return (
     <div className="grid gap-px overflow-hidden rounded-3xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
-      {links.map((link, i) => (
-        <QuickLinkItem
-          key={link.label}
-          link={link}
-          className={
-            fillLastRow && i === links.length - 1 ? "sm:col-span-2 lg:col-span-1" : ""
-          }
-        />
+      {links.map((link) => (
+        <QuickLinkItem key={link.label} link={link} />
+      ))}
+      {fillers.map((visibility, i) => (
+        <div key={`filler-${i}`} aria-hidden className={`bg-card ${visibility}`} />
       ))}
     </div>
   )
 }
 
-function QuickLinkItem({ link, className = "" }: { link: QuickLink; className?: string }) {
+function QuickLinkItem({ link }: { link: QuickLink }) {
   const { icon: Icon, label, description, href, locked } = link
 
   const inner = (
@@ -139,7 +147,8 @@ function QuickLinkItem({ link, className = "" }: { link: QuickLink; className?: 
     </>
   )
 
-  const base = `group flex items-center gap-3.5 bg-card px-5 py-4 text-left transition-colors ${className}`
+  const base =
+    "group flex items-center gap-3.5 bg-card px-5 py-4 text-left transition-colors"
 
   if (!href) {
     return (
