@@ -131,9 +131,23 @@ export interface Database {
         Relationships: []
       }
       vip_products: {
-        Row: { hotmart_product_id: string; label: string | null; created_at: string }
-        Insert: { hotmart_product_id: string; label?: string | null; created_at?: string }
-        Update: { hotmart_product_id?: string; label?: string | null; created_at?: string }
+        Row: {
+          id: string
+          /** Produto na Hotmart. Null quando a VIP só existe no catálogo do CRM. */
+          hotmart_product_id: string | null
+          /** Produto em public.products — a venda fechada por closer. */
+          crm_product_id: string | null
+          label: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          hotmart_product_id?: string | null
+          crm_product_id?: string | null
+          label?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database["comunidade"]["Tables"]["vip_products"]["Insert"]>
         Relationships: []
       }
     }
