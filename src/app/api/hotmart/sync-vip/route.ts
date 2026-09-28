@@ -14,8 +14,11 @@ export const maxDuration = 300
  * grava cada transação em comunidade.vip_purchases (origem 'hotmart_api'). No
  * fim chama a derivação, que decide a posse.
  *
- * Roda por cron e também sob demanda (para o histórico, quando o postback
- * ainda não existia). É idempotente: transação já registrada não vira linha
+ * Roda uma vez por dia (cron às 03:00 UTC = meia-noite em São Paulo; o
+ * vercel.json não aceita comentário, então a tradução do horário mora aqui) e
+ * também sob demanda — foi assim que o histórico anterior ao postback entrou.
+ * É conferência, não caminho de acesso: quem compra é liberada em segundos
+ * pelo postback. É idempotente: transação já registrada não vira linha
  * nova. O postback continua valendo para o acesso sair na hora; isto é a rede
  * de segurança que pega o que ele perder.
  *
