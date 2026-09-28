@@ -130,6 +130,28 @@ export interface Database {
         Update: Partial<Database["comunidade"]["Tables"]["lessons"]["Insert"]>
         Relationships: []
       }
+      vip_purchases: {
+        Row: {
+          id: string
+          email: string
+          hotmart_product_id: string | null
+          transaction_id: string | null
+          event_type: string
+          occurred_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          hotmart_product_id?: string | null
+          transaction_id?: string | null
+          event_type: string
+          occurred_at?: string
+          created_at?: string
+        }
+        Update: Partial<Database["comunidade"]["Tables"]["vip_purchases"]["Insert"]>
+        Relationships: []
+      }
       vip_products: {
         Row: {
           id: string

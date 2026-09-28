@@ -20,6 +20,11 @@ export const runtime = "nodejs"
  * comunidade.vip_products, a mesma tabela que a derivação do banco consulta
  * (comunidade.refresh_vip_entitlement) — uma fonte só para os dois caminhos.
  *
+ * O MESMO postback da VIP também chega no webhook do CRM. Por isso todo evento
+ * dela é registrado em comunidade.vip_purchases: a derivação lê as duas origens
+ * e usa a mais recente, então o portal concede sozinho e o cron não desfaz.
+ * Sem esse registro, o desacoplamento seria só aparente.
+ *
  * Configurar no Hotmart o header `x-hotmart-hottok` = HOTMART_HOTTOK.
  */
 
@@ -77,6 +82,18 @@ export async function POST(req: NextRequest) {
 
   const db = createComunidadeServiceClient()
 
+  /** Guarda o evento da VIP para a derivação enxergar o que o portal recebeu. */
+  const registraEventoVip = async () => {
+    const { error } = await db.from("vip_purchases").insert({
+      email: buyerEmail,
+      hotmart_product_id: productId,
+      transaction_id: transactionId,
+      event_type: body.event ?? "DESCONHECIDO",
+      occurred_at: purchaseTimestamp,
+    })
+    if (error) console.error("[hotmart] registro da compra VIP falhou:", error.message)
+  }
+
   // A compra é da assinatura VIP? Decide o que o evento mexe. A lista mora em
   // comunidade.vip_products: id de produto é dado, não código, e a Nati
   // cadastra uma oferta nova sem deploy.
@@ -133,6 +150,7 @@ export async function POST(req: NextRequest) {
         // Sobrescrever transação e produto apagaria o registro da compra do
         // Método, que é o que ancora o acesso dela.
         if (isVipProduct && existing) {
+          await registraEventoVip()
           const { error } = await db
             .from("authorized_emails")
             .update({
@@ -159,6 +177,8 @@ export async function POST(req: NextRequest) {
             email: buyerEmail,
           })
         }
+
+        if (isVipProduct) await registraEventoVip()
 
         if (shouldSetAuthorizedAt) {
           const { error } = await db
@@ -196,6 +216,7 @@ export async function POST(req: NextRequest) {
         // Reembolso da assinatura VIP: perde o grupo e o material, mantém o
         // portal — o acesso dela vem da compra do Método, que segue de pé.
         if (isVipProduct) {
+          await registraEventoVip()
           const { error } = await db
             .from("authorized_emails")
             .update({ has_comunidade_vip: false })
