@@ -97,32 +97,19 @@ export async function hasComunidadeVip(email: string): Promise<boolean> {
 }
 
 /**
- * Reconcilia a posse da Comunidade VIP com o que a aluna comprou, para ESTE
- * e-mail. A conta é feita no banco (comunidade.refresh_vip_entitlement): olha
- * as transações da Hotmart dos produtos cadastrados em comunidade.vip_products
- * e liga/desliga a flag. Quem não tem compra da VIP não é tocado — é o que
- * preserva a regra antiga e as cortesias dadas à mão.
+ * Reconcilia a posse da Comunidade VIP para ESTE e-mail, com o que já está no
+ * banco (comunidade.refresh_vip_entitlement) — consulta local e barata.
  *
- * Chamada no login porque o sync do CRM roda de 5 em 5 minutos: sem isto, quem
- * acabou de assinar entraria e ainda veria a Comunidade travada. Falha aqui não
- * derruba o login — no pior caso a liberação chega no próximo sync.
+ * NÃO pergunta à Hotmart. Perguntar no login custaria uma chamada de rede em
+ * toda entrada, para um caso raro: o postback já libera em segundos, e quem
+ * comprou com a aba aberta tem o botão "já assinei" na home. Cobrar latência
+ * de todas as alunas para cobrir minutos de exceção é mau negócio.
  */
 export async function refreshVipEntitlement(email: string): Promise<void> {
   const db = createComunidadeServiceClient()
   const { error } = await db.rpc("refresh_vip_entitlement", { p_email: email })
   if (error) {
     console.error("[access] refresh_vip_entitlement falhou:", error.message)
-  }
-
-  // Ainda sem a Comunidade? Pergunta à Hotmart por esta aluna antes de deixá-la
-  // entrar. É o caso de quem assinou há dois minutos: o postback pode não ter
-  // chegado e a varredura periódica só passa mais tarde. Uma consulta, e ela
-  // entra com o acesso que pagou. Só roda para quem NÃO tem — quem já tem não
-  // paga esse custo.
-  const { data } = await fetchAuthorizedRow(email)
-  if (data?.status === "active" && data.has_comunidade_vip !== true) {
-    const { verificarCompraVip } = await import("@/lib/vip-check")
-    await verificarCompraVip(email)
   }
 }
 

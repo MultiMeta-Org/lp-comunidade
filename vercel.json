@@ -2,8 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
     {
+      "_comment": "03:00 UTC = meia-noite em São Paulo. Conferência diária contra a Hotmart; o acesso em si chega pelo postback, em segundos.",
       "path": "/api/hotmart/sync-vip",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }
