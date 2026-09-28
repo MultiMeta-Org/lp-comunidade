@@ -247,14 +247,6 @@ function TodayFeature({ lesson, count }: { lesson: Lesson | null; count: number 
         aria-hidden
         className="card-sheen pointer-events-none absolute inset-0"
       />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute bottom-1 right-2 select-none font-serif font-bold leading-none text-primary opacity-[0.12] transition-transform duration-500 group-hover:scale-105 sm:bottom-auto sm:right-8 sm:top-1/2 sm:-translate-y-1/2"
-        style={{ fontSize: "clamp(5.5rem, 20vw, 13rem)" }}
-      >
-        {lesson.dia}
-      </span>
-
       <div className="relative p-7 sm:p-9">
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-secondary-foreground">
@@ -267,7 +259,7 @@ function TodayFeature({ lesson, count }: { lesson: Lesson | null; count: number 
         </div>
 
         <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-          Dia {lesson.dia} · {lesson.weekday} · {lesson.date}
+          {lesson.weekday} · {lesson.date}
         </p>
 
         <h2 className="mt-2 max-w-lg font-serif text-2xl sm:text-3xl font-bold leading-snug text-foreground">
