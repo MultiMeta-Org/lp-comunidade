@@ -43,23 +43,9 @@ export default async function LessonPage({
 
           {/* ── Lesson header ── */}
           <div className="animate-rise" style={{ "--d": "70ms" } as React.CSSProperties}>
-            <div className="flex items-end gap-4 mb-4">
-              <span
-                className="font-serif font-bold text-primary leading-none opacity-[0.18]"
-                style={{ fontSize: "6rem" }}
-                aria-hidden
-              >
-                {lesson.dia}
-              </span>
-              <div className="pb-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-secondary">
-                  Dia {lesson.dia}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {lesson.weekday} · {lesson.date}
-                </p>
-              </div>
-            </div>
+            <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
+              {lesson.weekday} · {lesson.date}
+            </p>
 
             <span className="inline-block text-[10px] font-bold uppercase tracking-[0.14em] px-2.5 py-1 rounded-full border border-border bg-card/70 text-muted-foreground mb-4">
               {categoryLabel(lesson.category)}
@@ -109,7 +95,7 @@ export default async function LessonPage({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-foreground">
-                    Material do Dia {lesson.dia}
+                    Material da aula
                   </p>
                   <p className="text-xs text-muted-foreground">PDF · clique para baixar</p>
                 </div>
@@ -148,7 +134,7 @@ export default async function LessonPage({
             </div>
           </section>
 
-          {/* ── Navegação entre dias ── */}
+          {/* ── Navegação entre aulas ── */}
           {(older || newer) && (
             <nav className="grid grid-cols-2 gap-3 border-t border-border pt-8">
               {older ? (
@@ -187,13 +173,13 @@ function NeighborLink({
       <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         {next ? (
           <>
-            Dia seguinte
+            Próxima aula
             <ArrowRight className="w-3.5 h-3.5" />
           </>
         ) : (
           <>
             <ArrowLeft className="w-3.5 h-3.5" />
-            Dia anterior
+            Aula anterior
           </>
         )}
       </span>

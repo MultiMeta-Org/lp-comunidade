@@ -223,15 +223,6 @@ function LessonCard({ lesson }: { lesson: Lesson }) {
         className="pointer-events-none absolute inset-0 transition-colors duration-300 group-hover:bg-primary-subtle/35"
       />
 
-      {/* Assinatura: numeral gigante do dia */}
-      <span
-        className="absolute right-2 bottom-0 font-serif font-bold text-primary pointer-events-none select-none leading-none opacity-[0.1] transition-transform duration-500 group-hover:scale-105"
-        style={{ fontSize: "7rem" }}
-        aria-hidden
-      >
-        {lesson.dia}
-      </span>
-
       <div className="relative">
         <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
           {lesson.weekday} · {lesson.date}
@@ -272,11 +263,6 @@ function LessonRow({ lesson }: { lesson: Lesson }) {
       href={`/dia/${lesson.id}`}
       className="group flex items-center gap-4 px-4 py-3.5 hover:bg-primary-subtle/40 transition-colors"
     >
-      {/* Numeral do dia */}
-      <span className="font-serif font-bold text-lg text-primary w-8 text-center flex-shrink-0 leading-none">
-        {lesson.dia}
-      </span>
-
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">

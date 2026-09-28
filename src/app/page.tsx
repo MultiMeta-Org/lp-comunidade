@@ -46,15 +46,8 @@ export default async function VIPPage() {
               style={{ "--d": "90ms" } as React.CSSProperties}
             >
               <article className="group relative overflow-hidden rounded-3xl border border-primary/25 bg-card shadow-sm transition-shadow duration-300 hover:shadow-md">
-                {/* Lavagem sage + numeral gigante: mesma assinatura do Hub. */}
+                {/* Lavagem sage: mesma assinatura do Hub. */}
                 <div aria-hidden className="card-sheen pointer-events-none absolute inset-0" />
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute bottom-1 right-2 select-none font-serif font-bold leading-none text-primary opacity-[0.12] transition-transform duration-500 group-hover:scale-105 sm:bottom-auto sm:right-8 sm:top-1/2 sm:-translate-y-1/2"
-                  style={{ fontSize: "clamp(5.5rem, 20vw, 13rem)" }}
-                >
-                  {today.dia}
-                </span>
 
                 <div className="relative p-7 sm:p-9">
                   <div className="flex flex-wrap items-center gap-2">
@@ -68,7 +61,7 @@ export default async function VIPPage() {
                   </div>
 
                   <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                    Dia {today.dia} · {today.weekday} · {today.date}
+                    {today.weekday} · {today.date}
                   </p>
 
                   <h2 className="mt-2 max-w-lg font-serif text-2xl sm:text-3xl font-bold leading-snug text-foreground">
