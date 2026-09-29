@@ -12,6 +12,34 @@
 const TOKEN_URL = "https://api-sec-vlc.hotmart.com/security/oauth/token"
 const API_BASE = "https://developers.hotmart.com/payments/api/v1"
 
+/**
+ * Quanto do passado o sync enxerga, em dias.
+ *
+ * NÃO É OPCIONAL. Sem `start_date`, o /sales/history da Hotmart devolve
+ * calado só os últimos ~30 dias — não erra, não avisa, só omite. Foi assim que
+ * o sync passou meses lendo 15 vendas quando existiam 41, e 23 alunas que
+ * pagaram a Comunidade VIP ficaram sem ela. Um sync que mente por omissão é
+ * pior que um sync que falha.
+ *
+ * O teto é da Hotmart: `now - 730d` responde 200, `now - 760d` responde 400.
+ * Por isso 720 — margem para o limite não ser exatamente o que medimos, e para
+ * fuso não empurrar a conta por cima da borda. E por isso é janela ROLANTE e
+ * não data fixa: uma constante tipo "2025-01-01" funciona hoje e começa a
+ * derrubar o sync inteiro com 400 quando envelhecer dois anos.
+ *
+ * Perder o que é mais velho que a janela não perde acesso: `vip_purchases` é
+ * cumulativa e idempotente, então venda já registrada continua valendo.
+ */
+function janelaDias(): number {
+  const raw = Number(process.env.HOTMART_JANELA_DIAS)
+  return Number.isFinite(raw) && raw > 0 && raw <= 730 ? raw : 720
+}
+
+/** Início da janela, em epoch ms — o que a Hotmart espera em `start_date`. */
+function inicioDaJanela(): number {
+  return Date.now() - janelaDias() * 24 * 60 * 60 * 1000
+}
+
 /** Status da Hotmart que valem como compra válida. */
 const STATUS_POSITIVOS = ["APPROVED", "COMPLETE"] as const
 /** Status que derrubam a compra. */
@@ -97,6 +125,8 @@ export async function listarVendas(productId: string): Promise<VendaHotmart[]> {
     const url = new URL(`${API_BASE}/sales/history`)
     url.searchParams.set("product_id", productId)
     url.searchParams.set("max_results", "500")
+    // Ver janelaDias(): sem isto a Hotmart devolve só os últimos ~30 dias.
+    url.searchParams.set("start_date", String(inicioDaJanela()))
     for (const s of [...STATUS_POSITIVOS, ...STATUS_NEGATIVOS]) {
       url.searchParams.append("transaction_status", s)
     }
@@ -181,6 +211,9 @@ export async function vendasDoEmail(
     url.searchParams.set("product_id", productId)
     url.searchParams.set("buyer_email", email)
     url.searchParams.set("max_results", "50")
+    // Mesma armadilha do listarVendas: sem start_date, quem comprou há mais de
+    // um mês some. Era por isto que o botão "já assinei" não achava a compra.
+    url.searchParams.set("start_date", String(inicioDaJanela()))
     for (const s of [...STATUS_POSITIVOS, ...STATUS_NEGATIVOS]) {
       url.searchParams.append("transaction_status", s)
     }
