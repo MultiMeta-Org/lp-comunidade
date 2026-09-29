@@ -24,7 +24,7 @@ export const NOTION_URL = "https://welcome-aboard-multimeta.lovable.app/"
 /** Suporte no WhatsApp (atendimento direto). */
 export const SUPPORT_URL = "https://wa.me/message/2BXZEO5TDW4QN1"
 
-/** Marketplace (libera 7 dias após a compra). */
+/** Marketplace — aberto para toda aluna autorizada, sem espera. */
 export const MARKETPLACE_URL = "https://www.conexaomultimeta.com.br/"
 
 /** CRM da MultiMeta — contatos e follow-up das alunas. */

@@ -24,7 +24,7 @@ type QuickLink = {
   description: string
   icon: React.ElementType
   href?: string
-  /** Cadeado: trava do 8º dia (Notion, Marketplace) ou produto que não é dela. */
+  /** Cadeado: trava do 8º dia (hoje só o Notion) ou produto que não é dela. */
   locked?: boolean
 }
 

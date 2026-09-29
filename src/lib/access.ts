@@ -33,8 +33,8 @@ export type AccessState =
  * Um e-mail tem acesso quando existe em comunidade.authorized_emails com
  * status = 'active' (não reembolsado/chargeback).
  *
- * A espera de 7 dias NÃO gateia o acesso geral — vale só para Marketplace/
- * Notion (ver getFeatureUnlock).
+ * A espera de 7 dias NÃO gateia o acesso geral — vale só para o Notion
+ * (ver getFeatureUnlock).
  *
  * Usado por: rota send-otp (portão do login) e painel admin (exibição de status).
  */
@@ -60,9 +60,14 @@ export type FeatureUnlock = {
 }
 
 /**
- * Desbloqueio das features "no 8º dia" (Marketplace, Notion): liberam
- * `waitingPeriodDays()` (7) dias após a compra — mesma âncora do acesso
- * (authorized_at). Contagem regressiva real, por usuário, lida do DB.
+ * Desbloqueio do Notion "no 8º dia": libera `waitingPeriodDays()` (7) dias
+ * após a compra — mesma âncora do acesso (authorized_at). Contagem regressiva
+ * real, por usuário, lida do DB.
+ *
+ * O Marketplace SAIU desta trava: toda aluna autorizada já é autorizada lá
+ * (marketplace.authorized_emails espelha a mesma base), então o cadeado só
+ * escondia uma porta que estava aberta. O card leva direto à home do
+ * marketplace.
  */
 export async function getFeatureUnlock(email: string): Promise<FeatureUnlock> {
   const { data } = await fetchAuthorizedRow(email)

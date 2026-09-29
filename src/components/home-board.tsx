@@ -35,7 +35,7 @@ function todayLabel(now: Date): string {
   }).format(now)
 }
 
-/** "8 de set" — data em que Notion/Marketplace liberam. */
+/** "8 de set" — data em que o Notion libera. */
 function unlockDateLabel(iso: string | null): string | null {
   if (!iso) return null
   return new Intl.DateTimeFormat("pt-BR", { timeZone: TZ, day: "numeric", month: "short" })
@@ -70,11 +70,7 @@ export function HomeBoard({
       ? "Libera amanhã"
       : `Libera em ${unlock.daysRemaining} dias${unlockDate ? ` · ${unlockDate}` : ""}`
 
-  const products = buildProducts({
-    hasComunidadeVip,
-    marketplaceUnlocked: unlock.unlocked,
-    marketplaceNote: lockedNote,
-  })
+  const products = buildProducts({ hasComunidadeVip })
   const owned = products.filter((p) => p.state === "owned")
   const soon = products.filter((p) => p.state !== "owned")
 

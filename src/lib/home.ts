@@ -53,14 +53,8 @@ export type Product = {
  */
 export function buildProducts({
   hasComunidadeVip,
-  marketplaceUnlocked,
-  marketplaceNote,
 }: {
   hasComunidadeVip: boolean
-  /** Marketplace libera 7 dias após a compra — mesma regra do link rápido. */
-  marketplaceUnlocked: boolean
-  /** "Libera em 3 dias · 5 de out", quando ainda falta. */
-  marketplaceNote: string | null
 }): Product[] {
   return PRODUCTS.filter(
     (product) => product.slug !== "comunidade-vip" || !hasComunidadeVip
@@ -74,14 +68,6 @@ export function buildProducts({
         href: COMUNIDADE_VIP_HOTMART_URL,
         cta: "Assinar na Hotmart",
         meta: "Grupo no WhatsApp e material das aulas",
-      }
-    }
-    if (product.slug === "marketplace" && !marketplaceUnlocked) {
-      return {
-        ...product,
-        state: "locked",
-        href: undefined,
-        meta: marketplaceNote ?? "Libera alguns dias após a compra",
       }
     }
     return product
