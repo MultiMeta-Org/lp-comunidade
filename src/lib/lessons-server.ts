@@ -55,13 +55,27 @@ async function resolveMedia(
   return data.signedUrl
 }
 
+/**
+ * Alcance de quem está lendo:
+ *   • "lab"    → assina o Laboratório de Vendas (ou é admin): acervo inteiro,
+ *                com vídeo, áudio e PDF.
+ *   • "aberto" → aluna do Método sem a assinatura: SÓ as aulas marcadas como
+ *                `open_to_all` (o Plantão Tira Dúvidas) e SÓ o vídeo delas.
+ *
+ * O corte do PDF/áudio acontece aqui, não na página: a URL assinada seria
+ * montada e enviada no HTML antes de qualquer `if` de interface.
+ */
+export type LessonsScope = "lab" | "aberto"
+
 async function mapRow(
   db: ReturnType<typeof createComunidadeServiceClient>,
-  row: LessonRow
+  row: LessonRow,
+  scope: LessonsScope
 ): Promise<Lesson> {
+  const aberto = scope === "aberto"
   const [pdfUrl, audioUrl, videoUrl] = await Promise.all([
-    resolveMedia(db, row.pdf_url, "download"),
-    resolveMedia(db, row.audio_url, "stream"),
+    aberto ? "#" : resolveMedia(db, row.pdf_url, "download"),
+    aberto ? "#" : resolveMedia(db, row.audio_url, "stream"),
     resolveMedia(db, row.video_url, "raw"),
   ])
   return {
@@ -76,6 +90,7 @@ async function mapRow(
     pdfUrl,
     audioUrl,
     videoUrl,
+    openToAll: row.open_to_all,
   }
 }
 
@@ -98,43 +113,56 @@ function supabaseConfigured(): boolean {
  * Agora: uma leitura de memória; só bate no banco quando a tag é revalidada.
  */
 const readPublishedLessons = unstable_cache(
-  async (): Promise<Lesson[]> => {
+  async (scope: LessonsScope): Promise<Lesson[]> => {
     const db = createComunidadeServiceClient()
-    const { data, error } = await db
-      .from("lessons")
-      .select("*")
-      .eq("published", true)
-      .order("sort_order", { ascending: false })
+    let query = db.from("lessons").select("*").eq("published", true)
+    if (scope === "aberto") query = query.eq("open_to_all", true)
+
+    const { data, error } = await query.order("sort_order", { ascending: false })
 
     if (error) {
       console.error("[lessons] erro ao carregar:", error.message)
       return []
     }
-    return Promise.all((data ?? []).map((row) => mapRow(db, row)))
+    return Promise.all((data ?? []).map((row) => mapRow(db, row, scope)))
   },
+  // `scope` entra na chave sozinho (unstable_cache usa os argumentos), então as
+  // duas listas são entradas separadas e a mesma tag invalida as duas.
   ["published-lessons"],
   { tags: [LESSONS_CACHE_TAG], revalidate: 3600 }
 )
 
+/** SEED filtrado pelo alcance — fallback de quando não há Supabase. */
+function seedFor(scope: LessonsScope): Lesson[] {
+  if (scope === "lab") return SEED_LESSONS
+  return SEED_LESSONS.filter((l) => l.openToAll).map((l) => ({
+    ...l,
+    pdfUrl: "#",
+    audioUrl: "#",
+  }))
+}
+
 /**
- * Aulas publicadas, mais recentes primeiro.
+ * Aulas visíveis para este alcance, mais recentes primeiro.
  * Sem Supabase configurado (esqueleto/dev), cai para SEED_LESSONS.
  */
-export async function getLessons(): Promise<Lesson[]> {
-  if (!supabaseConfigured()) return SEED_LESSONS
-  return readPublishedLessons()
+export async function getLessons(scope: LessonsScope = "lab"): Promise<Lesson[]> {
+  if (!supabaseConfigured()) return seedFor(scope)
+  return readPublishedLessons(scope)
 }
 
 /** Uma aula por id — servida da lista cacheada (sem query extra). */
-export async function getLesson(id: string): Promise<Lesson | null> {
-  if (!supabaseConfigured()) return SEED_LESSONS.find((l) => l.id === id) ?? null
-  const lessons = await getLessons()
+export async function getLesson(
+  id: string,
+  scope: LessonsScope = "lab"
+): Promise<Lesson | null> {
+  const lessons = await getLessons(scope)
   return lessons.find((l) => l.id === id) ?? null
 }
 
-/** Aula do topo (mais recente). */
-export async function getToday(): Promise<Lesson | null> {
-  const lessons = await getLessons()
+/** Aula do topo (mais recente) dentro do alcance. */
+export async function getToday(scope: LessonsScope = "lab"): Promise<Lesson | null> {
+  const lessons = await getLessons(scope)
   return lessons[0] ?? null
 }
 
@@ -143,12 +171,15 @@ export async function getToday(): Promise<Lesson | null> {
  * A lista vem da mais recente para a mais antiga, então o índice anterior
  * é o dia seguinte (mais novo) e o próximo é o dia anterior (mais antigo).
  */
-export async function getLessonWithNeighbors(id: string): Promise<{
+export async function getLessonWithNeighbors(
+  id: string,
+  scope: LessonsScope = "lab"
+): Promise<{
   lesson: Lesson | null
   older: Lesson | null
   newer: Lesson | null
 }> {
-  const lessons = await getLessons()
+  const lessons = await getLessons(scope)
   const i = lessons.findIndex((l) => l.id === id)
   if (i === -1) return { lesson: null, older: null, newer: null }
   return {

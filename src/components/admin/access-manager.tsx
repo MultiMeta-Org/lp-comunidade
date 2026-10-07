@@ -1,14 +1,17 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
+import { useState, useTransition } from "react"
+import { Check, Minus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { LAB_NAME } from "@/lib/produto"
 import {
   addAuthorizedEmail,
   revokeAccess,
   reactivateAccess,
-} from "@/app/admin/access/actions"
+  setLabAccess,
+} from "@/app/admin/acessos/actions"
 
 export type AuthorizedRow = {
   email: string
@@ -16,6 +19,8 @@ export type AuthorizedRow = {
   source: string | null
   state: "released" | "waiting" | "revoked"
   availableAt: string
+  /** Tem a assinatura (coluna has_comunidade_vip, derivada das compras). */
+  hasLab: boolean
 }
 
 const STATE_LABEL: Record<AuthorizedRow["state"], string> = {
@@ -30,64 +35,82 @@ const STATE_CLASS: Record<AuthorizedRow["state"], string> = {
   revoked: "bg-destructive-subtle text-destructive",
 }
 
-const PAGE_SIZE = 20
-
+/**
+ * A lista de acessos e as ações sobre cada linha.
+ *
+ * Busca, filtros e paginação NÃO estão aqui: moram na URL e são resolvidos no
+ * servidor (ver acessos/page.tsx). Este componente recebe só a página atual —
+ * antes ele recebia a base inteira e filtrava no navegador, o que significava
+ * mandar todas as alunas para a tela a cada visita.
+ */
 export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
   const [email, setEmail] = useState("")
   const [name, setName] = useState("")
+  const [comLab, setComLab] = useState(false)
   const [error, setError] = useState("")
-  const [query, setQuery] = useState("")
-  const [page, setPage] = useState(1)
+  const [aviso, setAviso] = useState("")
   const [pending, startTransition] = useTransition()
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return rows
-    return rows.filter(
-      (r) =>
-        r.email.toLowerCase().includes(q) ||
-        (r.buyerName?.toLowerCase().includes(q) ?? false) ||
-        (r.source?.toLowerCase().includes(q) ?? false),
-    )
-  }, [rows, query])
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const currentPage = Math.min(page, totalPages)
-  const pageRows = filtered.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  )
-
-  const handleSearch = (value: string) => {
-    setQuery(value)
-    setPage(1)
-  }
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setAviso("")
     startTransition(async () => {
-      const res = await addAuthorizedEmail(email, { buyerName: name || undefined })
+      const res = await addAuthorizedEmail(email, {
+        buyerName: name || undefined,
+        comLab,
+      })
       if (!res.ok) setError(res.error || "Erro ao adicionar.")
       else {
         setEmail("")
         setName("")
+        setComLab(false)
       }
     })
   }
 
-  const act = (fn: (email: string) => Promise<{ ok: boolean; error?: string }>, target: string) => {
+  const act = (
+    fn: (email: string) => Promise<{ ok: boolean; error?: string }>,
+    target: string
+  ) => {
     setError("")
+    setAviso("")
     startTransition(async () => {
       const res = await fn(target)
       if (!res.ok) setError(res.error || "Erro na operação.")
     })
   }
 
+  const toggleLab = (row: AuthorizedRow) => {
+    setError("")
+    setAviso("")
+    startTransition(async () => {
+      const res = await setLabAccess(row.email, !row.hasLab)
+      if (!res.ok) {
+        setError(res.error)
+        return
+      }
+      // Tirar a cortesia não vence uma compra registrada nem o direito
+      // adquirido de quem comprou o Método antes de 23/07/2026 — a derivação
+      // devolve o acesso no mesmo instante. Dizer isso é melhor que deixar a
+      // Nati clicando num botão que não obedece.
+      if (!res.has !== !row.hasLab) {
+        setAviso(
+          row.hasLab
+            ? `${row.email} continua com o ${LAB_NAME}: a cortesia saiu, mas existe compra registrada ou direito adquirido (Método antes de 23/07/2026).`
+            : `${row.email} segue sem o ${LAB_NAME} — a cortesia foi gravada, mas o recálculo não a confirmou. Confira se o e-mail tem acesso ativo.`
+        )
+      }
+    })
+  }
+
   return (
     <div className="space-y-5">
-      <form onSubmit={handleAdd} className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
-        <div className="grid gap-1.5 flex-1 min-w-[200px]">
+      <form
+        onSubmit={handleAdd}
+        className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4"
+      >
+        <div className="grid min-w-[200px] flex-1 gap-1.5">
           <Label htmlFor="new-email">E-mail</Label>
           <Input
             id="new-email"
@@ -98,7 +121,7 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
             required
           />
         </div>
-        <div className="grid gap-1.5 flex-1 min-w-[160px]">
+        <div className="grid min-w-[160px] flex-1 gap-1.5">
           <Label htmlFor="new-name">Nome (opcional)</Label>
           <Input
             id="new-name"
@@ -107,31 +130,25 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
             onChange={(e) => setName(e.target.value)}
           />
         </div>
+        <label className="flex h-10 items-center gap-2 text-sm text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={comLab}
+            onChange={(e) => setComLab(e.target.checked)}
+          />
+          já com o {LAB_NAME}
+        </label>
         <Button type="submit" disabled={pending}>
           {pending ? "Salvando..." : "Liberar acesso"}
         </Button>
       </form>
 
       {error && <p className="text-xs text-destructive">{error}</p>}
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="grid gap-1.5 flex-1 min-w-[220px]">
-          <Label htmlFor="access-search" className="sr-only">
-            Buscar
-          </Label>
-          <Input
-            id="access-search"
-            type="search"
-            placeholder="Buscar por e-mail, nome ou origem…"
-            value={query}
-            onChange={(e) => handleSearch(e.target.value)}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground">
-          {filtered.length} {filtered.length === 1 ? "acesso" : "acessos"}
-          {query && ` (de ${rows.length})`}
+      {aviso && (
+        <p className="rounded-lg border border-warning/40 bg-warning-subtle px-3 py-2 text-xs leading-relaxed text-warning-foreground">
+          {aviso}
         </p>
-      </div>
+      )}
 
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm">
@@ -140,18 +157,19 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
               <th className="px-4 py-3 font-semibold">E-mail</th>
               <th className="px-4 py-3 font-semibold">Origem</th>
               <th className="px-4 py-3 font-semibold">Status</th>
-              <th className="px-4 py-3 font-semibold text-right">Ações</th>
+              <th className="px-4 py-3 font-semibold">{LAB_NAME}</th>
+              <th className="px-4 py-3 text-right font-semibold">Ações</th>
             </tr>
           </thead>
           <tbody>
-            {pageRows.length === 0 && (
+            {rows.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
-                  {query ? "Nenhum acesso encontrado." : "Nenhum acesso ainda."}
+                <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
+                  Nenhum acesso encontrado com esses filtros.
                 </td>
               </tr>
             )}
-            {pageRows.map((r) => (
+            {rows.map((r) => (
               <tr key={r.email} className="border-b border-border last:border-0">
                 <td className="px-4 py-3">
                   <div className="font-medium text-foreground">{r.email}</div>
@@ -171,6 +189,35 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
                       libera {new Date(r.availableAt).toLocaleDateString("pt-BR")}
                     </div>
                   )}
+                </td>
+                <td className="px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleLab(r)}
+                    disabled={pending}
+                    title={
+                      r.hasLab
+                        ? `Tirar o ${LAB_NAME} desta aluna`
+                        : `Dar o ${LAB_NAME} a esta aluna`
+                    }
+                    className={`inline-flex cursor-pointer items-center gap-1.5 rounded px-2 py-0.5 text-[11px] font-semibold transition-colors disabled:opacity-60 ${
+                      r.hasLab
+                        ? "bg-secondary-subtle text-secondary hover:bg-secondary hover:text-secondary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-accent hover:text-foreground"
+                    }`}
+                  >
+                    {r.hasLab ? (
+                      <>
+                        <Check className="h-3 w-3" />
+                        Tem
+                      </>
+                    ) : (
+                      <>
+                        <Minus className="h-3 w-3" />
+                        Não tem
+                      </>
+                    )}
+                  </button>
                 </td>
                 <td className="px-4 py-3 text-right">
                   {r.state === "revoked" ? (
@@ -198,32 +245,6 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
           </tbody>
         </table>
       </div>
-
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground">
-            Página {currentPage} de {totalPages}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              Anterior
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage >= totalPages}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            >
-              Próxima
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

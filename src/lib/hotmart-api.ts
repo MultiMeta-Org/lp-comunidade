@@ -164,7 +164,7 @@ export async function listarVendas(productId: string): Promise<VendaHotmart[]> {
 
 /**
  * Catálogo de produtos da conta. Serve para desconfiar de produto novo: uma
- * oferta "Comunidade VIP 2027" criada amanhã e não cadastrada em
+ * oferta "Laboratório de Vendas 2027" criada amanhã e não cadastrada em
  * vip_products venderia sem ninguém ver.
  */
 export async function listarProdutos(): Promise<ProdutoHotmart[]> {
@@ -187,9 +187,16 @@ export async function listarProdutos(): Promise<ProdutoHotmart[]> {
   }))
 }
 
-/** Produto cujo nome cheira a Comunidade VIP — usado só para alertar. */
+/**
+ * Produto cujo nome cheira à assinatura — usado só para alertar.
+ *
+ * Os dois nomes entram: a oferta antiga ("Comunidade VIP") continua vendendo na
+ * Hotmart, e a nova ("Laboratório de Vendas") pode ser criada a qualquer
+ * momento. Reconhecer só o nome atual deixaria passar justamente a oferta nova,
+ * que é o caso que este alerta existe para pegar.
+ */
 export function pareceComunidadeVip(nome: string): boolean {
-  return /comunidade\s*vip/i.test(nome)
+  return /comunidade\s*vip|laborat[óo]rio\s*de\s*vendas/i.test(nome)
 }
 
 /**

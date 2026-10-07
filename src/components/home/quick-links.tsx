@@ -33,7 +33,7 @@ type QuickLink = {
  * 1px. O Notion entra travado até a liberação do 8º dia — `lockedNote` mostra
  * quanto falta.
  *
- * Comunidade VIP e Marketplace não vivem aqui: são produtos, e aparecem como
+ * Laboratório de Vendas e Marketplace não vivem aqui: são produtos, e aparecem como
  * capa na estante lá em cima. Repetir o mesmo destino nas duas superfícies só
  * dobrava a tela sem dar nada novo.
  */

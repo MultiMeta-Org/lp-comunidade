@@ -1,12 +1,14 @@
 "use client"
 
 import { useEffect, useRef, useState, useTransition } from "react"
-import { Trash2, Upload, FileCheck2, Loader2 } from "lucide-react"
+import Link from "next/link"
+import { BarChart3, Trash2, Upload, FileCheck2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Modal } from "@/components/ui/modal"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CATEGORIES, categoryLabel, weekdayFromIso } from "@/lib/lessons"
+import { PLANTAO_NAME } from "@/lib/produto"
 import { supabase } from "@/lib/supabase/client"
 import { compressAudioToMp3 } from "@/lib/audio-compress"
 import { useUploads } from "@/components/admin/uploads-provider"
@@ -17,9 +19,16 @@ import {
   createLessonUploadUrl,
   type LessonInput,
   type UploadKind,
-} from "@/app/admin/lessons/actions"
+} from "@/app/admin/aulas/actions"
 
 export type LessonRow = LessonInput
+
+/** Números de presença de uma aula, vindos de lesson_progress_stats. */
+export type LessonStatsRow = {
+  elegiveis: number
+  abriram: number
+  concluiram: number
+}
 
 const EMPTY: LessonRow = {
   id: "",
@@ -33,12 +42,34 @@ const EMPTY: LessonRow = {
   audioUrl: "",
   videoUrl: "",
   published: true,
+  openToAll: false,
 }
 
 const STORAGE_PREFIX = "storage://"
 const isUploadedFile = (v: string) => v.startsWith(STORAGE_PREFIX)
 
-export function LessonsManager({ rows }: { rows: LessonRow[] }) {
+/**
+ * A lista de aulas e o formulário de edição.
+ *
+ * `nextDia`/`nextId` e `categorias` vêm do SERVIDOR, não desta página: a lista
+ * agora é paginada, e derivar "o próximo número" da página visível daria a
+ * mesma aula 1 a cada página seguinte.
+ */
+export function LessonsManager({
+  rows,
+  nextDia,
+  nextId,
+  categorias,
+  stats,
+}: {
+  rows: LessonRow[]
+  nextDia: number
+  nextId: string
+  /** Categorias já usadas na base (para o datalist). */
+  categorias: string[]
+  /** Presença por id de aula — ausente quando ninguém abriu ainda. */
+  stats: Record<string, LessonStatsRow | undefined>
+}) {
   const [draft, setDraft] = useState<LessonRow | null>(null)
   const [editing, setEditing] = useState(false)
   const [error, setError] = useState("")
@@ -47,22 +78,9 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
   const set = <K extends keyof LessonRow>(key: K, value: LessonRow[K]) =>
     setDraft((d) => (d ? { ...d, [key]: value } : d))
 
-  // Número exibido da próxima aula: incrementa a partir do maior existente (issue #7).
-  const nextDia = rows.reduce((max, r) => Math.max(max, r.dia), 0) + 1
-
-  // id é uma chave estável, desacoplada do número exibido (que é recompactado ao
-  // excluir). Deriva do maior sufixo já usado para nunca colidir/reaproveitar.
-  const maxIdNum = rows.reduce((max, r) => {
-    const n = Number(String(r.id).replace(/^dia-/, ""))
-    return Number.isFinite(n) ? Math.max(max, n) : max
-  }, 0)
-  const nextId = `dia-${maxIdNum + 1}`
-
   // Rótulos sugeridos: os fixos + os que já foram criados à mão (issue #8).
   const knownLabels: string[] = Object.values(CATEGORIES)
-  const extraCategories = [...new Set(rows.map((r) => r.category))].filter(
-    (c) => c && !knownLabels.includes(c)
-  )
+  const extraCategories = categorias.filter((c) => c && !knownLabels.includes(c))
 
   const close = () => setDraft(null)
 
@@ -106,8 +124,7 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{rows.length} aula(s)</p>
+      <div className="flex items-center justify-end">
         <Button onClick={startNew} disabled={pending}>
           Nova aula
         </Button>
@@ -165,6 +182,24 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
             </Field>
           </div>
 
+          <Field label={`${PLANTAO_NAME} — vídeo aberto para todas`}>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={draft.openToAll}
+                onChange={(e) => set("openToAll", e.target.checked)}
+              />
+              <span className="text-muted-foreground">
+                Marque para o <b className="text-foreground">vídeo</b> desta aula
+                aparecer para toda aluna autorizada, não só para quem assina. O{" "}
+                <b className="text-foreground">PDF e o áudio continuam restritos</b>{" "}
+                — é assim que a gravação do plantão de sexta fica aberta sem abrir
+                o material.
+              </span>
+            </label>
+          </Field>
+
           <Field label="Tópico">
             <Input value={draft.topic} onChange={(e) => set("topic", e.target.value)} required />
           </Field>
@@ -218,10 +253,10 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <th className="px-4 py-3 font-semibold">Nº da aula</th>
+              <th className="px-4 py-3 font-semibold">Nº</th>
               <th className="px-4 py-3 font-semibold">Tópico</th>
-              <th className="px-4 py-3 font-semibold">Categoria</th>
               <th className="px-4 py-3 font-semibold">Publicada</th>
+              <th className="px-4 py-3 font-semibold">Presença</th>
               <th className="px-4 py-3 font-semibold text-right">Ações</th>
             </tr>
           </thead>
@@ -229,7 +264,7 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
             {rows.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
-                  Nenhuma aula ainda.
+                  Nenhuma aula encontrada.
                 </td>
               </tr>
             )}
@@ -241,9 +276,17 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
                 <td className="px-4 py-3 text-muted-foreground">{l.dia}</td>
                 <td className="px-4 py-3">
                   <div className="font-medium text-foreground">{l.topic}</div>
-                  <div className="text-xs text-muted-foreground">{l.isoDate}</div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                    <span>{l.isoDate}</span>
+                    <span>·</span>
+                    <span>{categoryLabel(l.category)}</span>
+                    {l.openToAll && (
+                      <span className="rounded bg-secondary-subtle px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-secondary">
+                        aberta
+                      </span>
+                    )}
+                  </div>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">{categoryLabel(l.category)}</td>
                 <td className="px-4 py-3">
                   <button
                     type="button"
@@ -258,7 +301,17 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
                     {l.published ? "Sim" : "Não"}
                   </button>
                 </td>
+                <td className="px-4 py-3">
+                  <Presenca stats={stats[l.id]} />
+                </td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
+                  <Link
+                    href={`/admin/aulas/${l.id}`}
+                    className="mr-1 inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-semibold transition-colors hover:bg-accent hover:text-foreground"
+                  >
+                    <BarChart3 className="h-3.5 w-3.5" />
+                    Presença
+                  </Link>
                   <Button variant="outline" size="sm" onClick={() => startEdit(l)} disabled={pending}>
                     Editar
                   </Button>{" "}
@@ -278,6 +331,30 @@ export function LessonsManager({ rows }: { rows: LessonRow[] }) {
           </tbody>
         </table>
       </div>
+    </div>
+  )
+}
+
+/**
+ * Presença resumida na linha da aula: concluíram sobre o tamanho da turma, com
+ * quantas abriram embaixo. Sem turma (ninguém elegível ainda) não há fração
+ * para mostrar — "0 de 0" seria um número falso de precisão.
+ */
+function Presenca({ stats }: { stats?: LessonStatsRow }) {
+  if (!stats || stats.elegiveis === 0) {
+    return <span className="text-xs text-muted-foreground">—</span>
+  }
+  const pct = Math.round((stats.concluiram / stats.elegiveis) * 100)
+  return (
+    <div className="min-w-[7rem]">
+      <p className="text-xs font-semibold text-foreground">
+        {stats.concluiram} de {stats.elegiveis}{" "}
+        <span className="font-normal text-muted-foreground">({pct}%)</span>
+      </p>
+      <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
+        <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+      </div>
+      <p className="mt-1 text-[11px] text-muted-foreground">{stats.abriram} abriram</p>
     </div>
   )
 }

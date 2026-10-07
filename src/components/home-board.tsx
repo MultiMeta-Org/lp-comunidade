@@ -1,11 +1,11 @@
 import type { FeatureUnlock } from "@/lib/access"
 import type { Lesson } from "@/lib/lessons"
+import type { Banner } from "@/lib/banners-server"
 import { buildHighlights, buildProducts } from "@/lib/home"
 import { Atmosphere } from "@/components/atmosphere"
 import { NewsCarousel } from "@/components/home/news-carousel"
 import { ProductShelf } from "@/components/home/product-shelf"
 import { QuickLinks } from "@/components/home/quick-links"
-import { VipSection } from "@/components/home/vip-section"
 import { VerificarAssinatura } from "@/components/home/verificar-assinatura"
 
 const TZ = "America/Sao_Paulo"
@@ -51,17 +51,25 @@ function unlockDateLabel(iso: string | null): string | null {
 export function HomeBoard({
   name,
   lesson,
+  banners,
   unlock,
-  hasComunidadeVip,
+  hasLab,
+  temPlantao = false,
   now = new Date(),
 }: {
   name: string | null
   lesson: Lesson | null
+  banners: Banner[]
   unlock: FeatureUnlock
-  hasComunidadeVip: boolean
+  hasLab: boolean
+  /**
+   * Existe ao menos uma aula aberta publicada. Decide a capa do Plantão na
+   * prateleira de quem não assina o Laboratório.
+   */
+  temPlantao?: boolean
   now?: Date
 }) {
-  const highlights = buildHighlights(lesson)
+  const highlights = buildHighlights(lesson, banners)
 
   const unlockDate = unlockDateLabel(unlock.unlockAt)
   const lockedNote = unlock.unlocked
@@ -70,7 +78,7 @@ export function HomeBoard({
       ? "Libera amanhã"
       : `Libera em ${unlock.daysRemaining} dias${unlockDate ? ` · ${unlockDate}` : ""}`
 
-  const products = buildProducts({ hasComunidadeVip })
+  const products = buildProducts({ hasLab, temPlantao })
   const owned = products.filter((p) => p.state === "owned")
   const soon = products.filter((p) => p.state !== "owned")
 
@@ -114,21 +122,6 @@ export function HomeBoard({
             <ProductShelf products={owned} />
           </div>
 
-          {/* ── Comunidade VIP: o único produto com ambiente dentro do portal ── */}
-          {hasComunidadeVip && (
-            <>
-              <SectionLabel className="mt-12" delay={110} hint="sua assinatura">
-                Comunidade VIP
-              </SectionLabel>
-              <div
-                className="animate-rise mt-4"
-                style={{ "--d": "140ms" } as React.CSSProperties}
-              >
-                <VipSection />
-              </div>
-            </>
-          )}
-
           {/* ── O que ela ainda vai conhecer ── */}
           {soon.length > 0 && (
             <>
@@ -142,7 +135,7 @@ export function HomeBoard({
                 <ProductShelf products={soon} />
                 {/* Quem assinou com a aba já aberta não passa por nenhuma das
                     verificações automáticas — este botão é a saída dela. */}
-                {!hasComunidadeVip && <VerificarAssinatura />}
+                {!hasLab && <VerificarAssinatura />}
               </div>
             </>
           )}

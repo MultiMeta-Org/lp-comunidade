@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/guard"
 import { SiteHeader } from "@/components/site-header"
+import { AdminNav } from "@/components/admin/admin-nav"
 import { UploadsProvider } from "@/components/admin/uploads-provider"
 
 export const metadata = {
@@ -18,7 +19,8 @@ export default async function AdminLayout({
 
   return (
     // O provider fica AQUI, acima da página: o upload de vídeo não pode ser
-    // interrompido ao fechar o modal da aula (ver uploads-provider.tsx).
+    // interrompido ao fechar o modal da aula (ver uploads-provider.tsx). Agora
+    // também sobrevive à troca de seção do admin, pelo mesmo motivo.
     <UploadsProvider>
       <div className="min-h-screen">
         <SiteHeader wide>
@@ -26,7 +28,10 @@ export default async function AdminLayout({
             {email}
           </span>
         </SiteHeader>
-        <main className="max-w-5xl mx-auto px-5 py-10 space-y-14">{children}</main>
+        <div className="max-w-5xl mx-auto px-5 pt-6">
+          <AdminNav />
+        </div>
+        <main className="max-w-5xl mx-auto px-5 py-8 space-y-10">{children}</main>
       </div>
     </UploadsProvider>
   )

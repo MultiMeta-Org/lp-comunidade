@@ -4,11 +4,12 @@
 export const METODO_EVP_URL =
   "https://hotmart.com/pt-br/marketplace/produtos/hagsxd-metodo-evp-920q0/S104764925D"
 
-/** Comunidade VIP na Hotmart — onde quem ainda não tem a assinatura compra. */
+/** Laboratório de Vendas na Hotmart — onde quem não assina compra. O produto na
+ *  Hotmart pode seguir com o nome antigo; o link é o mesmo. */
 export const COMUNIDADE_VIP_HOTMART_URL =
   "https://hotmart.com/pt-br/marketplace/produtos/hagsxd-comunidade-vip-evp-j2b07/Y106820903X?sck=HOTMART_PRODUCT_PAGE"
 
-/** Grupo VIP no WhatsApp — comunidade exclusiva das alunas. */
+/** Grupo no WhatsApp do Laboratório de Vendas — exclusivo de quem assina. */
 export const WHATSAPP_VIP_URL =
   "https://chat.whatsapp.com/ClfrOZ05MY2K2pOwnxvHDd?s=cl&p=i&mlu=0&ilr=4"
 

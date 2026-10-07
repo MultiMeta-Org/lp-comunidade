@@ -1,6 +1,12 @@
+"use client"
+
+import { useState } from "react"
 import Link from "next/link"
-import { ArrowUpRight, Lock } from "lucide-react"
+import { ArrowUpRight, BookOpen, Lock, MessageCircle } from "lucide-react"
 import type { Product } from "@/lib/home"
+import { WHATSAPP_VIP_URL } from "@/lib/links"
+import { LAB_NAME, MATERIAL_NAME } from "@/lib/produto"
+import { Modal } from "@/components/ui/modal"
 
 /**
  * Fileira de capas de produto. Uma fileira para o que a aluna já tem, outra
@@ -10,25 +16,66 @@ import type { Product } from "@/lib/home"
  * Travado com `href` + `cta` é o terceiro caso: existe, não é dela, mas está à
  * venda. A capa continua com cadeado (não é mentira: ela ainda não tem), só que
  * clica e leva para a compra.
+ *
+ * E o quarto: `chooser`. O Laboratório tem dois ambientes dentro do portal, e
+ * a capa abre a escolha entre eles — por isso este arquivo é client: a capa
+ * precisa de estado para o diálogo.
  */
 export function ProductShelf({ products }: { products: Product[] }) {
+  const [escolhendo, setEscolhendo] = useState(false)
+
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-      {products.map((product) => (
-        <ProductCard key={product.slug} product={product} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {products.map((product) => (
+          <ProductCard
+            key={product.slug}
+            product={product}
+            onChoose={() => setEscolhendo(true)}
+          />
+        ))}
+      </div>
+
+      {escolhendo && (
+        <Modal title={LAB_NAME} size="sm" onClose={() => setEscolhendo(false)}>
+          <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+            Sua assinatura tem dois lugares. Por onde você quer entrar?
+          </p>
+          <div className="grid gap-3">
+            <Door
+              icon={MessageCircle}
+              label="Grupo no WhatsApp"
+              description="Onde a gente conversa todo dia"
+              href={WHATSAPP_VIP_URL}
+            />
+            <Door
+              icon={BookOpen}
+              label={MATERIAL_NAME}
+              description="Vídeos, áudios e PDFs de todas as aulas"
+              href="/aulas"
+            />
+          </div>
+        </Modal>
+      )}
+    </>
   )
 }
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({
+  product,
+  onChoose,
+}: {
+  product: Product
+  onChoose: () => void
+}) {
   const locked = product.state !== "owned"
+  const clicavel = Boolean(product.href) || product.chooser
 
   const poster = (
     <span
       className={`relative isolate grid aspect-[3/4] grid-rows-[1fr_auto] overflow-hidden rounded-2xl border border-border p-4 shadow-sm transition-all duration-300 ${
         locked ? "saturate-[0.7]" : ""
-      } ${product.href ? "group-hover:-translate-y-1 group-hover:shadow-md" : ""}`}
+      } ${clicavel ? "group-hover:-translate-y-1 group-hover:shadow-md" : ""}`}
       style={{ background: product.art }}
     >
       {/* Malha fina sobre a capa: dá textura e disfarça o gradiente chapado. */}
@@ -78,6 +125,14 @@ function ProductCard({ product }: { product: Product }) {
 
   const base = "group flex w-full flex-col gap-2.5 text-left"
 
+  if (product.chooser) {
+    return (
+      <button type="button" onClick={onChoose} className={`${base} cursor-pointer`}>
+        {body}
+      </button>
+    )
+  }
+
   if (!product.href) {
     return (
       <div className={base} aria-disabled={locked || undefined}>
@@ -96,6 +151,69 @@ function ProductCard({ product }: { product: Product }) {
 
   return (
     <a href={product.href} target="_blank" rel="noopener noreferrer" className={base}>
+      {body}
+    </a>
+  )
+}
+
+/**
+ * Uma das portas do Laboratório, dentro do seletor. Mesma linguagem das capas:
+ * lavagem terracota, a cor do produto.
+ */
+function Door({
+  icon: Icon,
+  label,
+  description,
+  href,
+}: {
+  icon: React.ElementType
+  label: string
+  description: string
+  href: string
+}) {
+  const interno = href.startsWith("/")
+
+  const body = (
+    <>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={{
+          background:
+            "linear-gradient(135deg, var(--secondary-subtle) 0%, transparent 62%)",
+        }}
+      />
+
+      <span className="relative flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-secondary text-secondary-foreground shadow-sm">
+        <Icon className="h-5 w-5" />
+      </span>
+
+      <span className="relative flex min-w-0 flex-col gap-1">
+        <b className="font-serif text-lg font-bold leading-tight text-foreground">
+          {label}
+        </b>
+        <small className="text-xs leading-relaxed text-muted-foreground">
+          {description}
+        </small>
+      </span>
+
+      <ArrowUpRight className="relative ml-auto h-4 w-4 flex-none self-start text-border transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-secondary" />
+    </>
+  )
+
+  const base =
+    "group relative isolate flex items-start gap-4 overflow-hidden rounded-2xl border border-secondary/25 bg-card p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+
+  if (interno) {
+    return (
+      <Link href={href} className={base}>
+        {body}
+      </Link>
+    )
+  }
+
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={base}>
       {body}
     </a>
   )

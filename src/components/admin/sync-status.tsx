@@ -1,4 +1,5 @@
 import { AlertTriangle, CheckCircle2, RefreshCw } from "lucide-react"
+import { LAB_NAME } from "@/lib/produto"
 
 export type SyncRun = {
   ran_at: string
@@ -79,7 +80,7 @@ export function SyncStatus({
 
         {run.produtos_desconhecidos.length > 0 && (
           <p className="text-xs">
-            Produto com cara de Comunidade VIP <b>sem cadastro</b>:{" "}
+            Produto com cara de {LAB_NAME} <b>sem cadastro</b>:{" "}
             {run.produtos_desconhecidos.map((p) => `${p.nome} (${p.id})`).join(", ")}. As
             compras dele não viram acesso enquanto não for cadastrado.
           </p>

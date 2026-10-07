@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation"
+import { after } from "next/server"
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, Download, FileText, MessageCircle } from "lucide-react"
 import { type Lesson, categoryLabel, hasMedia } from "@/lib/lessons"
 import { WHATSAPP_VIP_URL } from "@/lib/links"
+import { MATERIAL_NAME, PLANTAO_NAME } from "@/lib/produto"
 import { getLessonWithNeighbors } from "@/lib/lessons-server"
-import { requireComunidadeVip } from "@/lib/guard"
+import { requireLessonsViewer } from "@/lib/guard"
+import { getCompletedLessonIds, markLessonViewed } from "@/lib/progress-server"
+import { LessonComplete } from "@/components/lesson-complete"
 import { AudioPlayer } from "@/components/audio-player"
 import { SiteHeader } from "@/components/site-header"
 import { LiveBanner } from "@/components/live-banner"
@@ -16,11 +20,21 @@ export default async function LessonPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  await requireComunidadeVip()
+  const { email, scope, admin } = await requireLessonsViewer()
 
   const { id } = await params
-  const { lesson, older, newer } = await getLessonWithNeighbors(id)
+  // O alcance entra na busca: para quem não assina o Laboratório, uma aula que
+  // não é o Plantão simplesmente não existe — 404, não "proibido", porque a
+  // existência do acervo não é informação dela.
+  const [{ lesson, older, newer }, completed] = await Promise.all([
+    getLessonWithNeighbors(id, scope),
+    getCompletedLessonIds(email),
+  ])
   if (!lesson) notFound()
+
+  // Presença: fato observado, gravado depois da resposta (não atrasa a página).
+  // A admin não conta — ver LessonsViewer.admin.
+  if (!admin) after(() => markLessonViewed(email, id))
 
   return (
     <div className="min-h-screen">
@@ -38,7 +52,7 @@ export default async function LessonPage({
             style={{ "--d": "0ms" } as React.CSSProperties}
           >
             <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-            Material de Aulas
+            {scope === "lab" ? MATERIAL_NAME : PLANTAO_NAME}
           </Link>
 
           {/* ── Lesson header ── */}
@@ -57,6 +71,12 @@ export default async function LessonPage({
             <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
               {lesson.description}
             </p>
+
+            {!admin && (
+              <div className="mt-6">
+                <LessonComplete lessonId={lesson.id} done={completed.has(lesson.id)} />
+              </div>
+            )}
           </div>
 
           {/* ── Vídeo ── */}
@@ -108,6 +128,9 @@ export default async function LessonPage({
           )}
 
           {/* ── Ao vivo ── */}
+          {/* O grupo é do Laboratório: quem está aqui pelo Plantão não vê a
+              porta de uma sala que não é dela. */}
+          {scope === "lab" && (
           <section className="space-y-3">
             <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               Ao Vivo
@@ -128,11 +151,12 @@ export default async function LessonPage({
                   rel="noopener noreferrer"
                   className="text-xs font-semibold text-primary hover:underline underline-offset-2"
                 >
-                  Entrar no WhatsApp VIP →
+                  Entrar no grupo no WhatsApp →
                 </a>
               </div>
             </div>
           </section>
+          )}
 
           {/* ── Navegação entre aulas ── */}
           {(older || newer) && (

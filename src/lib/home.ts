@@ -1,4 +1,6 @@
 import type { Lesson } from "@/lib/lessons"
+import type { Banner } from "@/lib/banners-server"
+import { LAB_NAME, PLANTAO_NAME } from "@/lib/produto"
 import {
   COMUNIDADE_VIP_HOTMART_URL,
   CRM_URL,
@@ -8,7 +10,6 @@ import {
   METODO_EVP_URL,
   MULTIQUIZ_URL,
   PODCAST_URL,
-  WHATSAPP_VIP_URL,
 } from "@/lib/links"
 
 /**
@@ -41,37 +42,73 @@ export type Product = {
    * Hotmart"), no lugar do selo "Não incluído". Sem isto, travado é só travado.
    */
   cta?: string
+  /**
+   * A capa abre um seletor em vez de um destino. É o caso do Laboratório, que
+   * tem dois ambientes (grupo e material) e nenhum deles é "o principal" —
+   * escolher por ela seria chutar.
+   */
+  chooser?: boolean
   state: ProductState
 }
 
+/** Slug do Laboratório na estante. O produto na Hotmart continua o mesmo. */
+export const LAB_SLUG = "laboratorio-de-vendas"
+
 /**
- * Os produtos como esta aluna os vê. A Comunidade VIP é a única que varia — e
- * de um jeito diferente das outras: quando é dela, SAI da estante e vira a
- * seção de duas portas (grupo + material de aulas), porque é o único produto
- * com ambiente dentro do portal. Quando não é, fica na estante como capa com
- * cadeado, igual aos demais. Produto travado é capa; produto seu se abre.
+ * Os produtos como esta aluna os vê. Tudo é capa na mesma prateleira — o que
+ * muda é o que acontece no clique.
+ *
+ * O Laboratório é o único com dois ambientes dentro do portal (o grupo e o
+ * material), então a capa dele abre um seletor em vez de um destino: escolher
+ * um dos dois por ela seria chutar qual ela quer.
+ *
+ * Quem não assina vê o Laboratório travado, à venda — e ganha no lugar a capa
+ * do Plantão Tira Dúvidas, que É dela. Sem essa capa, a aluna teria o direito
+ * ao plantão e nenhum jeito de descobrir: liberar no servidor sem mostrar a
+ * porta não é dar acesso, é esconder melhor.
  */
 export function buildProducts({
-  hasComunidadeVip,
+  hasLab,
+  temPlantao = false,
 }: {
-  hasComunidadeVip: boolean
+  hasLab: boolean
+  /** Existe ao menos uma aula aberta publicada. */
+  temPlantao?: boolean
 }): Product[] {
-  return PRODUCTS.filter(
-    (product) => product.slug !== "comunidade-vip" || !hasComunidadeVip
-  ).map((product) => {
-    if (product.slug === "comunidade-vip") {
-      // Travada, mas à venda: a capa leva para a página da assinatura na
-      // Hotmart. Comprou, o acesso chega pelo postback (ver rota do webhook).
-      return {
-        ...product,
-        state: "locked",
-        href: COMUNIDADE_VIP_HOTMART_URL,
-        cta: "Assinar na Hotmart",
-        meta: "Grupo no WhatsApp e material das aulas",
-      }
+  return PRODUCTS.flatMap((product): Product[] => {
+    if (product.slug !== LAB_SLUG) return [product]
+
+    if (hasLab) {
+      return [{ ...product, chooser: true, href: undefined }]
     }
-    return product
+
+    // Travada, mas à venda: a capa leva para a página da assinatura na
+    // Hotmart. Comprou, o acesso chega pelo postback (ver rota do webhook).
+    const travado: Product = {
+      ...product,
+      state: "locked",
+      href: COMUNIDADE_VIP_HOTMART_URL,
+      cta: "Assinar na Hotmart",
+      meta: "Grupo no WhatsApp e material das aulas",
+    }
+    return temPlantao ? [PLANTAO, travado] : [travado]
   })
+}
+
+/**
+ * O Plantão como capa de quem não assina: ocupa o lugar do Laboratório na
+ * prateleira e leva ao mesmo /aulas, que serve o recorte dela (só as aulas
+ * abertas, só o vídeo). Capa clara de propósito — é um pedaço do Laboratório
+ * que saiu de dentro da assinatura, e a cor diz isso.
+ */
+const PLANTAO: Product = {
+  slug: "plantao-tira-duvidas",
+  name: PLANTAO_NAME,
+  kicker: "Liberado para todas",
+  meta: "As gravações de sexta",
+  art: "linear-gradient(160deg,#E0A98B,#C76E49)",
+  href: "/aulas",
+  state: "owned",
 }
 
 const PRODUCTS: Product[] = [
@@ -87,12 +124,11 @@ const PRODUCTS: Product[] = [
     state: "owned",
   },
   {
-    slug: "comunidade-vip",
-    name: "Comunidade VIP",
+    slug: LAB_SLUG,
+    name: LAB_NAME,
     kicker: "Assinatura",
-    meta: "Seu grupo no WhatsApp",
+    meta: "Grupo no WhatsApp e material das aulas",
     art: "linear-gradient(160deg,#C76E49,#9d4f2f)",
-    href: WHATSAPP_VIP_URL,
     state: "owned",
   },
   {
@@ -132,30 +168,71 @@ const PRODUCTS: Product[] = [
   },
 ]
 
-export type Highlight = {
-  id: string
-  eyebrow: string
-  title: string
-  text: string
-  cta: string
-  href: string
-  /** Gradiente de fundo do slide (CSS pronto para `style.background`). */
-  art: string
-  /** Glifo gigante no canto direito — decorativo. */
-  figure?: string
-}
+/**
+ * Slide do carrossel. Duas formas, porque são duas origens:
+ *   • "texto"  — os slides escritos aqui no código (e o da aula mais recente).
+ *   • "imagem" — os banners que a admin cadastra: arte inteira + botão, sem
+ *     texto por cima. Texto sobre arte alheia quebra em qualquer tela.
+ */
+export type Highlight =
+  | {
+      kind: "texto"
+      id: string
+      eyebrow: string
+      title: string
+      text: string
+      cta: string
+      href: string
+      /** Gradiente de fundo do slide (CSS pronto para `style.background`). */
+      art: string
+      /** Glifo gigante no canto direito — decorativo. */
+      figure?: string
+    }
+  | {
+      kind: "imagem"
+      id: string
+      imageUrl: string
+      imageMobileUrl: string | null
+      href: string
+      cta: string
+      alt: string
+    }
 
 /**
- * Novidades do carrossel. A primeira é a aula mais recente (quando existe),
- * para a home abrir no que mudou hoje; as outras são fixas.
+ * Novidades do carrossel, nesta ordem:
+ *   1. os banners cadastrados pela admin (ela manda na ordem e na vigência);
+ *   2. a aula mais recente que ESTA aluna pode abrir;
+ *   3. os slides fixos — SÓ quando não há nenhum banner no ar.
+ *
+ * Os fixos são rede de segurança, não conteúdo permanente: existem para a home
+ * nunca virar uma faixa preta quando a tabela está vazia, o banner expirou ou
+ * ninguém lembrou de atualizar. Havendo banner cadastrado, quem fala é a
+ * admin — e os fixos saem de cena em vez de disputar a atenção com ela.
+ *
+ * A aula mais recente não é "fixo": é conteúdo vivo, desta aluna, e fica.
  */
-export function buildHighlights(lesson: Lesson | null): Highlight[] {
-  const highlights: Highlight[] = []
+export function buildHighlights(
+  lesson: Lesson | null,
+  banners: Banner[] = []
+): Highlight[] {
+  const highlights: Highlight[] = banners.map((b) => ({
+    kind: "imagem",
+    id: `banner-${b.id}`,
+    imageUrl: b.imageUrl,
+    imageMobileUrl: b.imageMobileUrl,
+    href: b.href,
+    cta: b.cta,
+    alt: b.alt,
+  }))
 
   if (lesson) {
     highlights.push({
+      kind: "texto",
       id: `aula-${lesson.id}`,
-      eyebrow: "Aula mais recente",
+      // Para quem não assina o Laboratório, a única aula que chega aqui é a
+      // gravação do plantão — e chamá-la de "aula mais recente" esconderia
+      // justamente o que ela ganhou.
+      eyebrow: lesson.openToAll ? PLANTAO_NAME : "Aula mais recente",
       title: lesson.topic,
       text: lesson.description,
       cta: "Abrir a aula",
@@ -164,8 +241,11 @@ export function buildHighlights(lesson: Lesson | null): Highlight[] {
     })
   }
 
+  if (banners.length > 0) return highlights
+
   highlights.push(
     {
+      kind: "texto",
       id: "ao-vivo",
       eyebrow: "Toda sexta",
       title: "Aula ao vivo às 9h da manhã",
@@ -176,6 +256,7 @@ export function buildHighlights(lesson: Lesson | null): Highlight[] {
       figure: "9h",
     },
     {
+      kind: "texto",
       id: "podprosperar",
       eyebrow: "PodProsperar",
       title: "Nosso podcast está no Spotify",
@@ -185,6 +266,7 @@ export function buildHighlights(lesson: Lesson | null): Highlight[] {
       art: "linear-gradient(112deg,#2A2A2A 0%,#37413a 44%,#4d6341 100%)",
     },
     {
+      kind: "texto",
       id: "louvores",
       eyebrow: "Louvores",
       title: "A playlist do PodProsperar",

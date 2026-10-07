@@ -2,7 +2,7 @@ import { cache } from "react"
 import { redirect } from "next/navigation"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
-import { getAccessState, hasComunidadeVip } from "@/lib/access"
+import { getAccessState, hasLab } from "@/lib/access"
 
 /**
  * E-mail do usuário logado (ou null).
@@ -36,19 +36,37 @@ export async function requireReleasedAccess(): Promise<string> {
 }
 
 /**
- * Guard das páginas de material (/aulas, /dia/[id]): além do acesso liberado,
- * exige a Comunidade VIP. O material é da assinatura — quem não a tem só vê a
- * home. Esconder o link não bastaria: a URL digitada à mão passaria por cima.
+ * Quem está vendo o acervo, e com qual alcance.
  *
- * Admin entra por ser admin, sem comprar: é ela quem publica a aula, e precisa
- * ver o resultado do jeito que a aluna vê. Não é posse do produto — a home
- * segue sem a seção da Comunidade para ela; o caminho é o link do /admin.
+ * `scope` é o que decide o que a página mostra e, principalmente, o que ela
+ * NÃO monta: com "aberto", lessons-server devolve apenas as aulas marcadas
+ * como `open_to_all` e sem PDF/áudio. O corte é no servidor porque esconder o
+ * botão não bastaria — a URL assinada iria no HTML junto.
+ *
+ * Admin entra como "lab" sem ter comprado: é ela quem publica a aula e precisa
+ * conferir do jeito que a aluna vê. Não é posse do produto — a home segue sem
+ * a seção do Laboratório para ela.
  */
-export async function requireComunidadeVip(): Promise<string> {
+export type LessonsViewer = {
+  email: string
+  scope: "lab" | "aberto"
+  /**
+   * Admin conferindo o próprio trabalho. As páginas usam isto para NÃO contar a
+   * visita dela na presença da aula: quem publica entra em toda aula para ver se
+   * ficou certo, e isso inflaria "abriram" com alguém que não é da turma.
+   */
+  admin: boolean
+}
+
+/**
+ * Guard das páginas de material (/aulas, /dia/[id]): exige acesso liberado e
+ * devolve o alcance. Já não redireciona quem não tem a assinatura — ela vê o
+ * Plantão Tira Dúvidas, que agora é de todas.
+ */
+export async function requireLessonsViewer(): Promise<LessonsViewer> {
   const email = await requireReleasedAccess()
-  const [vip, admin] = await Promise.all([hasComunidadeVip(email), isAdmin(email)])
-  if (!vip && !admin) redirect("/")
-  return email
+  const [lab, admin] = await Promise.all([hasLab(email), isAdmin(email)])
+  return { email, scope: lab || admin ? "lab" : "aberto", admin }
 }
 
 /**
