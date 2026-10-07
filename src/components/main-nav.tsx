@@ -16,9 +16,10 @@ type Item = {
  * estado ativo real (usePathname), em vez de esconder o link da página atual.
  * A aluna sempre vê para onde pode ir — e onde está.
  *
- * O material de aulas não entra aqui: é uma porta de dentro da Comunidade VIP,
- * e vive na seção dela na home. Quem não tem a assinatura nem a enxerga — e a
- * rota fica fechada no servidor (requireComunidadeVip) de todo jeito.
+ * O material de aulas não entra aqui: é uma porta de dentro do Laboratório de
+ * Vendas, e vive na seção dele na home. Quem não assina tem a sua própria porta
+ * ali (o Plantão Tira Dúvidas) — e o recorte do que cada uma vê é decidido no
+ * servidor (requireLessonsViewer), não por link escondido.
  */
 export function MainNav({ admin = false }: { admin?: boolean }) {
   const pathname = usePathname() ?? "/"

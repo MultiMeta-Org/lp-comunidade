@@ -23,6 +23,12 @@ export type Lesson = {
   pdfUrl: string
   audioUrl: string
   videoUrl: string
+  /**
+   * Vídeo desta aula vale para TODA aluna autorizada (é o Plantão Tira
+   * Dúvidas), não só para quem assina o Laboratório. PDF e áudio seguem
+   * restritos — quando o alcance é aberto, lessons-server não os envia.
+   */
+  openToAll: boolean
 }
 
 const MONTHS = [
@@ -119,6 +125,7 @@ export const SEED_LESSONS: Lesson[] = [
     pdfUrl: "#",
     audioUrl: "#",
     videoUrl: "#",
+    openToAll: false,
   },
   {
     id: "dia-11",
@@ -132,6 +139,7 @@ export const SEED_LESSONS: Lesson[] = [
     pdfUrl: "#",
     audioUrl: "#",
     videoUrl: "#",
+    openToAll: false,
   },
   {
     id: "dia-10",
@@ -145,6 +153,7 @@ export const SEED_LESSONS: Lesson[] = [
     pdfUrl: "#",
     audioUrl: "#",
     videoUrl: "#",
+    openToAll: false,
   },
   {
     id: "dia-9",
@@ -158,6 +167,7 @@ export const SEED_LESSONS: Lesson[] = [
     pdfUrl: "#",
     audioUrl: "#",
     videoUrl: "#",
+    openToAll: false,
   },
   {
     id: "dia-8",
@@ -171,6 +181,7 @@ export const SEED_LESSONS: Lesson[] = [
     pdfUrl: "#",
     audioUrl: "#",
     videoUrl: "#",
+    openToAll: false,
   },
   {
     id: "dia-7",
@@ -184,6 +195,7 @@ export const SEED_LESSONS: Lesson[] = [
     pdfUrl: "#",
     audioUrl: "#",
     videoUrl: "#",
+    openToAll: false,
   },
   {
     id: "dia-6",
@@ -197,6 +209,7 @@ export const SEED_LESSONS: Lesson[] = [
     pdfUrl: "#",
     audioUrl: "#",
     videoUrl: "#",
+    openToAll: false,
   },
   {
     id: "dia-5",
@@ -210,5 +223,6 @@ export const SEED_LESSONS: Lesson[] = [
     pdfUrl: "#",
     audioUrl: "#",
     videoUrl: "#",
+    openToAll: false,
   },
 ]

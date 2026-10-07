@@ -26,7 +26,7 @@ import {
   useState,
 } from "react"
 import { Loader2, X, CheckCircle2, AlertCircle, RotateCw, Wand2 } from "lucide-react"
-import { attachLessonMedia, createLessonUploadTicket } from "@/app/admin/lessons/actions"
+import { attachLessonMedia, createLessonUploadTicket } from "@/app/admin/aulas/actions"
 import { uploadVideoResumable, type ResumableUpload } from "@/lib/video-upload"
 import { compressVideo, planCompression, probeVideo } from "@/lib/video-compress"
 

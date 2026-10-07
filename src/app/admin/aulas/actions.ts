@@ -7,13 +7,18 @@ import { LESSONS_CACHE_TAG } from "@/lib/lessons-server"
 import { weekdayFromIso } from "@/lib/lessons"
 
 /**
- * Invalida o cache das aulas (home + /dia) e revalida as rotas do admin.
- * `{ expire: 0 }` = expiração imediata: a próxima visita já lê do banco, então
- * a edição da admin aparece na hora (sem stale-while-revalidate).
+ * Invalida o cache das aulas (home + /aulas + /dia) e revalida as rotas do
+ * admin. `{ expire: 0 }` = expiração imediata: a próxima visita já lê do banco,
+ * então a edição da admin aparece na hora (sem stale-while-revalidate).
+ *
+ * A tag cobre as DUAS listas cacheadas — a do Laboratório e a aberta (ver
+ * LessonsScope) —, então marcar uma aula como aberta aparece nos dois lados.
  */
 function revalidateLessons() {
   revalidateTag(LESSONS_CACHE_TAG, { expire: 0 })
+  revalidatePath("/admin/aulas")
   revalidatePath("/admin")
+  revalidatePath("/aulas")
   revalidatePath("/")
 }
 
@@ -31,6 +36,8 @@ export type LessonInput = {
   audioUrl: string
   videoUrl: string
   published: boolean
+  /** Vídeo liberado para todas (Plantão Tira Dúvidas) — PDF e áudio, não. */
+  openToAll: boolean
 }
 
 /** Tipo de mídia enviável → bucket privado correspondente. */
@@ -78,6 +85,7 @@ export async function upsertLesson(input: LessonInput): Promise<ActionResult> {
       audio_url: input.audioUrl.trim() || null,
       video_url: input.videoUrl.trim() || null,
       published: input.published,
+      open_to_all: input.openToAll,
       sort_order: dia,
     },
     { onConflict: "id" }

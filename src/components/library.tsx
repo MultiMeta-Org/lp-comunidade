@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import Link from "next/link"
 import {
+  Check,
   FileText,
   Headphones,
   Search,
@@ -23,19 +24,35 @@ function normalize(s: string) {
     .replace(/\p{Diacritic}/gu, "")
 }
 
-export function Library({ lessons }: { lessons: Lesson[] }) {
+/**
+ * O acervo com busca, filtros e selo de conclusão.
+ *
+ * `completed` chega como array (não Set) porque atravessa a fronteira
+ * servidor → cliente, e Set não é serializável nas props de um Client
+ * Component.
+ */
+export function Library({
+  lessons,
+  completed = [],
+}: {
+  lessons: Lesson[]
+  completed?: string[]
+}) {
   const [filter, setFilter] = useState<FilterValue>(ALL)
   const [query, setQuery] = useState("")
   const [view, setView] = useState<ViewMode>("grid")
   const [from, setFrom] = useState("")
   const [to, setTo] = useState("")
+  const [pendentes, setPendentes] = useState(false)
 
   const available = [...new Set(lessons.map((l) => l.category))]
+  const done = useMemo(() => new Set(completed), [completed])
 
   const filtered = useMemo(() => {
     const q = normalize(query.trim())
     return lessons.filter((l) => {
       if (filter !== ALL && l.category !== filter) return false
+      if (pendentes && done.has(l.id)) return false
       if (from && l.isoDate < from) return false
       if (to && l.isoDate > to) return false
       if (q) {
@@ -46,7 +63,7 @@ export function Library({ lessons }: { lessons: Lesson[] }) {
       }
       return true
     })
-  }, [lessons, filter, query, from, to])
+  }, [lessons, filter, query, from, to, pendentes, done])
 
   const dateActive = Boolean(from || to)
 
@@ -105,6 +122,13 @@ export function Library({ lessons }: { lessons: Lesson[] }) {
             onClick={() => setFilter(cat)}
           />
         ))}
+        {done.size > 0 && (
+          <FilterPill
+            label="Só as que faltam"
+            active={pendentes}
+            onClick={() => setPendentes((v) => !v)}
+          />
+        )}
 
         <div className="flex w-full sm:w-auto items-center gap-1.5 sm:ml-auto text-xs text-muted-foreground">
           <input
@@ -142,13 +166,13 @@ export function Library({ lessons }: { lessons: Lesson[] }) {
         view === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((lesson) => (
-              <LessonCard key={lesson.id} lesson={lesson} />
+              <LessonCard key={lesson.id} lesson={lesson} done={done.has(lesson.id)} />
             ))}
           </div>
         ) : (
           <div className="flex flex-col divide-y divide-border rounded-2xl border border-border bg-card overflow-hidden">
             {filtered.map((lesson) => (
-              <LessonRow key={lesson.id} lesson={lesson} />
+              <LessonRow key={lesson.id} lesson={lesson} done={done.has(lesson.id)} />
             ))}
           </div>
         )
@@ -211,7 +235,7 @@ function FilterPill({
   )
 }
 
-function LessonCard({ lesson }: { lesson: Lesson }) {
+function LessonCard({ lesson, done }: { lesson: Lesson; done: boolean }) {
   return (
     <Link
       href={`/dia/${lesson.id}`}
@@ -228,9 +252,12 @@ function LessonCard({ lesson }: { lesson: Lesson }) {
           {lesson.weekday} · {lesson.date}
         </p>
 
-        <span className="inline-block text-[10px] font-bold uppercase tracking-[0.12em] px-2.5 py-1 rounded-full border border-border bg-card/70 text-muted-foreground mb-3">
-          {categoryLabel(lesson.category)}
-        </span>
+        <div className="mb-3 flex flex-wrap items-center gap-1.5">
+          <span className="inline-block text-[10px] font-bold uppercase tracking-[0.12em] px-2.5 py-1 rounded-full border border-border bg-card/70 text-muted-foreground">
+            {categoryLabel(lesson.category)}
+          </span>
+          {done && <SeloConcluida />}
+        </div>
 
         <h3 className="text-sm font-semibold text-foreground leading-snug mb-5 line-clamp-3">
           {lesson.topic}
@@ -257,7 +284,7 @@ function LessonCard({ lesson }: { lesson: Lesson }) {
   )
 }
 
-function LessonRow({ lesson }: { lesson: Lesson }) {
+function LessonRow({ lesson, done }: { lesson: Lesson; done: boolean }) {
   return (
     <Link
       href={`/dia/${lesson.id}`}
@@ -271,6 +298,7 @@ function LessonRow({ lesson }: { lesson: Lesson }) {
           <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-accent text-muted-foreground">
             {categoryLabel(lesson.category)}
           </span>
+          {done && <SeloConcluida />}
         </div>
         <h3 className="text-sm font-semibold text-foreground leading-snug truncate">
           {lesson.topic}
@@ -282,5 +310,15 @@ function LessonRow({ lesson }: { lesson: Lesson }) {
         {hasMedia(lesson.pdfUrl) && <FileText className="w-4 h-4" />}
       </div>
     </Link>
+  )
+}
+
+/** Selo de aula concluída — a marca que a própria aluna deixou. */
+function SeloConcluida() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-primary-subtle px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-primary">
+      <Check className="h-3 w-3" />
+      Concluída
+    </span>
   )
 }

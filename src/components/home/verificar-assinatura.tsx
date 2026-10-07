@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2, RefreshCw } from "lucide-react"
+import { LAB_NAME } from "@/lib/produto"
 
 /**
  * "Já assinei e continua travado."
@@ -54,7 +55,7 @@ export function VerificarAssinatura() {
       ) : (
         <RefreshCw className="h-3.5 w-3.5 transition-transform group-hover:rotate-180" />
       )}
-      Já assinei a Comunidade VIP — liberar meu acesso
+      Já assinei o {LAB_NAME} — liberar meu acesso
     </button>
   )
 }

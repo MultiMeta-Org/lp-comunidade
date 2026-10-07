@@ -107,6 +107,8 @@ export interface Database {
           audio_url: string | null
           video_url: string | null
           published: boolean
+          /** Vídeo liberado para toda aluna autorizada (Plantão Tira Dúvidas). */
+          open_to_all: boolean
           sort_order: number
           created_at: string
           updated_at: string
@@ -123,11 +125,77 @@ export interface Database {
           audio_url?: string | null
           video_url?: string | null
           published?: boolean
+          open_to_all?: boolean
           sort_order?: number
           created_at?: string
           updated_at?: string
         }
         Update: Partial<Database["comunidade"]["Tables"]["lessons"]["Insert"]>
+        Relationships: []
+      }
+      lesson_progress: {
+        Row: {
+          lesson_id: string
+          email: string
+          first_viewed_at: string
+          completed_at: string | null
+        }
+        Insert: {
+          lesson_id: string
+          email: string
+          first_viewed_at?: string
+          completed_at?: string | null
+        }
+        Update: Partial<Database["comunidade"]["Tables"]["lesson_progress"]["Insert"]>
+        Relationships: []
+      }
+      banners: {
+        Row: {
+          id: string
+          /** Nome interno, só para a admin reconhecer a linha. Não vai para a tela. */
+          label: string
+          image_url: string
+          image_mobile_url: string | null
+          href: string
+          cta: string
+          alt: string
+          sort_order: number
+          active: boolean
+          starts_at: string | null
+          ends_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          label?: string
+          image_url: string
+          image_mobile_url?: string | null
+          href: string
+          cta?: string
+          alt?: string
+          sort_order?: number
+          active?: boolean
+          starts_at?: string | null
+          ends_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Database["comunidade"]["Tables"]["banners"]["Insert"]>
+        Relationships: []
+      }
+      vip_grants: {
+        Row: {
+          email: string
+          motivo: string | null
+          created_at: string
+        }
+        Insert: {
+          email: string
+          motivo?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database["comunidade"]["Tables"]["vip_grants"]["Insert"]>
         Relationships: []
       }
       vip_sync_runs: {
@@ -201,12 +269,38 @@ export interface Database {
         Relationships: []
       }
     }
-    Views: Record<never, never>
+    Views: {
+      /** Por aula: tamanho da turma, quantas abriram e quantas concluíram. */
+      lesson_progress_stats: {
+        Row: {
+          lesson_id: string
+          elegiveis: number
+          abriram: number
+          concluiram: number
+        }
+        Relationships: []
+      }
+    }
     Functions: {
       /** Recalcula has_comunidade_vip a partir das compras (ver migration do CRM). */
       refresh_vip_entitlement: {
         Args: { p_email?: string | null }
         Returns: number
+      }
+      /** Alunas da turma desta aula que nunca abriram a página dela. */
+      lesson_ausentes: {
+        Args: { p_lesson_id: string }
+        Returns: { email: string; buyer_name: string | null }[]
+      }
+      /** Alunas da turma que abriram esta aula, concluídas primeiro. */
+      lesson_presentes: {
+        Args: { p_lesson_id: string }
+        Returns: {
+          email: string
+          buyer_name: string | null
+          first_viewed_at: string
+          completed_at: string | null
+        }[]
       }
     }
     Enums: {

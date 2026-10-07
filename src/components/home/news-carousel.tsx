@@ -7,6 +7,11 @@ import type { Highlight } from "@/lib/home"
 
 const AUTOPLAY_MS = 6000
 
+/** Nome do slide para leitor de tela — banner não tem título, tem arte. */
+function slideLabel(item: Highlight): string {
+  return item.kind === "imagem" ? item.alt || item.cta : item.title
+}
+
 /**
  * Carrossel de novidades do topo da home: slides de lado a lado, com o texto
  * na esquerda sobre o gradiente escuro. Troca sozinho a cada 6s, pausa no
@@ -60,7 +65,7 @@ export function NewsCarousel({ highlights }: { highlights: Highlight[] }) {
                 type="button"
                 role="tab"
                 aria-current={i === index}
-                aria-label={`Novidade ${i + 1}: ${item.title}`}
+                aria-label={`Novidade ${i + 1}: ${slideLabel(item)}`}
                 onClick={() => goTo(i)}
                 className={`h-1 rounded-full transition-all duration-300 ${
                   i === index ? "w-10 bg-background" : "w-6 bg-background/35 hover:bg-background/60"
@@ -105,8 +110,6 @@ function Arrow({
 }
 
 function Slide({ item, active }: { item: Highlight; active: boolean }) {
-  const external = !item.href.startsWith("/")
-
   return (
     <article
       aria-hidden={!active}
@@ -114,6 +117,72 @@ function Slide({ item, active }: { item: Highlight; active: boolean }) {
         active ? "opacity-100" : "pointer-events-none opacity-0"
       }`}
     >
+      {item.kind === "imagem" ? (
+        <SlideImagem item={item} active={active} />
+      ) : (
+        <SlideTexto item={item} active={active} />
+      )}
+    </article>
+  )
+}
+
+/**
+ * Banner cadastrado pela admin: a arte ocupa o slide inteiro e o único texto é
+ * o botão. `<picture>` troca a arte no celular quando existe uma vertical —
+ * sem ela, a de desktop entra com recorte central, que é o padrão de quem
+ * mandou só uma imagem.
+ */
+function SlideImagem({
+  item,
+  active,
+}: {
+  item: Extract<Highlight, { kind: "imagem" }>
+  active: boolean
+}) {
+  return (
+    <>
+      <picture>
+        {item.imageMobileUrl && (
+          <source media="(max-width: 640px)" srcSet={item.imageMobileUrl} />
+        )}
+        <img
+          src={item.imageUrl}
+          alt={item.alt}
+          className="absolute inset-0 h-full w-full object-cover"
+          loading={active ? "eager" : "lazy"}
+        />
+      </picture>
+
+      {/* Véu de baixo para cima: o botão precisa de contraste em qualquer arte. */}
+      <span
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(0deg,rgba(26,24,22,.72) 0%,rgba(26,24,22,.18) 38%,transparent 62%)",
+        }}
+      />
+
+      {/* O botão mora na BASE da arte, não no meio dela: o <article> é
+          `items-center` (serve ao slide de texto), então aqui a camada é
+          absoluta para escapar desse alinhamento. `pb-16` deixa a faixa dos
+          pontinhos livre logo abaixo. */}
+      <div className="absolute inset-0 z-10 mx-auto flex w-full max-w-4xl items-end px-5 pb-16">
+        <Cta href={item.href} label={item.cta} active={active} />
+      </div>
+    </>
+  )
+}
+
+function SlideTexto({
+  item,
+  active,
+}: {
+  item: Extract<Highlight, { kind: "texto" }>
+  active: boolean
+}) {
+  return (
+    <>
       <span aria-hidden className="absolute inset-0" style={{ background: item.art }} />
       {/* Véu da esquerda para a direita: o texto sempre fica legível. */}
       <span
@@ -148,26 +217,47 @@ function Slide({ item, active }: { item: Highlight; active: boolean }) {
           {item.text}
         </p>
 
-        {external ? (
-          <a
-            href={item.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            tabIndex={active ? 0 : -1}
-            className="mt-2 inline-flex items-center gap-2 rounded-full bg-background px-6 py-3 text-sm font-semibold text-foreground transition-all hover:gap-3 hover:opacity-95"
-          >
-            {item.cta}
-          </a>
-        ) : (
-          <Link
-            href={item.href}
-            tabIndex={active ? 0 : -1}
-            className="mt-2 inline-flex items-center gap-2 rounded-full bg-background px-6 py-3 text-sm font-semibold text-foreground transition-all hover:gap-3 hover:opacity-95"
-          >
-            {item.cta}
-          </Link>
-        )}
+        <div className="mt-2">
+          <Cta href={item.href} label={item.cta} active={active} />
+        </div>
       </div>
-    </article>
+    </>
+  )
+}
+
+/**
+ * Botão do slide. Link interno vira <Link> (navegação do app); externo abre em
+ * aba nova. `tabIndex -1` quando o slide está fora de vista: foco não pode
+ * cair num botão invisível.
+ */
+function Cta({
+  href,
+  label,
+  active,
+}: {
+  href: string
+  label: string
+  active: boolean
+}) {
+  const className =
+    "inline-flex items-center gap-2 rounded-full bg-background px-6 py-3 text-sm font-semibold text-foreground transition-all hover:gap-3 hover:opacity-95"
+
+  if (href.startsWith("/")) {
+    return (
+      <Link href={href} tabIndex={active ? 0 : -1} className={className}>
+        {label}
+      </Link>
+    )
+  }
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      tabIndex={active ? 0 : -1}
+      className={className}
+    >
+      {label}
+    </a>
   )
 }

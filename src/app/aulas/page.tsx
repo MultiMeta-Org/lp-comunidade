@@ -1,25 +1,37 @@
 import { FileText, Play, Headphones } from "lucide-react"
 import { categoryLabel, hasMedia } from "@/lib/lessons"
 import { getLessons } from "@/lib/lessons-server"
-import { requireComunidadeVip } from "@/lib/guard"
+import { requireLessonsViewer } from "@/lib/guard"
+import { getCompletedLessonIds } from "@/lib/progress-server"
+import { LAB_NAME, MATERIAL_NAME, PLANTAO_NAME } from "@/lib/produto"
 import { Library } from "@/components/library"
 import { AudioPlayer } from "@/components/audio-player"
 import { VideoPlayer } from "@/components/video-player"
+import { LessonComplete } from "@/components/lesson-complete"
 import { SiteHeader } from "@/components/site-header"
 import { LiveBanner } from "@/components/live-banner"
 import { Atmosphere } from "@/components/atmosphere"
 
 export const metadata = {
-  title: "Material de Aulas VIP · Portal EVP",
+  title: "Material de Aulas · Portal EVP",
   description: "A aula de hoje e todo o acervo — vídeos, áudios e PDFs.",
 }
 
 export default async function AulasPage() {
-  await requireComunidadeVip()
+  const { email, scope, admin } = await requireLessonsViewer()
+  const lab = scope === "lab"
 
-  const lessons = await getLessons()
+  const [lessons, completed] = await Promise.all([
+    getLessons(scope),
+    getCompletedLessonIds(email),
+  ])
   const today = lessons[0]
   const pastLessons = lessons.slice(1)
+
+  // Esta página NÃO marca presença. Ela é o acervo: quem chega aqui pode estar
+  // procurando uma aula antiga, e contar a visita como "abriu a aula de hoje"
+  // inflaria a presença da aula mais recente com todo mundo que passou pela
+  // porta. "Abriu" significa abriu a página DAQUELA aula — ver /dia/[id].
 
   return (
     <div className="min-h-screen">
@@ -33,14 +45,16 @@ export default async function AulasPage() {
           {/* ── Título ── */}
           <header className="animate-rise" style={{ "--d": "0ms" } as React.CSSProperties}>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-secondary">
-              Comunidade VIP
+              {lab ? LAB_NAME : "Método EVP"}
             </p>
             <h1 className="mt-3 font-serif text-4xl sm:text-5xl font-bold leading-[1.05] text-foreground">
-              Material de Aulas VIP
+              {lab ? MATERIAL_NAME : PLANTAO_NAME}
               <span className="text-secondary">.</span>
             </h1>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-              A aula de hoje e todo o acervo — vídeos, áudios e PDFs.
+              {lab
+                ? "A aula de hoje e todo o acervo — vídeos, áudios e PDFs."
+                : `As gravações do plantão de sexta, liberadas para todas as alunas. O acervo completo, com áudios e PDFs, é do ${LAB_NAME}.`}
             </p>
           </header>
 
@@ -101,8 +115,8 @@ export default async function AulasPage() {
                     </div>
                   )}
 
-                  {hasMedia(today.pdfUrl) && (
-                    <div className="mt-7">
+                  <div className="mt-7 flex flex-wrap items-center gap-3">
+                    {hasMedia(today.pdfUrl) && (
                       <a
                         href={today.pdfUrl}
                         download
@@ -111,8 +125,11 @@ export default async function AulasPage() {
                         <FileText className="h-4 w-4" />
                         Baixar PDF
                       </a>
-                    </div>
-                  )}
+                    )}
+                    {!admin && (
+                      <LessonComplete lessonId={today.id} done={completed.has(today.id)} />
+                    )}
+                  </div>
                 </div>
               </article>
             </section>
@@ -128,13 +145,20 @@ export default async function AulasPage() {
                 Biblioteca
               </h2>
               <span className="text-xs text-muted-foreground">
-                {pastLessons.length} aulas
+                {pastLessons.length} {pastLessons.length === 1 ? "aula" : "aulas"}
               </span>
               <span className="h-px flex-1 bg-border" />
             </div>
 
             <div className="mt-6">
-              <Library lessons={pastLessons} />
+              {lessons.length === 0 ? (
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  A gravação do plantão de sexta aparece aqui assim que for
+                  publicada. O acervo completo, com os materiais, é do {LAB_NAME}.
+                </p>
+              ) : (
+                <Library lessons={pastLessons} completed={[...completed]} />
+              )}
             </div>
           </section>
         </div>

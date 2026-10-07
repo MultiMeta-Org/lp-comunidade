@@ -1,6 +1,7 @@
 import { requireReleasedAccess } from "@/lib/guard"
-import { getFeatureUnlock, getMemberFirstName, hasComunidadeVip } from "@/lib/access"
+import { getFeatureUnlock, getMemberFirstName, hasLab } from "@/lib/access"
 import { getLessons } from "@/lib/lessons-server"
+import { getBanners } from "@/lib/banners-server"
 import { SiteHeader } from "@/components/site-header"
 import { LiveBanner } from "@/components/live-banner"
 import { HomeBoard } from "@/components/home-board"
@@ -12,12 +13,16 @@ export const metadata = {
 
 export default async function HomePage() {
   const email = await requireReleasedAccess()
-  const [unlock, name, vip, lessons] = await Promise.all([
+  const [unlock, name, lab, banners] = await Promise.all([
     getFeatureUnlock(email),
     getMemberFirstName(email),
-    hasComunidadeVip(email),
-    getLessons(),
+    hasLab(email),
+    getBanners(),
   ])
+
+  // A novidade da aula sai do que ESTA aluna pode abrir: o acervo inteiro para
+  // quem assina o Laboratório, só o Plantão Tira Dúvidas para as demais.
+  const lessons = await getLessons(lab ? "lab" : "aberto")
 
   return (
     <div className="min-h-screen">
@@ -25,11 +30,11 @@ export default async function HomePage() {
       <SiteHeader />
       <HomeBoard
         name={name}
-        // A novidade da aula leva a /dia/[id], rota da VIP: sem ela, o carrossel
-        // abre nas novidades que valem para todas.
-        lesson={vip ? (lessons[0] ?? null) : null}
+        lesson={lessons[0] ?? null}
+        banners={banners}
         unlock={unlock}
-        hasComunidadeVip={vip}
+        hasLab={lab}
+        temPlantao={lessons.length > 0}
       />
     </div>
   )

@@ -86,23 +86,27 @@ export async function getFeatureUnlock(email: string): Promise<FeatureUnlock> {
 }
 
 /**
- * Aluna tem a Comunidade VIP — hoje, o grupo VIP no WhatsApp.
+ * Aluna tem o Laboratório de Vendas (a assinatura que já se chamou Comunidade
+ * VIP) — o grupo no WhatsApp e o material de aulas.
  *
- * Manda no grupo VIP e no material de aulas (/aulas, /dia/[id]); o restante do
- * portal é do Método e vale para toda aluna autorizada. A posse é fato no banco
- * (`has_comunidade_vip`), porque não há como inferi-la das compras: no Hotmart
- * tudo é o mesmo produto Método. Default true mantém quem entrou pela regra
- * atual, em que comprar o Método dá o grupo.
+ * Manda no grupo e no acervo (/aulas, /dia/[id]), com UMA exceção: o vídeo das
+ * aulas marcadas como `open_to_all` (o Plantão Tira Dúvidas) vale para toda
+ * aluna autorizada. O restante do portal é do Método.
+ *
+ * A coluna continua `has_comunidade_vip` — o rótulo mudou, o banco não (ver
+ * src/lib/produto.ts). É derivada das compras por
+ * comunidade.refresh_vip_entitlement, com as cortesias de comunidade.vip_grants
+ * como sinal positivo que sobrevive ao sync.
  *
  * Sai da MESMA leitura memoizada do acesso — sem query extra.
  */
-export async function hasComunidadeVip(email: string): Promise<boolean> {
+export async function hasLab(email: string): Promise<boolean> {
   const { data } = await fetchAuthorizedRow(email)
   return data?.status === "active" && data.has_comunidade_vip === true
 }
 
 /**
- * Reconcilia a posse da Comunidade VIP para ESTE e-mail, com o que já está no
+ * Reconcilia a posse do Laboratório de Vendas para ESTE e-mail, com o que já está no
  * banco (comunidade.refresh_vip_entitlement) — consulta local e barata.
  *
  * NÃO pergunta à Hotmart. Perguntar no login custaria uma chamada de rede em

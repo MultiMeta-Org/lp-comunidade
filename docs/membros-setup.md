@@ -17,6 +17,12 @@ de auth/admin não funcionam. Para ligar tudo:
   file size limit**, que tem precedência), o `file_size_limit` do bucket na
   migration, e `MAX_VIDEO_BYTES` em `src/components/admin/uploads-provider.tsx`.
   Vídeo maior que isso vai por link do Drive/YouTube — o mesmo campo aceita os dois.
+- Aplicar `supabase/migrations/0007_lesson_aberta_progresso_banners.sql` (aula aberta
+  para todas, presença nas aulas e banners da home + bucket público `banners`).
+  ⚠️ As migrations REAIS de `comunidade.*` vivem no repo do CRM
+  (`multimeta-crm-1/supabase/migrations/20261006*`), que é o dono do schema — o
+  arquivo daqui é espelho documental. Aplicar pelo CRM:
+  `cd ../multimeta-crm-1 && npx supabase db push`
 - Cadastrar os admins:
   `insert into comunidade.admins (email) values ('gabriel.multimeta@gmail.com');`
 
@@ -72,7 +78,31 @@ da compra**.
 - **Gate de acesso**: `src/lib/access.ts` (`getAccessState`) é a regra única dos 7 dias; fonte de verdade em `comunidade.authorized_emails`.
 - **Proteção de rotas**: `src/proxy.ts` (Next 16 — antigo middleware) exige sessão; `src/lib/guard.ts` faz o gate fino (acesso liberado nas páginas de conteúdo, allowlist no `/admin`).
 - **Hotmart**: `src/app/api/hotmart/webhook/route.ts` mantém `authorized_emails` (autoriza ancorando no `order_date`, revoga em reembolso/chargeback).
-- **Admin** (`/admin`): gestão de acessos + CMS de aulas (`comunidade.lessons`), server actions em `src/app/admin/*/actions.ts`.
+- **Admin**: quatro rotas — `/admin` (visão geral + estado do sync),
+  `/admin/acessos`, `/admin/aulas` (+ `/admin/aulas/[id]` com a presença da aula) e
+  `/admin/banners`. Cada lista **pagina e filtra no banco**, pela URL
+  (`?q=&status=&page=`), então link reaberto cai no mesmo lugar. Server actions em
+  `src/app/admin/*/actions.ts`.
+- **Laboratório de Vendas**: é o nome novo da Comunidade VIP. Só o rótulo mudou
+  (`src/lib/produto.ts`); o banco segue com `has_comunidade_vip` e as tabelas
+  `vip_*`, que o CRM também lê. Dar/tirar à mão no `/admin/acessos` escreve em
+  `comunidade.vip_grants` (cortesia) e chama `refresh_vip_entitlement` — escrever
+  direto na coluna derivada seria desfeito pelo próximo sync. Tirar a cortesia não
+  vence compra registrada nem direito adquirido (Método antes de 23/07/2026), e a
+  tela diz isso quando acontece.
+- **Plantão Tira Dúvidas**: `comunidade.lessons.open_to_all` libera **só o vídeo**
+  da aula para toda aluna autorizada. O corte de PDF/áudio é no servidor
+  (`lessons-server.ts`, `LessonsScope`), não na interface — esconder o botão
+  mandaria a URL assinada no HTML de todo jeito. `/aulas` e `/dia/[id]` passaram a
+  aceitar quem não assina, servindo esse recorte.
+- **Presença nas aulas**: `comunidade.lesson_progress` guarda `first_viewed_at`
+  (servidor grava com `after()` quando a aluna abre a aula) e `completed_at` (a
+  aluna clica em concluir). O `/admin` lê pela view `lesson_progress_stats` e pela
+  função `lesson_ausentes`. Visita de admin não entra na conta.
+- **Banners da home**: `comunidade.banners` (imagem desktop + celular opcional,
+  link, texto do botão, ordem e vigência), imagens no bucket público `banners`.
+  Entram ANTES dos slides fixos de `src/lib/home.ts`, que **continuam existindo**
+  como redundância — carrossel nunca fica vazio.
 - **Uploads**: PDF e áudio vão por *signed upload URL* (navegador → Storage direto).
   Vídeo vai por **TUS/resumable** (`src/lib/video-upload.ts`), em chunks de 6 MB, com
   progresso e retomada se a conexão cair. O estado dos envios vive no
