@@ -35,7 +35,7 @@ export default async function RadarPage() {
           <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
             Meu Radar
           </p>
-          <h1 className="font-serif text-3xl font-bold leading-[1.1] text-foreground sm:text-4xl">
+          <h1 className="font-display text-3xl font-bold leading-[1.1] text-foreground sm:text-4xl">
             Minhas empresas e oportunidades
           </h1>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">

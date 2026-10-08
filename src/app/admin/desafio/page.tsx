@@ -44,7 +44,7 @@ export default async function AdminDesafioPage({
   if (g.comAcesso === 0) {
     return (
       <section className="rounded-2xl border border-dashed border-border bg-card px-8 py-10">
-        <h2 className="font-serif text-2xl font-bold text-foreground">
+        <h2 className="font-display text-2xl font-bold text-foreground">
           Desafio 21 Dias
         </h2>
         <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
@@ -65,7 +65,7 @@ export default async function AdminDesafioPage({
       {/* ── Visão geral ── */}
       <section className="space-y-5">
         <div>
-          <h2 className="font-serif text-2xl font-bold text-foreground">
+          <h2 className="font-display text-2xl font-bold text-foreground">
             Desafio 21 Dias
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -109,7 +109,7 @@ export default async function AdminDesafioPage({
       {/* ── O funil dos 21 dias ── */}
       <section className="space-y-4">
         <div>
-          <h3 className="font-serif text-xl font-bold text-foreground">
+          <h3 className="font-display text-xl font-bold text-foreground">
             O funil dos 21 dias
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -166,7 +166,7 @@ export default async function AdminDesafioPage({
       {/* ── O que a base construiu ── */}
       <section className="space-y-4">
         <div>
-          <h3 className="font-serif text-xl font-bold text-foreground">
+          <h3 className="font-display text-xl font-bold text-foreground">
             O que a base construiu
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -190,7 +190,7 @@ export default async function AdminDesafioPage({
       {painel.transformacao.length > 0 && (
         <section className="space-y-4">
           <div>
-            <h3 className="font-serif text-xl font-bold text-foreground">
+            <h3 className="font-display text-xl font-bold text-foreground">
               Entrada → saída
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -248,7 +248,7 @@ export default async function AdminDesafioPage({
       <section className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h3 className="font-serif text-xl font-bold text-foreground">Alunas</h3>
+            <h3 className="font-display text-xl font-bold text-foreground">Alunas</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               Abre em &ldquo;quem parou&rdquo;: quem mexeu há mais tempo e ainda não
               terminou.
@@ -282,7 +282,7 @@ export default async function AdminDesafioPage({
       {painel.interesses.length > 0 && (
         <section className="space-y-4">
           <div>
-            <h3 className="font-serif text-xl font-bold text-foreground">
+            <h3 className="font-display text-xl font-bold text-foreground">
               Quem levantou a mão
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -298,7 +298,7 @@ export default async function AdminDesafioPage({
               >
                 <div className="flex items-baseline justify-between gap-3">
                   <b className="text-sm font-semibold text-foreground">{i.nome}</b>
-                  <span className="font-serif text-xl font-bold text-secondary">
+                  <span className="font-display text-xl font-bold text-secondary">
                     {i.total}
                   </span>
                 </div>
@@ -312,7 +312,7 @@ export default async function AdminDesafioPage({
       {/* ── Perfil da base ── */}
       <section className="space-y-4">
         <div>
-          <h3 className="font-serif text-xl font-bold text-foreground">
+          <h3 className="font-display text-xl font-bold text-foreground">
             Perfil da base
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -356,7 +356,7 @@ function Numero({
   const corpo = (
     <>
       <span
-        className={`font-serif font-bold leading-none ${compacto ? "text-2xl" : "text-3xl"} ${
+        className={`font-display font-bold leading-none ${compacto ? "text-2xl" : "text-3xl"} ${
           destaque && valor !== 0 ? "text-primary" : "text-foreground"
         }`}
       >

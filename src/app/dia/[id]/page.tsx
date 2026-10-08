@@ -65,7 +65,7 @@ export default async function LessonPage({
               {categoryLabel(lesson.category)}
             </span>
 
-            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-foreground leading-[1.1] mb-3">
+            <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground leading-[1.1] mb-3">
               {lesson.topic}
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-md">

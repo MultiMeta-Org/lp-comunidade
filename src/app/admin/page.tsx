@@ -64,7 +64,7 @@ export default async function AdminOverviewPage() {
 
       <section className="space-y-5">
         <div>
-          <h2 className="font-serif text-2xl font-bold text-foreground">Visão geral</h2>
+          <h2 className="font-display text-2xl font-bold text-foreground">Visão geral</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             O estado do portal agora. Cada número leva para onde se mexe nele.
           </p>
@@ -119,7 +119,7 @@ export default async function AdminOverviewPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-serif text-xl font-bold text-foreground">Conferir como a aluna vê</h2>
+        <h2 className="font-display text-xl font-bold text-foreground">Conferir como a aluna vê</h2>
         <p className="text-sm text-muted-foreground">
           O admin entra no acervo sem ter a assinatura — é quem publica a aula
           que precisa ver o resultado.
@@ -159,7 +159,7 @@ function Numero({
         className="pointer-events-none absolute inset-0 transition-colors duration-300 group-hover:bg-primary-subtle/35"
       />
       <div className="relative">
-        <p className="font-serif text-3xl font-bold leading-none text-foreground">{valor}</p>
+        <p className="font-display text-3xl font-bold leading-none text-foreground">{valor}</p>
         <p className="mt-2 text-sm font-semibold text-foreground">{label}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">{nota}</p>
       </div>

@@ -140,7 +140,7 @@ export function Missao({
       </div>
 
       <div key={i} className="animate-rise flex flex-col gap-3.5">
-        <h1 className="max-w-[22ch] font-serif text-[clamp(22px,3.4vw,28px)] font-bold leading-[1.18] text-foreground">
+        <h1 className="max-w-[22ch] font-display text-[clamp(22px,3.4vw,28px)] font-bold leading-[1.18] text-foreground">
           {passo.ask}
         </h1>
         {passo.support && (
@@ -410,7 +410,7 @@ function Funil({ operacao }: { operacao: Operacao }) {
           key={l.rotulo}
           className="flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-3"
         >
-          <b className="w-12 flex-none font-serif text-xl font-bold leading-none text-foreground">
+          <b className="w-12 flex-none font-display text-xl font-bold leading-none text-foreground">
             {l.n}
           </b>
           <span className="text-[13px] text-muted-foreground">{l.rotulo}</span>
@@ -524,7 +524,7 @@ function Leitura({
         </p>
       ))}
       {destaque && (
-        <p className="mt-1 font-serif text-lg font-bold leading-snug text-foreground">
+        <p className="mt-1 font-display text-lg font-bold leading-snug text-foreground">
           {destaque}
         </p>
       )}
@@ -762,7 +762,7 @@ function Escala({
             role="radio"
             aria-checked={marcado}
             onClick={() => set(campo.chave, String(n))}
-            className={`h-11 w-full rounded-xl border font-serif text-sm font-bold transition-all duration-200 sm:h-10 sm:w-10 ${
+            className={`h-11 w-full rounded-xl border font-display text-sm font-bold transition-all duration-200 sm:h-10 sm:w-10 ${
               marcado
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border bg-card text-muted-foreground hover:border-primary/45 hover:text-foreground"
@@ -966,7 +966,7 @@ export function RadarEditor({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3 rounded-[18px] bg-muted px-4 py-4 sm:px-5">
-        <span className="font-serif text-3xl font-bold leading-none text-foreground">
+        <span className="font-display text-3xl font-bold leading-none text-foreground">
           {radar.length}
         </span>
         {meta !== undefined && (
@@ -1249,7 +1249,7 @@ function EmpresaDoPasso({
             <small className="block text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
               Sua empresa
             </small>
-            <b className="block truncate font-serif text-lg font-bold text-foreground">
+            <b className="block truncate font-display text-lg font-bold text-foreground">
               {empresa.nome}
             </b>
             {empresa.segmento && (

@@ -60,7 +60,7 @@ export function ConteudoDaJornada({
 
       <div className="flex gap-6 rounded-2xl bg-muted px-4 py-4 sm:px-5">
         <div className="flex flex-col">
-          <b className="font-serif text-xl font-bold leading-none text-foreground">
+          <b className="font-display text-xl font-bold leading-none text-foreground">
             {feitos}
           </b>
           <small className="mt-1 text-[9.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
@@ -68,7 +68,7 @@ export function ConteudoDaJornada({
           </small>
         </div>
         <div className="flex flex-col">
-          <b className="font-serif text-xl font-bold leading-none text-foreground">
+          <b className="font-display text-xl font-bold leading-none text-foreground">
             {empresasNoRadar}
           </b>
           <small className="mt-1 text-[9.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
@@ -104,7 +104,7 @@ function AnelDoProgresso({ feitos }: { feitos: number }) {
             className="transition-[stroke-dashoffset] duration-700 ease-out"
           />
         </svg>
-        <span className="absolute inset-0 grid place-items-center font-serif text-[15px] font-bold text-foreground">
+        <span className="absolute inset-0 grid place-items-center font-display text-[15px] font-bold text-foreground">
           {feitos}
         </span>
       </div>
@@ -135,7 +135,7 @@ function LinhaDoDia({
 
   const numero = (
     <span
-      className={`grid h-[26px] w-[26px] flex-none place-items-center rounded-full font-serif text-[11.5px] font-bold transition-colors duration-200 sm:h-[25px] sm:w-[25px] ${
+      className={`grid h-[26px] w-[26px] flex-none place-items-center rounded-full font-display text-[11.5px] font-bold transition-colors duration-200 sm:h-[25px] sm:w-[25px] ${
         concluido
           ? "bg-primary text-primary-foreground"
           : atual

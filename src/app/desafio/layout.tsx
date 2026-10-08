@@ -44,7 +44,7 @@ export default async function DesafioLayout({
             <MultiMetaLogo className="h-6 w-6 flex-none transition-transform duration-300 group-hover:-rotate-6" />
             {/* No celular o nome encurta em vez de empurrar o resto da barra
                 para fora da tela: ela já sabe onde está — acabou de entrar. */}
-            <span className="truncate font-serif text-[15px] font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+            <span className="truncate font-display text-[15px] font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
               <span className="sm:hidden">Desafio</span>
               <span className="hidden sm:inline">Desafio 21 Dias</span>
             </span>

@@ -61,7 +61,7 @@ export default async function AdminBannersPage() {
   return (
     <section className="space-y-5">
       <div>
-        <h2 className="font-serif text-2xl font-bold text-foreground">Banners</h2>
+        <h2 className="font-display text-2xl font-bold text-foreground">Banners</h2>
         <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
           O carrossel do topo da home. Banner é imagem e botão — sem título nem
           texto corrido, porque a arte já diz o que precisa. Os seus aparecem

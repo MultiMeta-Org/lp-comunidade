@@ -61,7 +61,7 @@ export default async function AulaProgressoPage({
           Aulas
         </Link>
 
-        <h2 className="mt-3 font-serif text-2xl font-bold text-foreground">
+        <h2 className="mt-3 font-display text-2xl font-bold text-foreground">
           Aula {lesson.dia} · {lesson.topic}
         </h2>
         <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
@@ -170,7 +170,7 @@ function Numero({
         <Icon className="h-4 w-4" />
         <p className="text-xs font-semibold">{label}</p>
       </div>
-      <p className="mt-3 font-serif text-3xl font-bold leading-none text-foreground">
+      <p className="mt-3 font-display text-3xl font-bold leading-none text-foreground">
         {valor}
         <span className="ml-1 text-base font-normal text-muted-foreground">
           de {total}

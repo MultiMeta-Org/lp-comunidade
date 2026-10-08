@@ -101,7 +101,7 @@ export function JornadaMenu({
                 painel é a mesma jornada, não um lugar novo. */}
             <div className="animate-sheet relative flex h-full w-[min(86vw,330px)] flex-col border-r border-border bg-card shadow-xl">
               <div className="flex flex-none items-center justify-between gap-3 border-b border-border px-4 py-3.5">
-                <b className="font-serif text-sm font-bold text-foreground">
+                <b className="font-display text-sm font-bold text-foreground">
                   Os 21 dias
                 </b>
                 <button

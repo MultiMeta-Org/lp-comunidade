@@ -196,7 +196,7 @@ function SlideTexto({
       {item.figure && (
         <span
           aria-hidden
-          className="pointer-events-none absolute right-[4%] top-1/2 hidden -translate-y-1/2 select-none font-serif font-bold leading-none text-secondary-subtle opacity-[0.16] sm:block"
+          className="pointer-events-none absolute right-[4%] top-1/2 hidden -translate-y-1/2 select-none font-display font-bold leading-none text-secondary-subtle opacity-[0.16] sm:block"
           style={{ fontSize: "clamp(8rem, 19vw, 16rem)" }}
         >
           {item.figure}
@@ -208,7 +208,7 @@ function SlideTexto({
           {item.eyebrow}
         </p>
         <h2
-          className="max-w-[17ch] font-serif font-bold leading-[1.08]"
+          className="max-w-[17ch] font-display font-bold leading-[1.08]"
           style={{ fontSize: "clamp(1.6rem, 3.9vw, 2.5rem)" }}
         >
           {item.title}

@@ -35,7 +35,15 @@
   --ring: #758E67;
   --radius: 0.5rem;
   --font-sans: var(--font-geist-sans, Geist), ui-sans-serif, sans-serif, system-ui;
-  --font-serif-stack: var(--font-serif, Enriqueta), ui-serif, Georgia, serif;
+  /* A fonte de display (títulos, nomes de produto, números) é uma MONOSPACE,
+     e não um slab. O motivo é a leitura de número: o Desafio mostra dígito em
+     toda tela — o anel, o placar, a escala de 0 a 10, o contador dos 21 dias —
+     e os numerais da Enriqueta ficavam baixos e achatados ao lado das palavras.
+     Mono resolve isso de graça: todo dígito tem a mesma largura, então coluna
+     de números alinha sem tabela.
+     Chama-se `display`, e não `mono`, porque o papel dela aqui é esse — a
+     indireção é o que deixa a próxima troca de família custar uma linha. */
+  --font-display-stack: var(--font-geist-mono), ui-monospace, monospace;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --shadow-sm: 0px 4px 12px -3.5px hsl(0 0% 0% / 0.05), 0px 1px 2px -4.5px hsl(0 0% 0% / 0.05);
   --shadow-md: 0px 4px 12px -3.5px hsl(0 0% 0% / 0.05), 0px 2px 4px -4.5px hsl(0 0% 0% / 0.05);
@@ -71,7 +79,7 @@
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
-  --font-serif: var(--font-serif-stack);
+  --font-display: var(--font-display-stack);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

@@ -99,7 +99,7 @@ function Numero({
 }) {
   return (
     <div className="flex flex-col">
-      <b className="font-serif text-2xl font-bold leading-none text-foreground">{n}</b>
+      <b className="font-display text-2xl font-bold leading-none text-foreground">{n}</b>
       <small className="mt-1 text-[9.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
         {label}
       </small>

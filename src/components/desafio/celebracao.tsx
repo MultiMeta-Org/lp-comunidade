@@ -44,7 +44,7 @@ export function Celebracao({
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
         {fim.kicker}
       </p>
-      <h1 className="max-w-[18ch] font-serif text-[clamp(25px,4vw,33px)] font-bold leading-[1.12] text-foreground">
+      <h1 className="max-w-[18ch] font-display text-[clamp(25px,4vw,33px)] font-bold leading-[1.12] text-foreground">
         {fim.titulo}
       </h1>
       <p className="max-w-[44ch] text-[15px] leading-relaxed text-muted-foreground">
@@ -53,7 +53,7 @@ export function Celebracao({
 
       {placar && (
         <div className="mt-1 flex flex-col items-center gap-0.5 rounded-[20px] border border-dashed border-secondary bg-secondary-subtle/40 px-6 py-4 sm:px-8">
-          <span className="font-serif text-[40px] font-bold leading-none text-secondary sm:text-[46px]">
+          <span className="font-display text-[40px] font-bold leading-none text-secondary sm:text-[46px]">
             {placar.n}
           </span>
           <span className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-secondary">

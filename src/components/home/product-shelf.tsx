@@ -121,7 +121,7 @@ function ProductCard({
           <span className="relative self-start text-[9px] font-bold uppercase tracking-[0.2em] text-background/75">
             {product.kicker}
           </span>
-          <span className="relative font-serif text-xl font-bold uppercase leading-none text-background">
+          <span className="relative font-display text-xl font-bold uppercase leading-none text-background">
             {product.name}
           </span>
         </>
@@ -214,7 +214,7 @@ function Door({
       </span>
 
       <span className="relative flex min-w-0 flex-col gap-1">
-        <b className="font-serif text-lg font-bold leading-tight text-foreground">
+        <b className="font-display text-lg font-bold leading-tight text-foreground">
           {label}
         </b>
         <small className="text-xs leading-relaxed text-muted-foreground">

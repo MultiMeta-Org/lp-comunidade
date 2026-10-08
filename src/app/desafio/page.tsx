@@ -135,7 +135,7 @@ function CartaoDoDia({
           borda, porque em tela estreita ele cairia por baixo do texto. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-2 top-1/2 -translate-y-1/2 select-none font-serif text-[clamp(84px,20vw,200px)] font-bold leading-none text-primary opacity-[0.1] sm:right-6 sm:opacity-[0.13]"
+        className="pointer-events-none absolute -right-2 top-1/2 -translate-y-1/2 select-none font-display text-[clamp(84px,20vw,200px)] font-bold leading-none text-primary opacity-[0.1] sm:right-6 sm:opacity-[0.13]"
       >
         {n}
       </span>
@@ -143,7 +143,7 @@ function CartaoDoDia({
       <p className="relative text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
         {kicker}
       </p>
-      <h1 className="relative max-w-[17ch] font-serif text-[clamp(27px,3.6vw,38px)] font-bold leading-[1.08] text-foreground">
+      <h1 className="relative max-w-[17ch] font-display text-[clamp(27px,3.6vw,38px)] font-bold leading-[1.08] text-foreground">
         {titulo}
       </h1>
       <p className="relative max-w-[44ch] text-base leading-relaxed text-muted-foreground">
@@ -198,7 +198,7 @@ function TudoFeito({
         <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_0_0_12px_rgba(208,222,200,0.5)] sm:h-20 sm:w-20">
           <Check className="h-8 w-8 sm:h-9 sm:w-9" strokeWidth={2.6} />
         </span>
-        <h1 className="max-w-[16ch] font-serif text-[clamp(28px,3.8vw,40px)] font-bold leading-[1.06] text-foreground">
+        <h1 className="max-w-[16ch] font-display text-[clamp(28px,3.8vw,40px)] font-bold leading-[1.06] text-foreground">
           {titulo}
         </h1>
         <p className="max-w-[46ch] text-base leading-relaxed text-muted-foreground">
@@ -236,7 +236,7 @@ function TudoFeito({
 function SemConteudo() {
   return (
     <section className="rounded-[22px] border border-border bg-card px-5 py-8 sm:rounded-[26px] sm:px-8 sm:py-10">
-      <h1 className="font-serif text-2xl font-bold text-foreground">
+      <h1 className="font-display text-2xl font-bold text-foreground">
         Seu Desafio está sendo preparado.
       </h1>
       <p className="mt-3 max-w-[44ch] text-sm leading-relaxed text-muted-foreground">

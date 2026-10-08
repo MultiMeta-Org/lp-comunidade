@@ -102,7 +102,7 @@ export function HomeBoard({
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-secondary">
                 {todayLabel(now)}
               </p>
-              <h1 className="mt-3 font-serif text-4xl font-bold leading-[1.05] text-foreground sm:text-5xl">
+              <h1 className="mt-3 font-display text-4xl font-bold leading-[1.05] text-foreground sm:text-5xl">
                 {greeting(now)}
                 {name ? (
                   <>

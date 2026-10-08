@@ -47,7 +47,7 @@ export default async function AulasPage() {
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-secondary">
               {lab ? LAB_NAME : "Método EVP"}
             </p>
-            <h1 className="mt-3 font-serif text-4xl sm:text-5xl font-bold leading-[1.05] text-foreground">
+            <h1 className="mt-3 font-display text-4xl sm:text-5xl font-bold leading-[1.05] text-foreground">
               {lab ? MATERIAL_NAME : PLANTAO_NAME}
               <span className="text-secondary">.</span>
             </h1>
@@ -83,7 +83,7 @@ export default async function AulasPage() {
                     {today.weekday} · {today.date}
                   </p>
 
-                  <h2 className="mt-2 max-w-lg font-serif text-2xl sm:text-3xl font-bold leading-snug text-foreground">
+                  <h2 className="mt-2 max-w-lg font-display text-2xl sm:text-3xl font-bold leading-snug text-foreground">
                     {today.topic}
                   </h2>
                   <p className="mt-2.5 max-w-md text-sm leading-relaxed text-muted-foreground">
