@@ -45,12 +45,13 @@ export default async function DesafioPage() {
       <Atmosphere variant="quiet" />
 
       <div className="relative z-10 mx-auto grid w-full max-w-5xl gap-7 lg:grid-cols-[292px_1fr] lg:items-start lg:gap-9">
-        {/* No celular a jornada desce. Uma lista de 22 dias antes da missão de
-            hoje faz a aluna rolar para encontrar a única coisa que ela precisa
-            fazer agora — e o que está no topo é o que ela entende como tarefa.
-            Na tela larga a coluna volta para a esquerda, onde ela guia. */}
+        {/* No celular a jornada não aparece aqui: 22 linhas antes (ou depois)
+            da missão de hoje fazem a aluna rolar para encontrar a única coisa
+            que ela precisa fazer agora. Ela fica atrás do contador do
+            cabeçalho, a um toque (ver `JornadaMenu`). Na tela larga a coluna
+            volta para a esquerda, onde ela guia sem atravessar nada. */}
         <div
-          className="order-2 min-w-0 animate-rise lg:order-1"
+          className="hidden min-w-0 animate-rise lg:block"
           style={{ "--d": "0ms" } as React.CSSProperties}
         >
           <Jornada
@@ -61,7 +62,7 @@ export default async function DesafioPage() {
         </div>
 
         <div
-          className="order-1 flex min-w-0 flex-col gap-4 animate-rise sm:gap-5 lg:order-2"
+          className="flex min-w-0 flex-col gap-4 animate-rise sm:gap-5"
           style={{ "--d": "90ms" } as React.CSSProperties}
         >
           {dia ? (
@@ -98,7 +99,7 @@ export default async function DesafioPage() {
           {feitos > 0 && (
             <p className="text-center text-xs text-muted-foreground">
               Você já concluiu {feitos} de {TOTAL_DIAS} dias. Pode rever qualquer um
-              deles na lista ao lado — e editar o que escreveu.
+              deles pela lista dos 21 dias — e editar o que escreveu.
             </p>
           )}
         </div>

@@ -38,6 +38,7 @@ export function Missao({
   jaConcluido,
   interesses,
   operacao,
+  vizinhos,
 }: {
   dia: Dia
   respostasIniciais: Respostas
@@ -48,6 +49,13 @@ export function Missao({
   interesses: Record<string, string | null>
   /** O funil dela, para o passo `funil` do Dia 14. */
   operacao: Operacao
+  /**
+   * A navegação entre os dias (`DiasVizinhos`), montada no servidor e entregue
+   * pronta. Entra por aqui, e não na página, porque só este componente sabe
+   * quando a missão deu lugar à celebração — e "o Dia 8 abre quando você
+   * concluir este" embaixo da tela de conquista seria falso.
+   */
+  vizinhos?: React.ReactNode
 }) {
   const router = useRouter()
   const [i, setI] = useState(() => Math.min(passoInicial, dia.passos.length - 1))
@@ -209,6 +217,8 @@ export function Missao({
           </button>
         </div>
       </div>
+
+      {vizinhos}
     </div>
   )
 }
@@ -658,7 +668,10 @@ function Opcao({
       >
         {marcado && <Check className="h-2.5 w-2.5" strokeWidth={4} />}
       </span>
-      {rotulo}
+      {/* `min-w-0` + quebra no meio da palavra: o rótulo pode ser o nome de uma
+          empresa que a aluna digitou, e um nome comprido sem espaço esticaria o
+          botão para fora da tela no celular. */}
+      <span className="min-w-0 break-words">{rotulo}</span>
     </button>
   )
 }

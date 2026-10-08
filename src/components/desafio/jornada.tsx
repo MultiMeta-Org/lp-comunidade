@@ -3,7 +3,7 @@ import { Check, Lock } from "lucide-react"
 import { NUMEROS_DOS_DIAS, TOTAL_DIAS, diaDisponivel, getDia, podeAbrir } from "@/lib/desafio"
 
 /**
- * A jornada inteira na lateral: os 21 dias (mais o Zero) de uma vez.
+ * A jornada inteira: os 21 dias (mais o Zero) de uma vez.
  *
  * Por que mostrar tudo, inclusive o que ela não pode abrir: o Desafio é uma
  * promessa de 21 dias, e uma lista que só revela o dia de hoje esconde
@@ -13,8 +13,25 @@ import { NUMEROS_DOS_DIAS, TOTAL_DIAS, diaDisponivel, getDia, podeAbrir } from "
  *
  * Dia concluído é clicável: o documento pede que os anteriores sejam
  * revisitáveis e editáveis.
+ *
+ * O conteúdo é separado do `aside` porque ele vive em dois lugares: a coluna
+ * da esquerda na tela larga e o painel do `JornadaMenu` no celular — onde 22
+ * linhas antes da missão de hoje empurrariam para baixo a única coisa que ela
+ * precisa fazer agora.
  */
-export function Jornada({
+export function Jornada(props: {
+  concluidos: ReadonlySet<number>
+  atual: number
+  empresasNoRadar: number
+}) {
+  return (
+    <aside className="w-full min-w-0 lg:sticky lg:top-24">
+      <ConteudoDaJornada {...props} />
+    </aside>
+  )
+}
+
+export function ConteudoDaJornada({
   concluidos,
   atual,
   empresasNoRadar,
@@ -26,7 +43,7 @@ export function Jornada({
   const feitos = [...concluidos].filter((d) => d >= 1).length
 
   return (
-    <aside className="flex w-full min-w-0 flex-col gap-3.5 lg:sticky lg:top-24">
+    <div className="flex w-full min-w-0 flex-col gap-3.5">
       <AnelDoProgresso feitos={feitos} />
 
       <nav aria-label="Os 21 dias" className="flex min-w-0 flex-col gap-0.5">
@@ -59,7 +76,7 @@ export function Jornada({
           </small>
         </div>
       </div>
-    </aside>
+    </div>
   )
 }
 

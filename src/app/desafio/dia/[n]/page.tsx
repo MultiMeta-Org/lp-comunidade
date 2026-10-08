@@ -8,9 +8,10 @@ import {
   getOperacao,
   getRadar,
 } from "@/lib/desafio-server"
-import { getDia, podeAbrir } from "@/lib/desafio"
+import { diaAtual, getDia, podeAbrir } from "@/lib/desafio"
 import { Atmosphere } from "@/components/atmosphere"
 import { Missao } from "@/components/desafio/missao"
+import { DiasVizinhos } from "@/components/desafio/vizinhos"
 
 /**
  * A missão de um dia, em tela cheia.
@@ -80,6 +81,16 @@ export default async function DiaPage({
           jaConcluido={concluido}
           interesses={Object.fromEntries(interesses)}
           operacao={operacao}
+          // A navegação entre os dias desce montada do servidor: a Missao só
+          // decide SE mostra (não mostra depois da celebração).
+          vizinhos={
+            <DiasVizinhos
+              n={numero}
+              concluidos={jornada.concluidos}
+              atual={diaAtual(jornada.concluidos)}
+              empresasNoRadar={jornada.empresasNoRadar}
+            />
+          }
         />
       </div>
     </main>

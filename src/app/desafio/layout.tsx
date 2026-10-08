@@ -1,10 +1,11 @@
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, ListOrdered } from "lucide-react"
 import { MultiMetaLogo } from "@/components/multimeta-logo"
 import { LogoutButton } from "@/components/logout-button"
 import { requireDesafio } from "@/lib/guard"
 import { getJornada } from "@/lib/desafio-server"
-import { TOTAL_DIAS } from "@/lib/desafio"
+import { TOTAL_DIAS, diaAtual } from "@/lib/desafio"
+import { JornadaMenu } from "@/components/desafio/jornada-menu"
 
 /**
  * O Desafio é um ambiente próprio, e não uma página do portal.
@@ -25,7 +26,7 @@ export default async function DesafioLayout({
   children: React.ReactNode
 }) {
   const { email } = await requireDesafio()
-  const { concluidos } = await getJornada(email)
+  const { concluidos, empresasNoRadar } = await getJornada(email)
 
   // O Dia Zero é matrícula, não missão: a barra conta os 21.
   const feitos = [...concluidos].filter((d) => d >= 1).length
@@ -49,14 +50,24 @@ export default async function DesafioLayout({
             </span>
           </Link>
 
-          <span className="ml-auto flex-none text-xs font-semibold text-muted-foreground">
+          {/* O contador É o gatilho da lista completa: o número de dias é a
+              jornada, e tocar nele para ver a jornada inteira dispensa um
+              segundo botão numa barra que no celular já está cheia. */}
+          <JornadaMenu
+            concluidos={concluidos}
+            atual={diaAtual(concluidos)}
+            empresasNoRadar={empresasNoRadar}
+            className="ml-auto inline-flex flex-none items-center gap-1.5 rounded-full border border-border bg-background/60 px-2.5 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/45 hover:text-primary"
+          >
+            <ListOrdered className="h-3.5 w-3.5" />
             <span className="sm:hidden">
               {feitos}/{TOTAL_DIAS}
             </span>
             <span className="hidden sm:inline">
               {feitos} de {TOTAL_DIAS} dias
             </span>
-          </span>
+            <span className="sr-only">— ver os 21 dias</span>
+          </JornadaMenu>
 
           <Link
             href="/"
