@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { ArrowUpRight, BookOpen, Lock, MessageCircle } from "lucide-react"
 import type { Product } from "@/lib/home"
@@ -78,16 +79,34 @@ function ProductCard({
       } ${clicavel ? "group-hover:-translate-y-1 group-hover:shadow-md" : ""}`}
       style={{ background: product.art }}
     >
-      {/* Malha fina sobre a capa: dá textura e disfarça o gradiente chapado. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.13]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(245,242,237,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(245,242,237,.6) 1px,transparent 1px)",
-          backgroundSize: "25px 25px",
-        }}
-      />
+      {/* Malha fina sobre a capa: dá textura e disfarça o gradiente chapado.
+          Capa com arte não leva malha — a arte já tem a textura dela, e o
+          quadriculado por cima só sujaria o trabalho de quem a desenhou. */}
+      {!product.image && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.13]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(245,242,237,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(245,242,237,.6) 1px,transparent 1px)",
+            backgroundSize: "25px 25px",
+          }}
+        />
+      )}
+
+      {/* A arte ocupa a capa inteira. `alt` vazio de propósito: o nome do
+          produto já está no texto logo abaixo da capa, e repeti-lo aqui faria
+          o leitor de tela anunciar a mesma coisa duas vezes. O recorte 3/4 é o
+          mesmo das artes, então `cover` não corta nada. */}
+      {product.image && (
+        <Image
+          src={product.image}
+          alt=""
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 224px"
+          className="object-cover"
+        />
+      )}
 
       {locked && (
         <span className="absolute right-2.5 top-2.5 z-10 flex h-7 w-7 items-center justify-center rounded-[9px] bg-foreground/80 text-background">
@@ -95,12 +114,18 @@ function ProductCard({
         </span>
       )}
 
-      <span className="relative self-start text-[9px] font-bold uppercase tracking-[0.2em] text-background/75">
-        {product.kicker}
-      </span>
-      <span className="relative font-serif text-xl font-bold uppercase leading-none text-background">
-        {product.name}
-      </span>
+      {/* Etiqueta e nome só nas capas de gradiente. Onde há arte, ela já diz o
+          nome do produto — escrever por cima seria carimbar a peça pronta. */}
+      {!product.image && (
+        <>
+          <span className="relative self-start text-[9px] font-bold uppercase tracking-[0.2em] text-background/75">
+            {product.kicker}
+          </span>
+          <span className="relative font-serif text-xl font-bold uppercase leading-none text-background">
+            {product.name}
+          </span>
+        </>
+      )}
     </span>
   )
 

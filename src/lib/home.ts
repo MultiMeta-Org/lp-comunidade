@@ -35,6 +35,14 @@ export type Product = {
   meta: string
   /** Gradiente da capa (CSS pronto para `style.background`). */
   art: string
+  /**
+   * Arte da capa, em `public/produtos`. Quando existe, ela É a capa: o nome e
+   * a etiqueta somem de cima dela, porque a arte já traz o nome do produto e
+   * texto nosso em cima de arte pronta vira duplicata. O gradiente de `art`
+   * continua obrigatório — é o que fica no lugar enquanto a imagem carrega, e
+   * o que sobra se o arquivo sumir.
+   */
+  image?: string
   /** Destino. Ausente = card inerte (ambiente ainda não existe no portal). */
   href?: string
   /**
@@ -117,7 +125,8 @@ const PRODUCTS: Product[] = [
     name: "Método EVP",
     kicker: "Seu curso",
     meta: "Assistir na Hotmart",
-    art: "linear-gradient(160deg,#758E67,#5d7452)",
+    art: "linear-gradient(160deg,#D8A888,#B57C56)",
+    image: "/produtos/metodo-evp.webp",
     // O ambiente do Método ainda não vive no portal: o card leva para a Hotmart,
     // onde a aluna assiste o curso que comprou.
     href: METODO_EVP_URL,
@@ -144,7 +153,8 @@ const PRODUCTS: Product[] = [
     name: "Marketplace",
     kicker: "Oportunidades",
     meta: "Vagas e empresas contratando",
-    art: "linear-gradient(160deg,#C08A5B,#8a5a33)",
+    art: "linear-gradient(160deg,#7D9459,#44552B)",
+    image: "/produtos/marketplace.webp",
     href: MARKETPLACE_URL,
     state: "owned",
   },
@@ -153,7 +163,8 @@ const PRODUCTS: Product[] = [
     name: "MultiQuiz",
     kicker: "Ferramenta",
     meta: "Quizzes que trazem clientes",
-    art: "linear-gradient(160deg,#6B8DAD,#4d6a86)",
+    art: "linear-gradient(160deg,#FFC93C,#E0A411)",
+    image: "/produtos/multiquiz.webp",
     href: MULTIQUIZ_URL,
     state: "owned",
   },
@@ -162,7 +173,8 @@ const PRODUCTS: Product[] = [
     name: "CRM",
     kicker: "Ferramenta",
     meta: "Seus contatos organizados",
-    art: "linear-gradient(160deg,#E2B04B,#b9852c)",
+    art: "linear-gradient(160deg,#F7873A,#E35205)",
+    image: "/produtos/crm.webp",
     href: CRM_URL,
     state: "owned",
   },
