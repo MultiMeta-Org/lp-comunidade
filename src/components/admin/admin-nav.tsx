@@ -2,7 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { GalleryHorizontalEnd, Gauge, GraduationCap, Users } from "lucide-react"
+import {
+  GalleryHorizontalEnd,
+  Gauge,
+  GraduationCap,
+  Target,
+  Users,
+} from "lucide-react"
 
 type Item = {
   href: string
@@ -14,13 +20,14 @@ const ITEMS: Item[] = [
   { href: "/admin", label: "Visão geral", icon: Gauge },
   { href: "/admin/acessos", label: "Acessos", icon: Users },
   { href: "/admin/aulas", label: "Aulas", icon: GraduationCap },
+  { href: "/admin/desafio", label: "Desafio", icon: Target },
   { href: "/admin/banners", label: "Banners", icon: GalleryHorizontalEnd },
 ]
 
 /**
  * Navegação do /admin.
  *
- * O painel virou quatro rotas em vez de uma página rolante: cada lista pagina
+ * O painel virou cinco rotas em vez de uma página rolante: cada lista pagina
  * e filtra pela URL, então um link reaberto cai exatamente onde a Nati estava.
  * "Visão geral" é só o item exato — as outras acendem no prefixo, para a página
  * de progresso de uma aula manter "Aulas" aceso.

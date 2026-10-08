@@ -15,6 +15,7 @@ export default async function AdminOverviewPage() {
     { data: syncRun },
     { count: ativasRaw },
     { count: comLabRaw },
+    { count: comDesafioRaw },
     { count: publicadasRaw },
     { count: abertasRaw },
     { data: banners },
@@ -33,6 +34,11 @@ export default async function AdminOverviewPage() {
       .select("*", CONTAGEM)
       .eq("status", "active")
       .eq("has_comunidade_vip", true),
+    db
+      .from("authorized_emails")
+      .select("*", CONTAGEM)
+      .eq("status", "active")
+      .eq("has_desafio", true),
     db.from("lessons").select("*", CONTAGEM).eq("published", true),
     db
       .from("lessons")
@@ -44,6 +50,7 @@ export default async function AdminOverviewPage() {
 
   const ativas = ativasRaw ?? 0
   const comLab = comLabRaw ?? 0
+  const comDesafio = comDesafioRaw ?? 0
   const publicadas = publicadasRaw ?? 0
   const abertas = abertasRaw ?? 0
 
@@ -63,7 +70,7 @@ export default async function AdminOverviewPage() {
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <Numero
             valor={ativas}
             label="Alunas com acesso"
@@ -79,6 +86,16 @@ export default async function AdminOverviewPage() {
                 : "ninguém ainda"
             }
             href="/admin/acessos?lab=sim"
+          />
+          <Numero
+            valor={comDesafio}
+            label="Com o Desafio 21 Dias"
+            nota={
+              comDesafio > 0
+                ? "ver onde elas pararam"
+                : "ninguém ainda — libere por cortesia em Acessos"
+            }
+            href="/admin/desafio"
           />
           <Numero
             valor={publicadas}
