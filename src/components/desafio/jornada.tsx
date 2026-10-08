@@ -26,10 +26,10 @@ export function Jornada({
   const feitos = [...concluidos].filter((d) => d >= 1).length
 
   return (
-    <aside className="flex flex-col gap-3.5 lg:sticky lg:top-24">
+    <aside className="flex w-full min-w-0 flex-col gap-3.5 lg:sticky lg:top-24">
       <AnelDoProgresso feitos={feitos} />
 
-      <nav aria-label="Os 21 dias" className="flex flex-col gap-0.5">
+      <nav aria-label="Os 21 dias" className="flex min-w-0 flex-col gap-0.5">
         {NUMEROS_DOS_DIAS.map((n) => (
           <LinhaDoDia
             key={n}
@@ -41,7 +41,7 @@ export function Jornada({
         ))}
       </nav>
 
-      <div className="flex gap-6 rounded-2xl bg-muted px-5 py-4">
+      <div className="flex gap-6 rounded-2xl bg-muted px-4 py-4 sm:px-5">
         <div className="flex flex-col">
           <b className="font-serif text-xl font-bold leading-none text-foreground">
             {feitos}
@@ -118,7 +118,7 @@ function LinhaDoDia({
 
   const numero = (
     <span
-      className={`grid h-[25px] w-[25px] flex-none place-items-center rounded-full font-serif text-[11.5px] font-bold transition-colors duration-200 ${
+      className={`grid h-[26px] w-[26px] flex-none place-items-center rounded-full font-serif text-[11.5px] font-bold transition-colors duration-200 sm:h-[25px] sm:w-[25px] ${
         concluido
           ? "bg-primary text-primary-foreground"
           : atual
@@ -132,7 +132,7 @@ function LinhaDoDia({
 
   const texto = (
     <span
-      className={`min-w-0 flex-1 truncate text-[12.5px] leading-snug ${
+      className={`min-w-0 flex-1 truncate text-[13px] leading-snug sm:text-[12.5px] ${
         atual
           ? "font-bold text-secondary"
           : concluido
@@ -148,7 +148,7 @@ function LinhaDoDia({
   // que não leva a nada ensina a aluna a não confiar no que ela vê.
   if (!aberto) {
     return (
-      <div className="flex items-center gap-2.5 rounded-xl border border-transparent px-2.5 py-2">
+      <div className="flex items-center gap-2.5 rounded-xl border border-transparent px-2.5 py-2.5 sm:py-2">
         {numero}
         {texto}
         {!existe ? (
@@ -166,7 +166,7 @@ function LinhaDoDia({
     <Link
       href={`/desafio/dia/${n}`}
       aria-current={atual ? "page" : undefined}
-      className={`group flex items-center gap-2.5 rounded-xl border px-2.5 py-2 transition-all duration-200 ${
+      className={`group flex items-center gap-2.5 rounded-xl border px-2.5 py-2.5 transition-all duration-200 sm:py-2 ${
         atual
           ? "border-secondary/40 bg-secondary-subtle"
           : "border-transparent hover:border-primary/35 hover:bg-primary-subtle"
@@ -179,7 +179,7 @@ function LinhaDoDia({
           hoje
         </span>
       ) : (
-        <span className="flex-none text-[10px] font-bold uppercase tracking-[0.1em] text-primary opacity-0 transition-opacity group-hover:opacity-100">
+        <span className="flex-none text-[10px] font-bold uppercase tracking-[0.1em] text-primary opacity-0 transition-opacity group-hover:opacity-100 max-sm:opacity-60">
           rever
         </span>
       )}

@@ -41,11 +41,18 @@ export default async function DesafioPage() {
     primeiroNome
 
   return (
-    <main className="grain relative overflow-hidden px-5 pb-20 pt-8">
-      <Atmosphere variant="hub" />
+    <main className="grain relative overflow-hidden px-4 pb-20 pt-6 sm:px-5 sm:pt-8">
+      <Atmosphere variant="quiet" />
 
-      <div className="relative z-10 mx-auto grid w-full max-w-5xl gap-9 lg:grid-cols-[292px_1fr] lg:items-start">
-        <div className="animate-rise" style={{ "--d": "0ms" } as React.CSSProperties}>
+      <div className="relative z-10 mx-auto grid w-full max-w-5xl gap-7 lg:grid-cols-[292px_1fr] lg:items-start lg:gap-9">
+        {/* No celular a jornada desce. Uma lista de 22 dias antes da missão de
+            hoje faz a aluna rolar para encontrar a única coisa que ela precisa
+            fazer agora — e o que está no topo é o que ela entende como tarefa.
+            Na tela larga a coluna volta para a esquerda, onde ela guia. */}
+        <div
+          className="order-2 min-w-0 animate-rise lg:order-1"
+          style={{ "--d": "0ms" } as React.CSSProperties}
+        >
           <Jornada
             concluidos={jornada.concluidos}
             atual={atual}
@@ -54,7 +61,7 @@ export default async function DesafioPage() {
         </div>
 
         <div
-          className="flex min-w-0 flex-col gap-5 animate-rise"
+          className="order-1 flex min-w-0 flex-col gap-4 animate-rise sm:gap-5 lg:order-2"
           style={{ "--d": "90ms" } as React.CSSProperties}
         >
           {dia ? (
@@ -121,11 +128,13 @@ function CartaoDoDia({
   comecou: boolean
 }) {
   return (
-    <section className="relative flex flex-col items-start gap-3 overflow-hidden rounded-[26px] border border-border bg-card px-7 py-9 shadow-sm sm:px-10">
+    <section className="relative flex flex-col items-start gap-3 overflow-hidden rounded-[22px] border border-border bg-card px-5 py-7 shadow-sm sm:rounded-[26px] sm:px-10 sm:py-9">
       <div aria-hidden className="card-sheen pointer-events-none absolute inset-0" />
+      {/* O número do dia é marca d'água: no celular ele encolhe e encosta na
+          borda, porque em tela estreita ele cairia por baixo do texto. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 select-none font-serif text-[clamp(110px,17vw,200px)] font-bold leading-none text-primary opacity-[0.13]"
+        className="pointer-events-none absolute -right-2 top-1/2 -translate-y-1/2 select-none font-serif text-[clamp(84px,20vw,200px)] font-bold leading-none text-primary opacity-[0.1] sm:right-6 sm:opacity-[0.13]"
       >
         {n}
       </span>
@@ -151,7 +160,7 @@ function CartaoDoDia({
 
       <Link
         href={`/desafio/dia/${n}`}
-        className="relative mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+        className="relative mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-auto sm:py-3"
       >
         {comecou ? "Continuar de onde parei" : n === 0 ? "Fazer minha matrícula" : "Começar a missão de hoje"}
         <ArrowRight className="h-4 w-4" />
@@ -184,9 +193,9 @@ function TudoFeito({
 }) {
   return (
     <>
-      <section className="relative flex flex-col items-start gap-3.5 overflow-hidden rounded-[26px] border border-primary/40 bg-gradient-to-br from-primary-subtle to-card px-7 py-10 sm:px-10">
-        <span className="grid h-20 w-20 place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_0_0_12px_rgba(208,222,200,0.5)]">
-          <Check className="h-9 w-9" strokeWidth={2.6} />
+      <section className="relative flex flex-col items-start gap-3.5 overflow-hidden rounded-[22px] border border-primary/40 bg-gradient-to-br from-primary-subtle to-card px-5 py-8 sm:rounded-[26px] sm:px-10 sm:py-10">
+        <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_0_0_12px_rgba(208,222,200,0.5)] sm:h-20 sm:w-20">
+          <Check className="h-8 w-8 sm:h-9 sm:w-9" strokeWidth={2.6} />
         </span>
         <h1 className="max-w-[16ch] font-serif text-[clamp(28px,3.8vw,40px)] font-bold leading-[1.06] text-foreground">
           {titulo}
@@ -204,7 +213,7 @@ function TudoFeito({
         </Link>
       </section>
 
-      <section className="flex flex-col gap-1.5 rounded-[20px] border border-dashed border-border bg-card px-6 py-5">
+      <section className="flex flex-col gap-1.5 rounded-[20px] border border-dashed border-border bg-card px-5 py-5 sm:px-6">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
           {acabou ? "A partir de agora" : proximoEscrito ? "Amanhã" : "Em breve"}
         </p>
@@ -225,7 +234,7 @@ function TudoFeito({
 /** Nenhum dia escrito ainda. Não deveria acontecer em produção. */
 function SemConteudo() {
   return (
-    <section className="rounded-[26px] border border-border bg-card px-8 py-10">
+    <section className="rounded-[22px] border border-border bg-card px-5 py-8 sm:rounded-[26px] sm:px-8 sm:py-10">
       <h1 className="font-serif text-2xl font-bold text-foreground">
         Seu Desafio está sendo preparado.
       </h1>
@@ -253,7 +262,7 @@ function AcessosPermanentes({ empresas }: { empresas: number }) {
         href={SUPPORT_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative flex items-center gap-3.5 overflow-hidden rounded-2xl border border-secondary/40 bg-secondary-subtle px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+        className="group relative flex items-center gap-3.5 overflow-hidden rounded-2xl border border-secondary/40 bg-secondary-subtle px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:px-5"
       >
         <PartyPopper className="h-5 w-5 flex-none text-secondary" />
         <span className="min-w-0 flex-1">

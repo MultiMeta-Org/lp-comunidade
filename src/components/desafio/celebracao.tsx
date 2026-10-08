@@ -37,8 +37,8 @@ export function Celebracao({
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 text-center">
-      <span className="grid h-[84px] w-[84px] place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_0_0_13px_rgba(208,222,200,0.5)] motion-safe:animate-[pop_0.6s_cubic-bezier(0.3,1.5,0.5,1)_both]">
-        <Check className="h-9 w-9" strokeWidth={2.6} />
+      <span className="grid h-[68px] w-[68px] place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_0_0_10px_rgba(208,222,200,0.5)] motion-safe:animate-[pop_0.6s_cubic-bezier(0.3,1.5,0.5,1)_both] sm:h-[84px] sm:w-[84px] sm:shadow-[0_0_0_13px_rgba(208,222,200,0.5)]">
+        <Check className="h-8 w-8 sm:h-9 sm:w-9" strokeWidth={2.6} />
       </span>
 
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
@@ -52,8 +52,8 @@ export function Celebracao({
       </p>
 
       {placar && (
-        <div className="mt-1 flex flex-col items-center gap-0.5 rounded-[20px] border border-dashed border-secondary bg-secondary-subtle/40 px-8 py-4">
-          <span className="font-serif text-[46px] font-bold leading-none text-secondary">
+        <div className="mt-1 flex flex-col items-center gap-0.5 rounded-[20px] border border-dashed border-secondary bg-secondary-subtle/40 px-6 py-4 sm:px-8">
+          <span className="font-serif text-[40px] font-bold leading-none text-secondary sm:text-[46px]">
             {placar.n}
           </span>
           <span className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -80,7 +80,7 @@ export function Celebracao({
         {fim.badge}
       </span>
 
-      <section className="mt-4 flex w-full flex-col gap-1.5 rounded-[20px] border border-dashed border-border bg-card px-6 py-5 text-left">
+      <section className="mt-4 flex w-full flex-col gap-1.5 rounded-[20px] border border-dashed border-border bg-card px-5 py-5 text-left sm:px-6">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
           {temProximo ? "Amanhã" : "Em breve"}
         </p>
@@ -92,7 +92,7 @@ export function Celebracao({
           seria desfazer isso com um botão. */}
       <Link
         href="/desafio"
-        className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+        className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-auto sm:py-3"
       >
         Voltar para a minha jornada
         <ArrowRight className="h-4 w-4" />

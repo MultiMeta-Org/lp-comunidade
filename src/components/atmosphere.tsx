@@ -8,11 +8,17 @@
  *   • hub     → galho à esquerda, sol à direita (página mais larga)
  *   • library → espelhado: sol à esquerda, galho à direita
  *   • lesson  → discreto, encostado nas bordas (coluna estreita de leitura)
+ *   • quiet   → só a luz, sem botânica
+ *
+ * `quiet` existe para as telas que já têm desenho próprio na frente: na casa
+ * do Desafio o galho cai exatamente atrás da jornada — 22 linhas, anel de
+ * progresso, números — e duas camadas de linha fina disputando o mesmo lugar
+ * viram ruído. A lavagem quente fica; o desenho sai.
  */
 export function Atmosphere({
   variant = "hub",
 }: {
-  variant?: "hub" | "library" | "lesson"
+  variant?: "hub" | "library" | "lesson" | "quiet"
 }) {
   return (
     <div
@@ -20,7 +26,9 @@ export function Atmosphere({
       className="pointer-events-none absolute inset-x-0 top-0 h-[520px] select-none"
     >
       <div
-        className={`absolute inset-0 ${variant === "hub" ? "page-wash" : "page-wash-alt"}`}
+        className={`absolute inset-0 ${
+          variant === "hub" || variant === "quiet" ? "page-wash" : "page-wash-alt"
+        }`}
       />
 
       {variant === "hub" && (

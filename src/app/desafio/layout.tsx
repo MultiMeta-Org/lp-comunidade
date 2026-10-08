@@ -34,25 +34,34 @@ export default async function DesafioLayout({
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-30 border-b border-border/80 bg-card/85 backdrop-blur-md supports-[backdrop-filter]:bg-card/70">
-        <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-3 px-5">
+        <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-2.5 px-4 sm:gap-3 sm:px-5">
           <Link
             href="/desafio"
-            className="group flex min-w-0 shrink-0 items-center gap-2"
+            className="group flex min-w-0 shrink items-center gap-2"
             aria-label="Ir para a sua jornada"
           >
-            <MultiMetaLogo className="h-6 w-6 transition-transform duration-300 group-hover:-rotate-6" />
-            <span className="font-serif text-[15px] font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
-              Desafio 21 Dias
+            <MultiMetaLogo className="h-6 w-6 flex-none transition-transform duration-300 group-hover:-rotate-6" />
+            {/* No celular o nome encurta em vez de empurrar o resto da barra
+                para fora da tela: ela já sabe onde está — acabou de entrar. */}
+            <span className="truncate font-serif text-[15px] font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+              <span className="sm:hidden">Desafio</span>
+              <span className="hidden sm:inline">Desafio 21 Dias</span>
             </span>
           </Link>
 
-          <span className="ml-auto hidden text-xs font-semibold text-muted-foreground sm:inline">
-            {feitos} de {TOTAL_DIAS} dias
+          <span className="ml-auto flex-none text-xs font-semibold text-muted-foreground">
+            <span className="sm:hidden">
+              {feitos}/{TOTAL_DIAS}
+            </span>
+            <span className="hidden sm:inline">
+              {feitos} de {TOTAL_DIAS} dias
+            </span>
           </span>
 
           <Link
             href="/"
-            className="group inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-primary"
+            className="group inline-flex flex-none items-center gap-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-primary"
+            aria-label="Voltar para o Portal"
           >
             <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
             <span className="hidden sm:inline">Portal</span>

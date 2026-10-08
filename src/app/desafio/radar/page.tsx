@@ -19,13 +19,13 @@ export default async function RadarPage() {
   const radar = await getRadar(email)
 
   return (
-    <main className="grain relative min-h-[calc(100vh-3.5rem)] overflow-hidden px-5 pb-20 pt-8">
+    <main className="grain relative min-h-[calc(100vh-3.5rem)] overflow-hidden px-4 pb-20 pt-6 sm:px-5 sm:pt-8">
       <Atmosphere variant="library" />
 
       <div className="relative z-10 mx-auto w-full max-w-2xl">
         <Link
           href="/desafio"
-          className="group mb-8 inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
+          className="group mb-6 inline-flex items-center gap-1.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:mb-8"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
           Minha jornada

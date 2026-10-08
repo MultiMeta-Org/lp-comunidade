@@ -162,45 +162,52 @@ export function Missao({
         )}
       </div>
 
-      <div className="mt-9 flex flex-wrap items-center gap-3.5 border-t border-border pt-6">
-        <button
-          type="button"
-          onClick={avancar}
-          disabled={salvando}
-          className="inline-flex min-w-[180px] items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md disabled:pointer-events-none disabled:opacity-60"
-        >
-          {salvando ? "Salvando…" : rotuloDoBotao(passo, ultimo)}
-        </button>
-
-        {i > 0 && (
-          <button
-            type="button"
-            onClick={() => {
-              setI(i - 1)
-              setErro(null)
-            }}
-            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-primary"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Voltar
-          </button>
-        )}
-
+      {/* O rodapé: para trás à esquerda, para a frente à direita — a direção
+          que cada botão oferece é a mesma em que ele aponta.
+          No celular eles empilham, e o `flex-col-reverse` coloca o de avançar
+          em cima: ele é a continuação do que ela acabou de responder, e o
+          Voltar fica embaixo, onde um toque errado não desfaz o passo. */}
+      <div className="mt-9 flex flex-col gap-3.5 border-t border-border pt-6">
         {erro && (
-          <span role="alert" className="text-xs font-semibold text-secondary">
+          <span role="alert" className="text-[13px] font-semibold text-secondary">
             {erro}
           </span>
         )}
 
-        {jaConcluido && (
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:gap-3.5">
+          {i > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setI(i - 1)
+                setErro(null)
+              }}
+              className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-primary sm:px-0 sm:py-0"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Voltar
+            </button>
+          )}
+
+          {jaConcluido && (
+            <button
+              type="button"
+              onClick={() => router.push("/desafio")}
+              className="inline-flex items-center justify-center rounded-full px-4 py-2.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-primary sm:px-0 sm:py-0"
+            >
+              Sair da revisão
+            </button>
+          )}
+
           <button
             type="button"
-            onClick={() => router.push("/desafio")}
-            className="ml-auto text-[13px] font-semibold text-muted-foreground transition-colors hover:text-primary"
+            onClick={avancar}
+            disabled={salvando}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md disabled:pointer-events-none disabled:opacity-60 sm:ml-auto sm:w-auto sm:min-w-[180px] sm:py-3"
           >
-            Sair da revisão
+            {salvando ? "Salvando…" : rotuloDoBotao(passo, ultimo)}
           </button>
-        )}
+        </div>
       </div>
     </div>
   )
@@ -439,7 +446,7 @@ function Diagnostico({
       </div>
 
       {atual && (
-        <div className="flex flex-col gap-2 rounded-[18px] border border-primary/35 bg-primary-subtle px-5 py-4">
+        <div className="flex flex-col gap-2 rounded-[18px] border border-primary/35 bg-primary-subtle px-4 py-4 sm:px-5">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
             Onde isso é tratado
           </p>
@@ -464,7 +471,7 @@ function Diagnostico({
 function Video({ label, src }: { label: string; src?: string }) {
   if (!src) {
     return (
-      <div className="flex items-center gap-4 rounded-[18px] border border-dashed border-border bg-muted/60 px-5 py-6">
+      <div className="flex items-center gap-3.5 rounded-[18px] border border-dashed border-border bg-muted/60 px-4 py-5 sm:gap-4 sm:px-5 sm:py-6">
         <span className="grid h-11 w-11 flex-none place-items-center rounded-full bg-card text-muted-foreground">
           <Play className="h-5 w-5" />
         </span>
@@ -725,10 +732,13 @@ function Escala({
   const notas = Array.from({ length: max - min + 1 }, (_, n) => min + n)
 
   return (
+    // Grade de 6 no celular: em fila, onze botões de 40px quebram em duas
+    // linhas tortas e a nota vira um alvo pequeno. Em grade cada número ocupa
+    // a largura que sobra e continua fácil de acertar com o polegar.
     <div
       role="radiogroup"
       aria-label={campo.rotulo}
-      className="flex flex-wrap gap-1.5"
+      className="grid grid-cols-6 gap-1.5 sm:flex sm:flex-wrap"
     >
       {notas.map((n) => {
         const marcado = valor === String(n)
@@ -739,7 +749,7 @@ function Escala({
             role="radio"
             aria-checked={marcado}
             onClick={() => set(campo.chave, String(n))}
-            className={`h-10 w-10 rounded-xl border font-serif text-sm font-bold transition-all duration-200 ${
+            className={`h-11 w-full rounded-xl border font-serif text-sm font-bold transition-all duration-200 sm:h-10 sm:w-10 ${
               marcado
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border bg-card text-muted-foreground hover:border-primary/45 hover:text-foreground"
@@ -819,7 +829,7 @@ function Copiar({
       {mensagens.map((msg, n) => (
         <div
           key={n}
-          className="flex flex-col gap-3 rounded-[18px] border border-border bg-card px-5 py-4"
+          className="flex flex-col gap-3 rounded-[18px] border border-border bg-card px-4 py-4 sm:px-5"
         >
           {msg.titulo && (
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -942,7 +952,7 @@ export function RadarEditor({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3 rounded-[18px] bg-muted px-5 py-4">
+      <div className="flex items-center gap-3 rounded-[18px] bg-muted px-4 py-4 sm:px-5">
         <span className="font-serif text-3xl font-bold leading-none text-foreground">
           {radar.length}
         </span>
@@ -1012,7 +1022,9 @@ export function RadarEditor({
                     if (res.ok) setRadar((r) => r.filter((e) => e.id !== empresa.id))
                   })
                 }
-                className="flex-none text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                // Visível no celular: sem hover, um botão que só aparece ao
+                // passar o mouse simplesmente não existe para quem toca.
+                className="flex-none p-1 text-muted-foreground transition-opacity hover:text-destructive lg:opacity-0 lg:group-hover:opacity-100"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -1058,7 +1070,7 @@ export function RadarEditor({
           type="button"
           onClick={adicionar}
           disabled={salvando || nome.trim() === ""}
-          className="inline-flex w-fit items-center gap-1.5 rounded-full bg-secondary px-5 py-2.5 text-xs font-semibold text-secondary-foreground transition-all duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-secondary px-5 py-3 text-xs font-semibold text-secondary-foreground transition-all duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 sm:w-fit sm:py-2.5"
         >
           <Plus className="h-3.5 w-3.5" />
           Adicionar empresa
@@ -1219,7 +1231,7 @@ function EmpresaDoPasso({
     return (
       <div className="flex flex-col gap-5">
         {contador}
-        <div className="flex items-center gap-3 rounded-[18px] border border-primary/35 bg-primary-subtle px-5 py-4">
+        <div className="flex items-center gap-3 rounded-[18px] border border-primary/35 bg-primary-subtle px-4 py-4 sm:px-5">
           <span className="min-w-0 flex-1">
             <small className="block text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
               Sua empresa
@@ -1293,7 +1305,7 @@ function EmpresaDoPasso({
           type="button"
           onClick={guardarRodada}
           disabled={salvando}
-          className="inline-flex w-fit items-center gap-1.5 rounded-full bg-secondary px-5 py-2.5 text-xs font-semibold text-secondary-foreground transition-all duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-secondary px-5 py-3 text-xs font-semibold text-secondary-foreground transition-all duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 sm:w-fit sm:py-2.5"
         >
           {salvando
             ? "Salvando…"
@@ -1383,7 +1395,7 @@ function EmpresaDoPasso({
               setAviso(null)
             })
           }
-          className="inline-flex w-fit items-center gap-1.5 rounded-full bg-secondary px-5 py-2.5 text-xs font-semibold text-secondary-foreground transition-all duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-secondary px-5 py-3 text-xs font-semibold text-secondary-foreground transition-all duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 sm:w-fit sm:py-2.5"
         >
           <Plus className="h-3.5 w-3.5" />
           Guardar essa empresa

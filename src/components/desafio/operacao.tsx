@@ -22,7 +22,7 @@ export function OperacaoDeHoje({ operacao }: { operacao: Operacao }) {
   return (
     <section
       aria-label="Sua operação hoje"
-      className="flex flex-col gap-4 rounded-[22px] border border-border bg-card px-6 py-5"
+      className="flex flex-col gap-4 rounded-[22px] border border-border bg-card px-5 py-5 sm:px-6"
     >
       <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
         Sua operação hoje
