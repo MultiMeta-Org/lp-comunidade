@@ -25,6 +25,11 @@ export const runtime = "nodejs"
  * e usa a mais recente, então o portal concede sozinho e o cron não desfaz.
  * Sem esse registro, o desacoplamento seria só aparente.
  *
+ * O Desafio 21 Dias funciona EXATAMENTE igual, com as tabelas irmãs
+ * (comunidade.desafio_products / desafio_purchases) e a coluna has_desafio.
+ * Os dois produtos extras são tratados pelo mesmo caminho de código, parametrizado
+ * por `EXTRAS` abaixo: a diferença entre eles é dado, não lógica.
+ *
  * Configurar no Hotmart o header `x-hotmart-hottok` = HOTMART_HOTTOK.
  */
 
@@ -40,6 +45,46 @@ function ehEventoDeTeste(email: string, productId: string | null): boolean {
   if (/^teste?@hotmart\.com(\.br)?$/i.test(email)) return true
   // Ids que a Hotmart usa nos disparos de teste.
   return productId !== null && ["0", "123456", "99999"].includes(productId)
+}
+
+/**
+ * Os produtos que o portal libera ALÉM do acesso em si.
+ *
+ * Numa tabela, e não em dois ramos de `if`, porque a VIP e o Desafio têm a
+ * mesma regra: compra liga a coluna, reembolso desliga a coluna e NÃO revoga o
+ * acesso ao portal — esse vem da compra do Método, que segue de pé. Duplicar o
+ * ramo faria a terceira oferta nascer com um bug de copiar-e-colar.
+ */
+const EXTRAS = [
+  {
+    nome: "Laboratório de Vendas",
+    /** Tabela com os ids da Hotmart que valem como este produto. */
+    produtos: "vip_products",
+    /** Onde o portal registra o postback que ELE recebeu. */
+    compras: "vip_purchases",
+    /** A coluna derivada em authorized_emails. */
+    coluna: "has_comunidade_vip",
+  },
+  {
+    nome: "Desafio 21 Dias",
+    produtos: "desafio_products",
+    compras: "desafio_purchases",
+    coluna: "has_desafio",
+  },
+] as const
+
+type Extra = (typeof EXTRAS)[number]
+
+/**
+ * `{ [coluna]: valor }` com o tipo certo.
+ *
+ * Uma chave computada a partir de um union de literais vira `string` para o
+ * TypeScript, e aí o update deixa de ser tipado contra as colunas reais da
+ * tabela — justamente a checagem que a gente quer aqui. O `Record` devolve
+ * isso: um objeto que só pode ter as colunas dos produtos extras.
+ */
+function ligaExtra(alvo: Extra, valor: boolean): Partial<Record<Extra["coluna"], boolean>> {
+  return { [alvo.coluna]: valor }
 }
 
 interface HotmartPayload {
@@ -101,35 +146,54 @@ export async function POST(req: NextRequest) {
 
   const db = createComunidadeServiceClient()
 
-  /** Guarda o evento da VIP para a derivação enxergar o que o portal recebeu. */
-  const registraEventoVip = async () => {
-    const { error } = await db.from("vip_purchases").insert({
+  /**
+   * Qual produto extra esta compra é — ou null, se for o Método (ou qualquer
+   * outro produto que só dê o acesso).
+   *
+   * A lista de ids mora no banco (vip_products / desafio_products): id de
+   * produto é dado, não código, e a Nati cadastra uma oferta nova sem deploy.
+   */
+  let extra: Extra | null = null
+  if (productId) {
+    for (const candidato of EXTRAS) {
+      const { data } = await db
+        .from(candidato.produtos)
+        .select("hotmart_product_id")
+        .eq("hotmart_product_id", productId)
+        .maybeSingle()
+      if (data) {
+        extra = candidato
+        break
+      }
+    }
+  }
+
+  /**
+   * Guarda o evento para a derivação enxergar o que o PORTAL recebeu.
+   *
+   * O mesmo postback também chega no webhook do CRM, e a derivação é regra
+   * total: sem sinal positivo, desliga. Sem este registro, a compra que o
+   * portal concedeu seria desfeita pelo cron cinco minutos depois.
+   */
+  const registraCompra = async (alvo: Extra) => {
+    const { error } = await db.from(alvo.compras).insert({
       email: buyerEmail,
       hotmart_product_id: productId,
       transaction_id: transactionId,
       event_type: body.event ?? "DESCONHECIDO",
       occurred_at: purchaseTimestamp,
     })
-    if (error) console.error("[hotmart] registro da compra VIP falhou:", error.message)
-  }
-
-  // A compra é da assinatura VIP? Decide o que o evento mexe. A lista mora em
-  // comunidade.vip_products: id de produto é dado, não código, e a Nati
-  // cadastra uma oferta nova sem deploy.
-  let isVipProduct = false
-  if (productId) {
-    const { data: vip } = await db
-      .from("vip_products")
-      .select("hotmart_product_id")
-      .eq("hotmart_product_id", productId)
-      .maybeSingle()
-    isVipProduct = Boolean(vip)
+    // Postback repetido cai no índice único por (e-mail, transação, evento):
+    // não é erro, é o mesmo fato chegando duas vezes.
+    if (error && error.code !== "23505") {
+      console.error(`[hotmart] registro da compra (${alvo.nome}) falhou:`, error.message)
+    }
   }
 
   // O id do produto sai no log de todo evento: é assim que se descobre o
-  // número de uma oferta nova para cadastrar em comunidade.vip_products.
+  // número de uma oferta nova para cadastrar na tabela dela.
   console.log(
-    `[hotmart] ${body.event} · produto ${productId ?? "?"}${isVipProduct ? " (VIP)" : ""} · ${buyerEmail}`
+    `[hotmart] ${body.event} · produto ${productId ?? "?"}${extra ? ` (${extra.nome})` : ""} · ${buyerEmail}`
   )
 
   try {
@@ -160,24 +224,25 @@ export async function POST(req: NextRequest) {
           buyer_name: buyerName,
           phone: buyerPhone,
           revoked_at: null,
-          // Compra da VIP liga a assinatura. Compra de outro produto não
-          // mexe na flag: quem já tem o grupo não o perde comprando mais.
-          ...(isVipProduct ? { has_comunidade_vip: true } : {}),
+          // Compra de um produto extra liga a coluna dele. Compra de outro
+          // produto não mexe em nada: quem já tem o grupo não o perde
+          // comprando mais.
+          ...(extra ? ligaExtra(extra, true) : {}),
         }
 
-        // Aluna que já tinha o Método e agora assinou a VIP: só liga a flag.
-        // Sobrescrever transação e produto apagaria o registro da compra do
-        // Método, que é o que ancora o acesso dela.
-        if (isVipProduct && existing) {
-          await registraEventoVip()
+        // Aluna que já tinha o Método e agora comprou o extra: só liga a
+        // coluna. Sobrescrever transação e produto apagaria o registro da
+        // compra do Método, que é o que ancora o acesso dela.
+        if (extra && existing) {
+          await registraCompra(extra)
           const { error } = await db
             .from("authorized_emails")
             .update({
               status: "active",
               revoked_at: null,
-              has_comunidade_vip: true,
-              // Linha revogada que volta pela VIP recomeça a contagem dos 7
-              // dias — senão Marketplace e Notion abririam de cara.
+              ...ligaExtra(extra, true),
+              // Linha revogada que volta por um extra recomeça a contagem dos
+              // 7 dias — senão Marketplace e Notion abririam de cara.
               ...(existing.status === "revoked"
                 ? { authorized_at: purchaseTimestamp }
                 : {}),
@@ -186,18 +251,19 @@ export async function POST(req: NextRequest) {
             })
             .eq("email", buyerEmail)
           if (error) {
-            console.error("[hotmart] update VIP error:", error.message)
+            console.error(`[hotmart] update ${extra.nome} error:`, error.message)
             return NextResponse.json({ error: "Database error" }, { status: 500 })
           }
-          console.log(`[hotmart] Comunidade VIP liberada: ${buyerEmail}`)
+          console.log(`[hotmart] ${extra.nome} liberado: ${buyerEmail}`)
           return NextResponse.json({
             received: true,
-            status: "vip_granted",
+            status: "extra_granted",
+            produto: extra.nome,
             email: buyerEmail,
           })
         }
 
-        if (isVipProduct) await registraEventoVip()
+        if (extra) await registraCompra(extra)
 
         if (shouldSetAuthorizedAt) {
           const { error } = await db
@@ -232,22 +298,23 @@ export async function POST(req: NextRequest) {
 
       case "PURCHASE_REFUNDED":
       case "PURCHASE_CHARGEBACK": {
-        // Reembolso da assinatura VIP: perde o grupo e o material, mantém o
-        // portal — o acesso dela vem da compra do Método, que segue de pé.
-        if (isVipProduct) {
-          await registraEventoVip()
+        // Reembolso de um produto extra: perde o extra, mantém o portal — o
+        // acesso dela vem da compra do Método, que segue de pé.
+        if (extra) {
+          await registraCompra(extra)
           const { error } = await db
             .from("authorized_emails")
-            .update({ has_comunidade_vip: false })
+            .update(ligaExtra(extra, false))
             .eq("email", buyerEmail)
           if (error) {
-            console.error("[hotmart] revoke VIP error:", error.message)
+            console.error(`[hotmart] revoke ${extra.nome} error:`, error.message)
             return NextResponse.json({ error: "Database error" }, { status: 500 })
           }
-          console.log(`[hotmart] Comunidade VIP revogada: ${buyerEmail}`)
+          console.log(`[hotmart] ${extra.nome} revogado: ${buyerEmail}`)
           return NextResponse.json({
             received: true,
-            status: "vip_revoked",
+            status: "extra_revoked",
+            produto: extra.nome,
             email: buyerEmail,
           })
         }

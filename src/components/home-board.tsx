@@ -54,6 +54,7 @@ export function HomeBoard({
   banners,
   unlock,
   hasLab,
+  hasDesafio = false,
   temPlantao = false,
   now = new Date(),
 }: {
@@ -62,6 +63,8 @@ export function HomeBoard({
   banners: Banner[]
   unlock: FeatureUnlock
   hasLab: boolean
+  /** Aluna tem o Desafio 21 Dias. */
+  hasDesafio?: boolean
   /**
    * Existe ao menos uma aula aberta publicada. Decide a capa do Plantão na
    * prateleira de quem não assina o Laboratório.
@@ -78,7 +81,7 @@ export function HomeBoard({
       ? "Libera amanhã"
       : `Libera em ${unlock.daysRemaining} dias${unlockDate ? ` · ${unlockDate}` : ""}`
 
-  const products = buildProducts({ hasLab, temPlantao })
+  const products = buildProducts({ hasLab, hasDesafio, temPlantao })
   const owned = products.filter((p) => p.state === "owned")
   const soon = products.filter((p) => p.state !== "owned")
 

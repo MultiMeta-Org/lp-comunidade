@@ -10,7 +10,7 @@ const fetchAuthorizedRow = cache(async (email: string) => {
   const db = createComunidadeServiceClient()
   return db
     .from("authorized_emails")
-    .select("status, authorized_at, buyer_name, has_comunidade_vip")
+    .select("status, authorized_at, buyer_name, has_comunidade_vip, has_desafio")
     .eq("email", email.toLowerCase().trim())
     .maybeSingle()
 })
@@ -106,6 +106,23 @@ export async function hasLab(email: string): Promise<boolean> {
 }
 
 /**
+ * Aluna tem o Desafio 21 Dias — o ambiente de /desafio.
+ *
+ * Produto à parte, com entitlement próprio: compra registrada na Hotmart
+ * (postback no CRM ou no portal) ou cortesia em `comunidade.desafio_grants`.
+ * Ao contrário do Laboratório, NÃO há direito adquirido por data de compra do
+ * Método: o Desafio nasceu como produto próprio e nenhuma compra anterior
+ * prometeu ele a ninguém.
+ *
+ * A coluna `has_desafio` é derivada por `comunidade.refresh_desafio_entitlement`.
+ * Sai da MESMA leitura memoizada do acesso — sem query extra.
+ */
+export async function hasDesafio(email: string): Promise<boolean> {
+  const { data } = await fetchAuthorizedRow(email)
+  return data?.status === "active" && data.has_desafio === true
+}
+
+/**
  * Reconcilia a posse do Laboratório de Vendas para ESTE e-mail, com o que já está no
  * banco (comunidade.refresh_vip_entitlement) — consulta local e barata.
  *
@@ -119,6 +136,22 @@ export async function refreshVipEntitlement(email: string): Promise<void> {
   const { error } = await db.rpc("refresh_vip_entitlement", { p_email: email })
   if (error) {
     console.error("[access] refresh_vip_entitlement falhou:", error.message)
+  }
+}
+
+/**
+ * O mesmo para o Desafio 21 Dias, e pelo mesmo motivo: fechar a janela entre
+ * comprar e ver o produto liberado, sem perguntar à Hotmart no login.
+ *
+ * Roda em paralelo com a do Laboratório (ver a rota de verify-otp) porque são
+ * duas derivações independentes no banco — encadear só somaria latência na
+ * entrada de toda aluna.
+ */
+export async function refreshDesafioEntitlement(email: string): Promise<void> {
+  const db = createComunidadeServiceClient()
+  const { error } = await db.rpc("refresh_desafio_entitlement", { p_email: email })
+  if (error) {
+    console.error("[access] refresh_desafio_entitlement falhou:", error.message)
   }
 }
 

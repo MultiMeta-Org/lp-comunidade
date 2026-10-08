@@ -1,5 +1,10 @@
 import { requireReleasedAccess } from "@/lib/guard"
-import { getFeatureUnlock, getMemberFirstName, hasLab } from "@/lib/access"
+import {
+  getFeatureUnlock,
+  getMemberFirstName,
+  hasDesafio,
+  hasLab,
+} from "@/lib/access"
 import { getLessons } from "@/lib/lessons-server"
 import { getBanners } from "@/lib/banners-server"
 import { SiteHeader } from "@/components/site-header"
@@ -13,10 +18,11 @@ export const metadata = {
 
 export default async function HomePage() {
   const email = await requireReleasedAccess()
-  const [unlock, name, lab, banners] = await Promise.all([
+  const [unlock, name, lab, desafio, banners] = await Promise.all([
     getFeatureUnlock(email),
     getMemberFirstName(email),
     hasLab(email),
+    hasDesafio(email),
     getBanners(),
   ])
 
@@ -34,6 +40,7 @@ export default async function HomePage() {
         banners={banners}
         unlock={unlock}
         hasLab={lab}
+        hasDesafio={desafio}
         temPlantao={lessons.length > 0}
       />
     </div>

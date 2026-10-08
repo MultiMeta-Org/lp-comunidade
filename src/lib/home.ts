@@ -4,6 +4,7 @@ import { LAB_NAME, PLANTAO_NAME } from "@/lib/produto"
 import {
   COMUNIDADE_VIP_HOTMART_URL,
   CRM_URL,
+  DESAFIO_HOTMART_URL,
   LIVE_CLASS_URL,
   LOUVORES_URL,
   MARKETPLACE_URL,
@@ -62,6 +63,9 @@ export type Product = {
 /** Slug do Laboratório na estante. O produto na Hotmart continua o mesmo. */
 export const LAB_SLUG = "laboratorio-de-vendas"
 
+/** Slug do Desafio 21 Dias na estante. */
+export const DESAFIO_SLUG = "desafio-21-dias"
+
 /**
  * Os produtos como esta aluna os vê. Tudo é capa na mesma prateleira — o que
  * muda é o que acontece no clique.
@@ -77,13 +81,36 @@ export const LAB_SLUG = "laboratorio-de-vendas"
  */
 export function buildProducts({
   hasLab,
+  hasDesafio = false,
   temPlantao = false,
 }: {
   hasLab: boolean
+  /** Aluna tem o Desafio 21 Dias (coluna derivada has_desafio). */
+  hasDesafio?: boolean
   /** Existe ao menos uma aula aberta publicada. */
   temPlantao?: boolean
 }): Product[] {
   return PRODUCTS.flatMap((product): Product[] => {
+    // O Desafio ganhou ambiente no portal: quem tem entra, quem não tem vê a
+    // capa travada com o convite. Saiu de "soon", que era o estado de um
+    // produto sem lugar para ir.
+    if (product.slug === DESAFIO_SLUG) {
+      if (hasDesafio) {
+        return [{ ...product, state: "owned", href: "/desafio" }]
+      }
+      // Sem produto na Hotmart ainda, a capa fica travada e inerte: cadeado
+      // para conhecer, sem botão que não leva a lugar nenhum.
+      return [
+        {
+          ...product,
+          state: DESAFIO_HOTMART_URL ? "locked" : "soon",
+          href: DESAFIO_HOTMART_URL ?? undefined,
+          cta: DESAFIO_HOTMART_URL ? "Quero fazer o Desafio" : undefined,
+          meta: "21 dias até o seu primeiro contrato",
+        },
+      ]
+    }
+
     if (product.slug !== LAB_SLUG) return [product]
 
     if (hasLab) {
@@ -141,12 +168,13 @@ const PRODUCTS: Product[] = [
     state: "owned",
   },
   {
-    slug: "desafio-21-dias",
+    slug: DESAFIO_SLUG,
     name: "Desafio 21 Dias",
     kicker: "21 missões",
     meta: "Sua missão do primeiro contrato",
     art: "linear-gradient(155deg,#2A2A2A,#3b332e 55%,#7a4127)",
-    state: "soon",
+    // O destino e o estado são decididos em buildProducts, pela posse.
+    state: "owned",
   },
   {
     slug: "marketplace",
