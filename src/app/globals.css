@@ -154,3 +154,15 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Selo da conquista do Desafio: estampa ao concluir o dia. */
+@keyframes pop {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

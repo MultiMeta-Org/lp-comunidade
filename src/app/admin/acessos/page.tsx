@@ -29,6 +29,7 @@ type EmailRow = {
   authorized_at: string
   buyer_name: string | null
   has_comunidade_vip: boolean
+  has_desafio: boolean
 }
 
 /**
@@ -49,6 +50,7 @@ function toRows(emails: EmailRow[], waitDays: number): AuthorizedRow[] {
         e.status === "revoked" ? "revoked" : now < availableAtMs ? "waiting" : "released",
       availableAt: new Date(availableAtMs).toISOString(),
       hasLab: e.has_comunidade_vip === true,
+      hasDesafio: e.has_desafio === true,
     }
   })
 }
@@ -56,13 +58,20 @@ function toRows(emails: EmailRow[], waitDays: number): AuthorizedRow[] {
 export default async function AcessosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; status?: string; lab?: string }>
+  searchParams: Promise<{
+    q?: string
+    page?: string
+    status?: string
+    lab?: string
+    desafio?: string
+  }>
 }) {
   const sp = await searchParams
   const q = termoBusca(sp.q ?? "")
   const status: Filtro =
     sp.status === "ativos" || sp.status === "revogados" ? sp.status : "todos"
   const lab = sp.lab === "sim" || sp.lab === "nao" ? sp.lab : undefined
+  const desafio = sp.desafio === "sim" || sp.desafio === "nao" ? sp.desafio : undefined
   const page = Math.max(1, Number(sp.page) || 1)
 
   const db = createComunidadeServiceClient()
@@ -70,7 +79,7 @@ export default async function AcessosPage({
   let query = db
     .from("authorized_emails")
     .select(
-      "email, status, source, authorized_at, revoked_at, buyer_name, has_comunidade_vip",
+      "email, status, source, authorized_at, revoked_at, buyer_name, has_comunidade_vip, has_desafio",
       { count: "exact" }
     )
 
@@ -78,6 +87,7 @@ export default async function AcessosPage({
   if (status === "ativos") query = query.eq("status", "active")
   if (status === "revogados") query = query.eq("status", "revoked")
   if (lab) query = query.eq("has_comunidade_vip", lab === "sim")
+  if (desafio) query = query.eq("has_desafio", desafio === "sim")
 
   const desde = (page - 1) * PAGE_SIZE
   const { data, count, error } = await query
@@ -94,7 +104,12 @@ export default async function AcessosPage({
   const base = "/admin/acessos"
   const statusChips: Chip[] = (["todos", "ativos", "revogados"] as const).map((s) => ({
     label: { todos: "Todos", ativos: "Ativos", revogados: "Revogados" }[s],
-    href: hrefCom(base, { q, status: s === "todos" ? undefined : s, lab }),
+    href: hrefCom(base, {
+      q,
+      status: s === "todos" ? undefined : s,
+      lab,
+      desafio,
+    }),
     active: status === s,
   }))
   const labChips: Chip[] = (["sim", "nao"] as const).map((v) => ({
@@ -103,8 +118,19 @@ export default async function AcessosPage({
       q,
       status: status === "todos" ? undefined : status,
       lab: lab === v ? undefined : v,
+      desafio,
     }),
     active: lab === v,
+  }))
+  const desafioChips: Chip[] = (["sim", "nao"] as const).map((v) => ({
+    label: v === "sim" ? "Com o Desafio" : "Sem o Desafio",
+    href: hrefCom(base, {
+      q,
+      status: status === "todos" ? undefined : status,
+      lab,
+      desafio: desafio === v ? undefined : v,
+    }),
+    active: desafio === v,
   }))
 
   return (
@@ -114,7 +140,7 @@ export default async function AcessosPage({
         <p className="mt-1 text-sm text-muted-foreground">
           Compras do Hotmart entram automáticas (liberam {waitDays} dias após a
           compra). Reembolso/chargeback revoga sozinho. Aqui você adiciona à mão
-          e também dá ou tira o {LAB_NAME}.
+          e também dá ou tira o {LAB_NAME} e o Desafio 21 Dias.
         </p>
       </div>
 
@@ -128,12 +154,13 @@ export default async function AcessosPage({
         basePath="/admin/acessos"
         q={q}
         placeholder="Buscar por e-mail ou nome…"
-        hidden={{ status: status === "todos" ? undefined : status, lab }}
+        hidden={{ status: status === "todos" ? undefined : status, lab, desafio }}
         limparHref={hrefCom("/admin/acessos", {
           status: status === "todos" ? undefined : status,
           lab,
+          desafio,
         })}
-        chipGroups={[statusChips, labChips]}
+        chipGroups={[statusChips, labChips, desafioChips]}
       />
 
       <AccessManager rows={rows} />

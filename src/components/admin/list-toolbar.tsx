@@ -72,6 +72,7 @@ export function ListToolbar({
         {q && (
           <Link
             href={limparHref}
+            scroll={false}
             className="text-xs font-semibold text-muted-foreground hover:text-foreground"
           >
             Limpar
@@ -99,6 +100,11 @@ function ChipLink({ chip }: { chip: Chip }) {
   return (
     <Link
       href={chip.href}
+      // Filtrar não é navegar: sem `scroll={false}` o Next joga a página para o
+      // topo a cada chip clicado, tirando da tela justamente a lista que a
+      // pessoa está filtrando. A paginação segue rolando para o topo de
+      // propósito — ali você quer ver o começo da página nova.
+      scroll={false}
       aria-current={chip.active ? "true" : undefined}
       className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
         chip.active

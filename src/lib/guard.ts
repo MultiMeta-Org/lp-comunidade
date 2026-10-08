@@ -2,7 +2,7 @@ import { cache } from "react"
 import { redirect } from "next/navigation"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
-import { getAccessState, hasLab } from "@/lib/access"
+import { getAccessState, hasDesafio, hasLab } from "@/lib/access"
 
 /**
  * E-mail do usuário logado (ou null).
@@ -85,4 +85,30 @@ export async function requireAdmin(): Promise<string> {
   if (!email) redirect("/login?redirect_to=/admin")
   if (!(await isAdmin(email))) redirect("/login?status=admin_only")
   return email
+}
+
+export type DesafioViewer = {
+  email: string
+  /** Admin conferindo o ambiente sem ter comprado. Ver LessonsViewer.admin. */
+  admin: boolean
+}
+
+/**
+ * Guard do ambiente do Desafio (/desafio): exige acesso liberado E a posse do
+ * produto.
+ *
+ * Quem não tem o Desafio vai para a home, não para o login: ela ESTÁ logada e
+ * tem acesso ao portal — o que falta é o produto. Mandar para o login seria
+ * dizer "você não é você" quando o problema é outro. Na home ela encontra a
+ * capa do Desafio com o convite para comprar.
+ *
+ * Admin entra sem ter comprado, para conferir o conteúdo do jeito que a aluna
+ * vê. Como no acervo, isso não é posse do produto: a estante dela segue sem a
+ * capa como "comprada".
+ */
+export async function requireDesafio(): Promise<DesafioViewer> {
+  const email = await requireReleasedAccess()
+  const [desafio, admin] = await Promise.all([hasDesafio(email), isAdmin(email)])
+  if (!desafio && !admin) redirect("/?produto=desafio-21-dias")
+  return { email, admin }
 }

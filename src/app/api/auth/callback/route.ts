@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { getAccessState, refreshVipEntitlement } from "@/lib/access"
+import {
+  getAccessState,
+  refreshDesafioEntitlement,
+  refreshVipEntitlement,
+} from "@/lib/access"
 
 export const runtime = "nodejs"
 
@@ -45,8 +49,8 @@ export async function GET(request: NextRequest) {
     return back(request, `/login?status=${access.reason}`)
   }
 
-  // Quem assinou a Comunidade VIP agora há pouco já entra com ela liberada.
-  await refreshVipEntitlement(email)
+  // Quem comprou um dos produtos agora há pouco já entra com ele liberado.
+  await Promise.all([refreshVipEntitlement(email), refreshDesafioEntitlement(email)])
 
   return back(request, redirectTo)
 }

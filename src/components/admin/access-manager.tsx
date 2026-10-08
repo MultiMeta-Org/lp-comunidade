@@ -10,6 +10,7 @@ import {
   addAuthorizedEmail,
   revokeAccess,
   reactivateAccess,
+  setDesafioAccess,
   setLabAccess,
 } from "@/app/admin/acessos/actions"
 
@@ -21,6 +22,8 @@ export type AuthorizedRow = {
   availableAt: string
   /** Tem a assinatura (coluna has_comunidade_vip, derivada das compras). */
   hasLab: boolean
+  /** Tem o Desafio 21 Dias (coluna has_desafio, derivada das compras). */
+  hasDesafio: boolean
 }
 
 const STATE_LABEL: Record<AuthorizedRow["state"], string> = {
@@ -81,24 +84,38 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
     })
   }
 
-  const toggleLab = (row: AuthorizedRow) => {
+  /**
+   * Dá ou tira um produto à mão.
+   *
+   * Os dois produtos extras compartilham o mesmo botão porque compartilham a
+   * mesma mecânica: a cortesia é gravada numa tabela própria e a coluna é
+   * RECALCULADA. Por isso o aviso depois do clique — tirar a cortesia não
+   * vence uma compra registrada (nem, no caso do Laboratório, o direito
+   * adquirido de quem comprou o Método antes de 23/07/2026), e a derivação
+   * devolve o produto no mesmo instante. Dizer isso é melhor que deixar a Nati
+   * clicando num botão que não obedece.
+   */
+  const togglePosse = (
+    row: AuthorizedRow,
+    produto: "lab" | "desafio"
+  ) => {
     setError("")
     setAviso("")
+    const tinha = produto === "lab" ? row.hasLab : row.hasDesafio
+    const nome = produto === "lab" ? LAB_NAME : "Desafio 21 Dias"
+    const acao = produto === "lab" ? setLabAccess : setDesafioAccess
+
     startTransition(async () => {
-      const res = await setLabAccess(row.email, !row.hasLab)
+      const res = await acao(row.email, !tinha)
       if (!res.ok) {
         setError(res.error)
         return
       }
-      // Tirar a cortesia não vence uma compra registrada nem o direito
-      // adquirido de quem comprou o Método antes de 23/07/2026 — a derivação
-      // devolve o acesso no mesmo instante. Dizer isso é melhor que deixar a
-      // Nati clicando num botão que não obedece.
-      if (!res.has !== !row.hasLab) {
+      if (!res.has !== !tinha) {
         setAviso(
-          row.hasLab
-            ? `${row.email} continua com o ${LAB_NAME}: a cortesia saiu, mas existe compra registrada ou direito adquirido (Método antes de 23/07/2026).`
-            : `${row.email} segue sem o ${LAB_NAME} — a cortesia foi gravada, mas o recálculo não a confirmou. Confira se o e-mail tem acesso ativo.`
+          tinha
+            ? `${row.email} continua com o ${nome}: a cortesia saiu, mas existe compra registrada${produto === "lab" ? " ou direito adquirido (Método antes de 23/07/2026)" : ""}.`
+            : `${row.email} segue sem o ${nome} — a cortesia foi gravada, mas o recálculo não a confirmou. Confira se o e-mail tem acesso ativo.`
         )
       }
     })
@@ -158,13 +175,14 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
               <th className="px-4 py-3 font-semibold">Origem</th>
               <th className="px-4 py-3 font-semibold">Status</th>
               <th className="px-4 py-3 font-semibold">{LAB_NAME}</th>
+              <th className="px-4 py-3 font-semibold">Desafio</th>
               <th className="px-4 py-3 text-right font-semibold">Ações</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
+                <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
                   Nenhum acesso encontrado com esses filtros.
                 </td>
               </tr>
@@ -191,33 +209,20 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
                   )}
                 </td>
                 <td className="px-4 py-3">
-                  <button
-                    type="button"
-                    onClick={() => toggleLab(r)}
+                  <BotaoDePosse
+                    tem={r.hasLab}
+                    nome={LAB_NAME}
                     disabled={pending}
-                    title={
-                      r.hasLab
-                        ? `Tirar o ${LAB_NAME} desta aluna`
-                        : `Dar o ${LAB_NAME} a esta aluna`
-                    }
-                    className={`inline-flex cursor-pointer items-center gap-1.5 rounded px-2 py-0.5 text-[11px] font-semibold transition-colors disabled:opacity-60 ${
-                      r.hasLab
-                        ? "bg-secondary-subtle text-secondary hover:bg-secondary hover:text-secondary-foreground"
-                        : "bg-muted text-muted-foreground hover:bg-accent hover:text-foreground"
-                    }`}
-                  >
-                    {r.hasLab ? (
-                      <>
-                        <Check className="h-3 w-3" />
-                        Tem
-                      </>
-                    ) : (
-                      <>
-                        <Minus className="h-3 w-3" />
-                        Não tem
-                      </>
-                    )}
-                  </button>
+                    onClick={() => togglePosse(r, "lab")}
+                  />
+                </td>
+                <td className="px-4 py-3">
+                  <BotaoDePosse
+                    tem={r.hasDesafio}
+                    nome="Desafio 21 Dias"
+                    disabled={pending}
+                    onClick={() => togglePosse(r, "desafio")}
+                  />
                 </td>
                 <td className="px-4 py-3 text-right">
                   {r.state === "revoked" ? (
@@ -246,5 +251,44 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
         </table>
       </div>
     </div>
+  )
+}
+
+/** O selo clicável de posse de um produto. Mesmo desenho para os dois. */
+function BotaoDePosse({
+  tem,
+  nome,
+  disabled,
+  onClick,
+}: {
+  tem: boolean
+  nome: string
+  disabled: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={tem ? `Tirar o ${nome} desta aluna` : `Dar o ${nome} a esta aluna`}
+      className={`inline-flex cursor-pointer items-center gap-1.5 rounded px-2 py-0.5 text-[11px] font-semibold transition-colors disabled:opacity-60 ${
+        tem
+          ? "bg-secondary-subtle text-secondary hover:bg-secondary hover:text-secondary-foreground"
+          : "bg-muted text-muted-foreground hover:bg-accent hover:text-foreground"
+      }`}
+    >
+      {tem ? (
+        <>
+          <Check className="h-3 w-3" />
+          Tem
+        </>
+      ) : (
+        <>
+          <Minus className="h-3 w-3" />
+          Não tem
+        </>
+      )}
+    </button>
   )
 }

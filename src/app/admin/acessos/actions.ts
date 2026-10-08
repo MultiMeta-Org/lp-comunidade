@@ -137,3 +137,51 @@ export async function setLabAccess(
   revalidateAcessos()
   return { ok: true, has: data?.has_comunidade_vip === true }
 }
+
+/**
+ * Dá ou tira o Desafio 21 Dias à mão.
+ *
+ * Mesma mecânica do Laboratório (ver setLabAccess) e pelo mesmo motivo:
+ * `has_desafio` é derivada, e escrever direto na coluna "funcionaria" até o
+ * próximo sync desfazer. A cortesia vive em comunidade.desafio_grants, que é
+ * o sinal positivo que a derivação respeita.
+ *
+ * Diferença em relação ao Laboratório: aqui NÃO existe direito adquirido. O
+ * Desafio nasceu como produto próprio, então tirar a cortesia de quem não
+ * comprou tira o produto de verdade — e o retorno pós-recálculo serve para a
+ * tela poder dizer quando o clique não bastou (ela tem compra registrada).
+ */
+export async function setDesafioAccess(
+  email: string,
+  has: boolean,
+  motivo = "cortesia dada no admin"
+): Promise<LabResult> {
+  await requireAdmin()
+
+  const normalized = email.toLowerCase().trim()
+  const db = createComunidadeServiceClient()
+
+  if (has) {
+    const { error } = await db
+      .from("desafio_grants")
+      .upsert({ email: normalized, motivo }, { onConflict: "email" })
+    if (error) return { ok: false, error: error.message }
+  } else {
+    const { error } = await db.from("desafio_grants").delete().eq("email", normalized)
+    if (error) return { ok: false, error: error.message }
+  }
+
+  const { error: rpcError } = await db.rpc("refresh_desafio_entitlement", {
+    p_email: normalized,
+  })
+  if (rpcError) return { ok: false, error: rpcError.message }
+
+  const { data } = await db
+    .from("authorized_emails")
+    .select("has_desafio")
+    .eq("email", normalized)
+    .maybeSingle()
+
+  revalidateAcessos()
+  return { ok: true, has: data?.has_desafio === true }
+}

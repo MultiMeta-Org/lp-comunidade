@@ -9,6 +9,17 @@ export const METODO_EVP_URL =
 export const COMUNIDADE_VIP_HOTMART_URL =
   "https://hotmart.com/pt-br/marketplace/produtos/hagsxd-comunidade-vip-evp-j2b07/Y106820903X?sck=HOTMART_PRODUCT_PAGE"
 
+/**
+ * Desafio 21 Dias na Hotmart — onde quem não tem compra.
+ *
+ * `null` enquanto o produto não existir na Hotmart: a capa travada fica inerte,
+ * sem botão. Mandar quem clicou com vontade de comprar para a página de OUTRO
+ * produto é pior que não ter botão, e um 404 é pior ainda. Quando o produto
+ * existir, trocar por aqui — e cadastrar o id em comunidade.desafio_products,
+ * que é o que liga o entitlement.
+ */
+export const DESAFIO_HOTMART_URL: string | null = null
+
 /** Grupo no WhatsApp do Laboratório de Vendas — exclusivo de quem assina. */
 export const WHATSAPP_VIP_URL =
   "https://chat.whatsapp.com/ClfrOZ05MY2K2pOwnxvHDd?s=cl&p=i&mlu=0&ilr=4"
