@@ -340,6 +340,8 @@ function CorpoDoPasso(props: CorpoProps) {
     case "confirma":
       return (
         <Confirmacao
+          // Dois passos `confirma` seguidos não podem herdar as marcas um do outro.
+          key={passo.chave}
           itens={passo.itens}
           marcado={props.respostas[passo.chave] === true}
           onChange={(v) => props.set(passo.chave, v)}
@@ -349,6 +351,7 @@ function CorpoDoPasso(props: CorpoProps) {
     case "copiar":
       return (
         <Copiar
+          key={passo.chave}
           mensagens={passo.mensagens}
           confirmacao={passo.confirmacao}
           marcado={props.respostas[passo.chave] === true}
@@ -781,6 +784,11 @@ function Escala({
  *
  * Declaração, não prova: a missão cobra o que está sob o controle da aluna.
  * Ela controla enviar; não controla receber resposta.
+ *
+ * Cada item tem sua própria marca — "foto adequada" e "nome identificável" são
+ * declarações diferentes. O que vai para as respostas continua sendo um único
+ * booleano, `true` só quando TODOS estão marcados: é o que a validação do
+ * passo e as views do painel já leem, e o banco não precisa saber de itens.
  */
 function Confirmacao({
   itens,
@@ -791,26 +799,35 @@ function Confirmacao({
   marcado: boolean
   onChange: (v: boolean) => void
 }) {
+  // Dia já feito volta com tudo marcado; dia novo, com nada.
+  const [marcados, setMarcados] = useState(() => itens.map(() => marcado))
+
+  function alternar(i: number) {
+    const proximos = marcados.map((m, j) => (j === i ? !m : m))
+    setMarcados(proximos)
+    onChange(proximos.every(Boolean))
+  }
+
   return (
     <div className="flex flex-col gap-2">
-      {itens.map((item) => (
+      {itens.map((item, i) => (
         <button
           key={item}
           type="button"
-          onClick={() => onChange(!marcado)}
-          aria-pressed={marcado}
+          onClick={() => alternar(i)}
+          aria-pressed={marcados[i]}
           className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left text-sm transition-all duration-200 ${
-            marcado
+            marcados[i]
               ? "border-primary bg-primary-subtle font-semibold text-foreground"
               : "border-border bg-card text-muted-foreground hover:border-primary/45 hover:text-foreground"
           }`}
         >
           <span
             className={`grid h-5 w-5 flex-none place-items-center rounded border transition-colors ${
-              marcado ? "border-primary bg-primary text-primary-foreground" : "border-border"
+              marcados[i] ? "border-primary bg-primary text-primary-foreground" : "border-border"
             }`}
           >
-            {marcado && <Check className="h-3 w-3" strokeWidth={3.5} />}
+            {marcados[i] && <Check className="h-3 w-3" strokeWidth={3.5} />}
           </span>
           {item}
         </button>
