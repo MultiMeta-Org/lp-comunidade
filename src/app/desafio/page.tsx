@@ -32,6 +32,7 @@ export default async function DesafioPage() {
   const dia = getDia(atual)
   const feitoHoje = jornada.concluidos.has(atual)
   const feitos = [...jornada.concluidos].filter((d) => d >= 1).length
+  const emMatricula = !jornada.concluidos.has(0)
 
   // O apelido que ELA escolheu na matrícula manda sobre o nome da Hotmart:
   // foi a primeira coisa que o Desafio perguntou, e ignorá-la depois seria
@@ -90,11 +91,19 @@ export default async function DesafioPage() {
             <SemConteudo />
           )}
 
-          {/* A operação vem ANTES dos acessos e DEPOIS da missão: a missão de
-              hoje é o destino do dia; a operação é o que já está em campo. */}
-          <OperacaoDeHoje operacao={operacao} />
+          {/* Na matrícula, a tela é só a matrícula. B.IA, Biblioteca e "Fechei
+              meu primeiro contrato" ao lado do primeiro botão que ela vê geravam
+              dúvida sobre por onde começar — e nenhum deles faz sentido antes de
+              ela existir no Desafio. Concluída a matrícula, tudo volta. */}
+          {!emMatricula && (
+            <>
+              {/* A operação vem ANTES dos acessos e DEPOIS da missão: a missão de
+                  hoje é o destino do dia; a operação é o que já está em campo. */}
+              <OperacaoDeHoje operacao={operacao} />
 
-          <AcessosPermanentes empresas={jornada.empresasNoRadar} />
+              <AcessosPermanentes empresas={jornada.empresasNoRadar} />
+            </>
+          )}
 
           {feitos > 0 && (
             <p className="text-center text-xs text-muted-foreground">

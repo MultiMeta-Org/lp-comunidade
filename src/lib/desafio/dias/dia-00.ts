@@ -22,33 +22,12 @@ export const dia00: Dia = {
   dia: 0,
   kicker: "Comece por aqui",
   titulo: "Que bom que você chegou.",
-  lede: "Hoje você não precisa saber de nada ainda. É só assistir os vídeos e preencher sua matrícula. Eu vou com você no resto.",
+  lede: "Hoje você não precisa saber de nada ainda. É só preencher sua matrícula e assistir os vídeos. Eu vou com você no resto.",
   tempo: "20 minutinhos",
   objetivo:
     "Acolher, explicar a jornada dos 21 dias e a Missão Primeiro Sim, apresentar o portal e colher a matrícula — inclusive o ponto de partida (baseline) que vai ser comparado no Dia 21.",
 
   passos: [
-    {
-      tipo: "video",
-      chave: "video-boas-vindas",
-      label: "Bem-vinda à Empreendedora Anônima",
-      ask: "Assista ao vídeo de boas-vindas.",
-      support:
-        "Assista antes de preencher sua matrícula. Aqui você vai entender como funcionam os próximos 21 dias e como usar sua formação.",
-      nota: "Não precisa anotar nada agora. Depois do vídeo eu te digo exatamente o que fazer.",
-      cta: "Já assisti",
-    },
-    {
-      tipo: "video",
-      chave: "video-tour",
-      label: "Conheça seu Portal — tour rápido",
-      ask: "Agora um tour rápido pelo portal.",
-      support:
-        "Dois minutinhos para você saber onde fica cada coisa: os 21 dias, a Biblioteca, o Radar, a B.IA, o seu progresso e o botão de quando você fechar seu primeiro contrato.",
-      nota: "Todos os dias: assista → execute → registre → avance.",
-      cta: "Já assisti",
-    },
-
     // ── 1. Sobre você ──
     {
       tipo: "formulario",
@@ -301,6 +280,31 @@ export const dia00: Dia = {
             "Hoje, de 0 a 10, quanto você se sente preparada para conduzir uma oportunidade comercial até o fechamento?",
         },
       ],
+    },
+
+    // ── Os vídeos ──
+    // Vêm DEPOIS do formulário, e não antes: quem clica em "Fazer minha
+    // matrícula" espera cair na matrícula. Abrir num vídeo gerava a dúvida
+    // "cadê o formulário?" logo no primeiro clique.
+    {
+      tipo: "video",
+      chave: "video-boas-vindas",
+      label: "Bem-vinda à Empreendedora Anônima",
+      ask: "Assista ao vídeo de boas-vindas.",
+      support:
+        "Matrícula feita. Agora você vai entender como funcionam os próximos 21 dias e como usar sua formação.",
+      nota: "Não precisa anotar nada agora. Depois do vídeo eu te digo exatamente o que fazer.",
+      cta: "Já assisti",
+    },
+    {
+      tipo: "video",
+      chave: "video-tour",
+      label: "Conheça seu Portal — tour rápido",
+      ask: "Agora um tour rápido pelo portal.",
+      support:
+        "Dois minutinhos para você saber onde fica cada coisa: os 21 dias, a Biblioteca, o Radar, a B.IA, o seu progresso e o botão de quando você fechar seu primeiro contrato.",
+      nota: "Todos os dias: assista → execute → registre → avance.",
+      cta: "Já assisti",
     },
 
     // ── Compromisso ──
