@@ -24,6 +24,12 @@ export const DESAFIO_HOTMART_URL: string | null = null
 export const MAPA_URL =
   "https://multi-quiz.com/pt-BR/quiz/4a3facc1-3c75-444a-ace9-374667240007"
 
+/**
+ * Guia de Profissões — o PDF que acompanha o Mapa. Mora em `public/`, mas o
+ * proxy não exclui `.pdf` do matcher: sem sessão, cai no login.
+ */
+export const MAPA_GUIA_PDF_URL = "/produtos/guia-de-profissoes.pdf"
+
 /** Mapa de Direção Profissional na Hotmart — onde quem não tem compra. */
 export const MAPA_HOTMART_URL =
   "https://hotmart.com/pt-br/marketplace/produtos/mapa-de-direcao-profissional/F107937511Y"

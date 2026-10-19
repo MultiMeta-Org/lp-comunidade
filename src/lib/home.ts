@@ -8,7 +8,6 @@ import {
   LIVE_CLASS_URL,
   LOUVORES_URL,
   MAPA_HOTMART_URL,
-  MAPA_URL,
   MARKETPLACE_URL,
   METODO_EVP_URL,
   MULTIQUIZ_URL,
@@ -56,7 +55,8 @@ export type Product = {
   /**
    * A capa abre um seletor em vez de um destino. É o caso do Laboratório, que
    * tem dois ambientes (grupo e material) e nenhum deles é "o principal" —
-   * escolher por ela seria chutar.
+   * escolher por ela seria chutar. E do Mapa, que é o quiz e o Guia de
+   * Profissões em PDF.
    */
   chooser?: boolean
   state: ProductState
@@ -121,9 +121,10 @@ export function buildProducts({
   temPlantao?: boolean
 }): Product[] {
   return PRODUCTS.flatMap((product): Product[] => {
-    // Quem tem abre o quiz; quem não tem vê a capa travada, à venda.
+    // Quem tem escolhe entre o quiz e o Guia em PDF; quem não tem vê a capa
+    // travada, à venda.
     if (product.slug === MAPA_SLUG) {
-      if (hasMapa) return [product]
+      if (hasMapa) return [{ ...product, chooser: true, href: undefined }]
       return [
         {
           ...product,
@@ -200,9 +201,10 @@ const PRODUCTS: Product[] = [
     slug: MAPA_SLUG,
     name: MAPA_NAME,
     kicker: "Seu mapa",
-    meta: "Abrir o seu mapa",
+    meta: "O quiz e o Guia de Profissões",
     art: "linear-gradient(160deg,#6E9493,#2F4F51)",
-    href: MAPA_URL,
+    // Sem destino próprio: quem tem abre o seletor (quiz ou PDF), quem não
+    // tem vai para a Hotmart. Os dois decididos em buildProducts.
     state: "owned",
   },
   {
