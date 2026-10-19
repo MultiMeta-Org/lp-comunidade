@@ -2,7 +2,7 @@ import { cache } from "react"
 import { redirect } from "next/navigation"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
-import { getAccessState, hasDesafio, hasLab } from "@/lib/access"
+import { getAccessState, hasDesafio, hasLab, hasMetodo } from "@/lib/access"
 
 /**
  * E-mail do usuário logado (ou null).
@@ -61,11 +61,19 @@ export type LessonsViewer = {
 /**
  * Guard das páginas de material (/aulas, /dia/[id]): exige acesso liberado e
  * devolve o alcance. Já não redireciona quem não tem a assinatura — ela vê o
- * Plantão Tira Dúvidas, que agora é de todas.
+ * Plantão Tira Dúvidas, que é de toda aluna do Método.
+ *
+ * Quem entrou só pelo Mapa de Direção Profissional não tem nem o Plantão: vai
+ * para a home, onde vê o Método e o Laboratório travados, à venda.
  */
 export async function requireLessonsViewer(): Promise<LessonsViewer> {
   const email = await requireReleasedAccess()
-  const [lab, admin] = await Promise.all([hasLab(email), isAdmin(email)])
+  const [lab, metodo, admin] = await Promise.all([
+    hasLab(email),
+    hasMetodo(email),
+    isAdmin(email),
+  ])
+  if (!lab && !metodo && !admin) redirect("/")
   return { email, scope: lab || admin ? "lab" : "aberto", admin }
 }
 

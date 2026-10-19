@@ -44,6 +44,8 @@ export async function addAuthorizedEmail(
       authorized_at: authorizedAt,
       revoked_at: null,
       buyer_name: opts?.buyerName ?? null,
+      // Liberar à mão é dar o portal inteiro — inclusive para quem tinha só o Mapa.
+      has_metodo: true,
     },
     { onConflict: "email" }
   )

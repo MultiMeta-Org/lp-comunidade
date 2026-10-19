@@ -12,7 +12,9 @@ import { createProxyClient } from "@/lib/supabase/proxy-client"
  *       - liberação (7 dias)  → RLS de comunidade.lessons + guard das páginas
  *       - /admin              → verificação da allowlist no layout do /admin
  *
- * Rotas públicas (excluídas pelo matcher): /login, /api/*, assets estáticos.
+ * Rotas públicas (excluídas pelo matcher): /login, /api/*, assets estáticos e
+ * /testemapadir — o postback do Mapa, no endereço que está cadastrado na
+ * Hotmart. Ela não tem sessão; sem a exceção levaria um redirect para o login.
  */
 export async function proxy(request: NextRequest) {
   const { supabase, response } = createProxyClient(request)
@@ -33,8 +35,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Roda em tudo, exceto: rotas de API, assets do Next, arquivos estáticos e /login.
+  // Roda em tudo, exceto: rotas de API, assets do Next, arquivos estáticos,
+  // /login e o postback do Mapa.
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|login|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|login|testemapadir|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)",
   ],
 }

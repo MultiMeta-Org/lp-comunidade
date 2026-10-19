@@ -36,28 +36,38 @@ type QuickLink = {
  * Laboratório de Vendas e Marketplace não vivem aqui: são produtos, e aparecem como
  * capa na estante lá em cima. Repetir o mesmo destino nas duas superfícies só
  * dobrava a tela sem dar nada novo.
+ *
+ * Aula ao vivo, grupo das alunas e Notion são do Método: quem entrou só pelo
+ * Mapa os vê travados. O resto é aberto para qualquer pessoa.
  */
 export function QuickLinks({
   unlocked,
   lockedNote,
+  hasMetodo = true,
 }: {
   unlocked: boolean
   lockedNote: string | null
+  hasMetodo?: boolean
 }) {
+  const doMetodo = (link: QuickLink): QuickLink =>
+    hasMetodo
+      ? link
+      : { ...link, description: "Vem com o Método EVP", href: undefined, locked: true }
+
   const links: QuickLink[] = [
-    {
+    doMetodo({
       label: "Aula ao vivo",
       description: "Toda sexta às 9h, no Meet",
       icon: Video,
       href: LIVE_CLASS_URL,
-    },
-    {
+    }),
+    doMetodo({
       label: "Todas as Alunas",
       description: "O grupo gratuito",
       icon: MessageCircle,
       href: WHATSAPP_FREE_URL,
-    },
-    {
+    }),
+    doMetodo({
       label: "Notion",
       description: unlocked
         ? "Materiais e modelos"
@@ -65,7 +75,7 @@ export function QuickLinks({
       icon: BookOpen,
       href: unlocked ? NOTION_URL : undefined,
       locked: !unlocked,
-    },
+    }),
     {
       label: "PodProsperar",
       description: "Nosso podcast no Spotify",
