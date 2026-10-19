@@ -63,7 +63,7 @@ export type LessonsViewer = {
  * devolve o alcance. Já não redireciona quem não tem a assinatura — ela vê o
  * Plantão Tira Dúvidas, que é de toda aluna do Método.
  *
- * Quem entrou só pelo Mapa de Direção Profissional não tem nem o Plantão: vai
+ * Quem entrou só pelo Mapa de Transição para o Digital não tem nem o Plantão: vai
  * para a home, onde vê o Método e o Laboratório travados, à venda.
  */
 export async function requireLessonsViewer(): Promise<LessonsViewer> {

@@ -68,7 +68,7 @@ export const LAB_SLUG = "laboratorio-de-vendas"
 /** Slug do Desafio 21 Dias na estante. */
 export const DESAFIO_SLUG = "desafio-21-dias"
 
-/** Slug do Mapa de Direção Profissional na estante. */
+/** Slug do Mapa de Transição para o Digital na estante. */
 export const MAPA_SLUG = "mapa-direcao-profissional"
 
 /**
@@ -98,7 +98,7 @@ const DO_METODO: Record<string, { href: string; cta: string }> = {
  * ao plantão e nenhum jeito de descobrir: liberar no servidor sem mostrar a
  * porta não é dar acesso, é esconder melhor.
  *
- * Quem entrou só pelo Mapa de Direção Profissional tem o Mapa e mais nada: o
+ * Quem entrou só pelo Mapa de Transição para o Digital tem o Mapa e mais nada: o
  * Método e as ferramentas que vêm com ele aparecem travados, cada um levando
  * para a própria página. O Plantão também não — ele é de toda aluna DO
  * MÉTODO. Comprou depois, a coluna liga e a capa destrava sozinha.
@@ -115,7 +115,7 @@ export function buildProducts({
   hasDesafio?: boolean
   /** Aluna tem o Método EVP. False só para quem entrou pelo Mapa. */
   hasMetodo?: boolean
-  /** Aluna tem o Mapa de Direção Profissional. */
+  /** Aluna tem o Mapa de Transição para o Digital. */
   hasMapa?: boolean
   /** Existe ao menos uma aula aberta publicada. */
   temPlantao?: boolean
@@ -131,7 +131,7 @@ export function buildProducts({
           state: "locked",
           href: MAPA_HOTMART_URL,
           cta: "Quero o meu Mapa",
-          meta: "Descubra a sua direção profissional",
+          meta: "Descubra o seu caminho para o digital",
         },
       ]
     }

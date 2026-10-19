@@ -69,7 +69,7 @@ export function HomeBoard({
   hasDesafio?: boolean
   /** Aluna tem o Método EVP. False só para quem entrou pelo Mapa. */
   hasMetodo?: boolean
-  /** Aluna tem o Mapa de Direção Profissional. */
+  /** Aluna tem o Mapa de Transição para o Digital. */
   hasMapa?: boolean
   /**
    * Existe ao menos uma aula aberta publicada. Decide a capa do Plantão na

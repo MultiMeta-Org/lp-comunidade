@@ -31,7 +31,7 @@ export const runtime = "nodejs"
  * Os dois produtos extras são tratados pelo mesmo caminho de código, parametrizado
  * por `EXTRAS` abaixo: a diferença entre eles é dado, não lógica.
  *
- * O Mapa de Direção Profissional NÃO passa por aqui: tem endereço próprio
+ * O Mapa de Transição para o Digital NÃO passa por aqui: tem endereço próprio
  * (/testemapadir), e se o postback dele cair também neste — postback da conta
  * inteira — é ignorado. Tratar aqui seria tratá-lo como Método.
  *

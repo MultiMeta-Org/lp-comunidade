@@ -7,7 +7,7 @@ export const runtime = "nodejs"
 
 /**
  * POST /testemapadir
- * Postback da Hotmart do Mapa de Direção Profissional — o endereço que está
+ * Postback da Hotmart do Mapa de Transição para o Digital — o endereço que está
  * cadastrado no produto, por isso fora de /api (e fora do proxy, ver
  * src/proxy.ts: sem isso a Hotmart levaria um redirect para o /login).
  *

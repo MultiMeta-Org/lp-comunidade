@@ -26,4 +26,4 @@ export const PLANTAO_NAME = "Plantão Tira Dúvidas"
  * a capa dele em "Meus produtos" e o resto travado. No banco é a coluna
  * `comunidade.authorized_emails.has_mapa`.
  */
-export const MAPA_NAME = "Mapa de Direção Profissional"
+export const MAPA_NAME = "Mapa de Transição para o Digital"

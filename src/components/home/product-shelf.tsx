@@ -78,7 +78,7 @@ export function ProductShelf({ products }: { products: Product[] }) {
             <Door
               icon={Compass}
               label="Fazer o quiz"
-              description="Descubra a sua direção profissional"
+              description="Descubra o seu caminho para o digital"
               href={MAPA_URL}
             />
             <Door

@@ -20,7 +20,7 @@ export const COMUNIDADE_VIP_HOTMART_URL =
  */
 export const DESAFIO_HOTMART_URL: string | null = null
 
-/** Mapa de Direção Profissional — o quiz do MultiQuiz que é o produto em si. */
+/** Mapa de Transição para o Digital — o quiz do MultiQuiz que é o produto em si. */
 export const MAPA_URL =
   "https://multi-quiz.com/pt-BR/quiz/4a3facc1-3c75-444a-ace9-374667240007"
 
@@ -30,7 +30,7 @@ export const MAPA_URL =
  */
 export const MAPA_GUIA_PDF_URL = "/produtos/guia-de-profissoes.pdf"
 
-/** Mapa de Direção Profissional na Hotmart — onde quem não tem compra. */
+/** Mapa de Transição para o Digital na Hotmart — onde quem não tem compra. */
 export const MAPA_HOTMART_URL =
   "https://hotmart.com/pt-br/marketplace/produtos/mapa-de-direcao-profissional/F107937511Y"
 
