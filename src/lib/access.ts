@@ -10,7 +10,7 @@ const fetchAuthorizedRow = cache(async (email: string) => {
   const db = createComunidadeServiceClient()
   return db
     .from("authorized_emails")
-    .select("status, authorized_at, buyer_name, has_comunidade_vip, has_desafio")
+    .select("status, authorized_at, buyer_name, has_comunidade_vip, has_desafio, has_metodo, has_mapa")
     .eq("email", email.toLowerCase().trim())
     .maybeSingle()
 })
@@ -120,6 +120,29 @@ export async function hasLab(email: string): Promise<boolean> {
 export async function hasDesafio(email: string): Promise<boolean> {
   const { data } = await fetchAuthorizedRow(email)
   return data?.status === "active" && data.has_desafio === true
+}
+
+/**
+ * Aluna tem o Método EVP.
+ *
+ * Até o Mapa de Direção Profissional, estar no portal ERA ter o Método, e a
+ * coluna nasce true para toda a base. Só é false para quem entrou pelo Mapa
+ * sem o Método — essa vê o Método, as ferramentas e o Plantão travados.
+ *
+ * Sai da MESMA leitura memoizada do acesso — sem query extra.
+ */
+export async function hasMetodo(email: string): Promise<boolean> {
+  const { data } = await fetchAuthorizedRow(email)
+  return data?.status === "active" && data.has_metodo === true
+}
+
+/**
+ * Aluna tem o Mapa de Direção Profissional. Não é derivada: só o postback em
+ * /testemapadir escreve a coluna.
+ */
+export async function hasMapa(email: string): Promise<boolean> {
+  const { data } = await fetchAuthorizedRow(email)
+  return data?.status === "active" && data.has_mapa === true
 }
 
 /**

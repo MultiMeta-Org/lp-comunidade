@@ -55,6 +55,8 @@ export function HomeBoard({
   unlock,
   hasLab,
   hasDesafio = false,
+  hasMetodo = true,
+  hasMapa = false,
   temPlantao = false,
   now = new Date(),
 }: {
@@ -65,6 +67,10 @@ export function HomeBoard({
   hasLab: boolean
   /** Aluna tem o Desafio 21 Dias. */
   hasDesafio?: boolean
+  /** Aluna tem o Método EVP. False só para quem entrou pelo Mapa. */
+  hasMetodo?: boolean
+  /** Aluna tem o Mapa de Direção Profissional. */
+  hasMapa?: boolean
   /**
    * Existe ao menos uma aula aberta publicada. Decide a capa do Plantão na
    * prateleira de quem não assina o Laboratório.
@@ -81,7 +87,7 @@ export function HomeBoard({
       ? "Libera amanhã"
       : `Libera em ${unlock.daysRemaining} dias${unlockDate ? ` · ${unlockDate}` : ""}`
 
-  const products = buildProducts({ hasLab, hasDesafio, temPlantao })
+  const products = buildProducts({ hasLab, hasDesafio, hasMetodo, hasMapa, temPlantao })
   const owned = products.filter((p) => p.state === "owned")
   const soon = products.filter((p) => p.state !== "owned")
 
@@ -128,7 +134,11 @@ export function HomeBoard({
           {/* ── O que ela ainda vai conhecer ── */}
           {soon.length > 0 && (
             <>
-              <SectionLabel className="mt-12" delay={130} hint="em breve no portal">
+              <SectionLabel
+                className="mt-12"
+                delay={130}
+                hint={hasMetodo ? "em breve no portal" : undefined}
+              >
                 Para conhecer
               </SectionLabel>
               <div
@@ -148,7 +158,7 @@ export function HomeBoard({
             Links que você usa sempre
           </SectionLabel>
           <div className="animate-rise mt-4" style={{ "--d": "230ms" } as React.CSSProperties}>
-            <QuickLinks unlocked={unlock.unlocked} lockedNote={lockedNote} />
+            <QuickLinks unlocked={unlock.unlocked} lockedNote={lockedNote} hasMetodo={hasMetodo} />
           </div>
 
           <footer className="mt-14 flex items-center justify-center gap-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">

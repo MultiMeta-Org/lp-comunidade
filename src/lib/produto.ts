@@ -20,3 +20,10 @@ export const MATERIAL_NAME = "Material de Aulas"
  * `comunidade.lessons.open_to_all`.
  */
 export const PLANTAO_NAME = "Plantão Tira Dúvidas"
+
+/**
+ * O primeiro produto que dá o portal sem o Método EVP. Quem compra só ele vê
+ * a capa dele em "Meus produtos" e o resto travado. No banco é a coluna
+ * `comunidade.authorized_emails.has_mapa`.
+ */
+export const MAPA_NAME = "Mapa de Direção Profissional"

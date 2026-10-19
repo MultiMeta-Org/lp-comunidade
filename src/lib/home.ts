@@ -1,12 +1,13 @@
 import type { Lesson } from "@/lib/lessons"
 import type { Banner } from "@/lib/banners-server"
-import { LAB_NAME, PLANTAO_NAME } from "@/lib/produto"
+import { LAB_NAME, MAPA_NAME, PLANTAO_NAME } from "@/lib/produto"
 import {
   COMUNIDADE_VIP_HOTMART_URL,
   CRM_URL,
   DESAFIO_HOTMART_URL,
   LIVE_CLASS_URL,
   LOUVORES_URL,
+  MAPA_URL,
   MARKETPLACE_URL,
   METODO_EVP_URL,
   MULTIQUIZ_URL,
@@ -66,6 +67,23 @@ export const LAB_SLUG = "laboratorio-de-vendas"
 /** Slug do Desafio 21 Dias na estante. */
 export const DESAFIO_SLUG = "desafio-21-dias"
 
+/** Slug do Mapa de Direção Profissional na estante. */
+export const MAPA_SLUG = "mapa-direcao-profissional"
+
+/**
+ * O que vem com o Método — e o convite de cada um para quem entrou só pelo
+ * Mapa. Marketplace e CRM não se compram à parte: a aluna do Método ganha os
+ * dois na hora. Por isso as capas deles levam para a compra do Método, que é
+ * o único jeito de tê-los. O MultiQuiz é vendido sozinho e leva para a página
+ * dele.
+ */
+const DO_METODO: Record<string, { href: string; cta: string }> = {
+  "metodo-evp": { href: METODO_EVP_URL, cta: "Conhecer o Método" },
+  marketplace: { href: METODO_EVP_URL, cta: "Vem com o Método" },
+  multiquiz: { href: MULTIQUIZ_URL, cta: "Conhecer o MultiQuiz" },
+  crm: { href: METODO_EVP_URL, cta: "Vem com o Método" },
+}
+
 /**
  * Os produtos como esta aluna os vê. Tudo é capa na mesma prateleira — o que
  * muda é o que acontece no clique.
@@ -78,19 +96,39 @@ export const DESAFIO_SLUG = "desafio-21-dias"
  * do Plantão Tira Dúvidas, que É dela. Sem essa capa, a aluna teria o direito
  * ao plantão e nenhum jeito de descobrir: liberar no servidor sem mostrar a
  * porta não é dar acesso, é esconder melhor.
+ *
+ * Quem entrou só pelo Mapa de Direção Profissional tem o Mapa e mais nada: o
+ * Método e as ferramentas que vêm com ele aparecem travados, cada um levando
+ * para a própria página. O Plantão também não — ele é de toda aluna DO
+ * MÉTODO. Comprou depois, a coluna liga e a capa destrava sozinha.
  */
 export function buildProducts({
   hasLab,
   hasDesafio = false,
+  hasMetodo = true,
+  hasMapa = false,
   temPlantao = false,
 }: {
   hasLab: boolean
   /** Aluna tem o Desafio 21 Dias (coluna derivada has_desafio). */
   hasDesafio?: boolean
+  /** Aluna tem o Método EVP. False só para quem entrou pelo Mapa. */
+  hasMetodo?: boolean
+  /** Aluna tem o Mapa de Direção Profissional. */
+  hasMapa?: boolean
   /** Existe ao menos uma aula aberta publicada. */
   temPlantao?: boolean
 }): Product[] {
   return PRODUCTS.flatMap((product): Product[] => {
+    // Sem página de venda, o Mapa só aparece para quem tem: uma capa travada
+    // sem destino não diria nada a quem é do Método.
+    if (product.slug === MAPA_SLUG) return hasMapa ? [product] : []
+
+    const doMetodo = DO_METODO[product.slug]
+    if (doMetodo) {
+      return hasMetodo ? [product] : [{ ...product, state: "locked", ...doMetodo }]
+    }
+
     // O Desafio ganhou ambiente no portal: quem tem entra, quem não tem vê a
     // capa travada com o convite. Saiu de "soon", que era o estado de um
     // produto sem lugar para ir.
@@ -126,7 +164,7 @@ export function buildProducts({
       cta: "Assinar na Hotmart",
       meta: "Grupo no WhatsApp e material das aulas",
     }
-    return temPlantao ? [PLANTAO, travado] : [travado]
+    return temPlantao && hasMetodo ? [PLANTAO, travado] : [travado]
   })
 }
 
@@ -147,6 +185,15 @@ const PLANTAO: Product = {
 }
 
 const PRODUCTS: Product[] = [
+  {
+    slug: MAPA_SLUG,
+    name: MAPA_NAME,
+    kicker: "Seu mapa",
+    meta: "Abrir o seu mapa",
+    art: "linear-gradient(160deg,#6E9493,#2F4F51)",
+    href: MAPA_URL,
+    state: "owned",
+  },
   {
     slug: "metodo-evp",
     name: "Método EVP",

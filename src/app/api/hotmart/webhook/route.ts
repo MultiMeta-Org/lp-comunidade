@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
+import { lerPostback } from "@/lib/hotmart-postback"
 
 export const runtime = "nodejs"
 
@@ -30,22 +31,15 @@ export const runtime = "nodejs"
  * Os dois produtos extras são tratados pelo mesmo caminho de código, parametrizado
  * por `EXTRAS` abaixo: a diferença entre eles é dado, não lógica.
  *
+ * O Mapa de Direção Profissional NÃO passa por aqui: tem endereço próprio
+ * (/testemapadir), e se o postback dele cair também neste — postback da conta
+ * inteira — é ignorado. Tratar aqui seria tratá-lo como Método.
+ *
+ * Por isso a compra do Método liga `has_metodo` (que só é false para quem
+ * entrou pelo Mapa), e o reembolso dele não revoga o portal de quem tem o Mapa.
+ *
  * Configurar no Hotmart o header `x-hotmart-hottok` = HOTMART_HOTTOK.
  */
-
-/**
- * Evento de teste do painel da Hotmart (o botão "enviar evento de teste").
- *
- * Eles vêm com comprador e produto fictícios e passam pelo hottok igual a um
- * evento real — já criaram uma aluna fantasma na base uma vez. Como o portal
- * cria acesso a partir do webhook, teste precisa morrer na porta.
- */
-function ehEventoDeTeste(email: string, productId: string | null): boolean {
-  if (/@example\.com$/i.test(email)) return true
-  if (/^teste?@hotmart\.com(\.br)?$/i.test(email)) return true
-  // Ids que a Hotmart usa nos disparos de teste.
-  return productId !== null && ["0", "123456", "99999"].includes(productId)
-}
 
 /**
  * Os produtos que o portal libera ALÉM do acesso em si.
@@ -87,62 +81,18 @@ function ligaExtra(alvo: Extra, valor: boolean): Partial<Record<Extra["coluna"],
   return { [alvo.coluna]: valor }
 }
 
-interface HotmartPayload {
-  id?: string
-  event?: string
-  data?: {
-    product?: { id?: number }
-    purchase?: { transaction?: string; order_date?: number }
-    buyer?: {
-      email?: string
-      name?: string
-      first_name?: string
-      last_name?: string
-      phone?: string
-    }
-  }
-}
-
 export async function POST(req: NextRequest) {
-  // 1. Valida o hottok.
-  const hottok = req.headers.get("x-hotmart-hottok")
-  const expected = process.env.HOTMART_HOTTOK
-  if (!expected || !hottok || hottok !== expected) {
-    console.error("[hotmart] hottok inválido ou ausente")
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  let body: HotmartPayload
-  try {
-    body = (await req.json()) as HotmartPayload
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
-  }
-
-  const buyerEmail = body.data?.buyer?.email?.toLowerCase().trim()
-  if (!buyerEmail) {
-    return NextResponse.json({ received: true, ignored: true, reason: "No buyer email" })
-  }
-
-  const buyerName =
-    body.data?.buyer?.name ||
-    `${body.data?.buyer?.first_name || ""} ${body.data?.buyer?.last_name || ""}`.trim() ||
-    null
-  const buyerPhone = body.data?.buyer?.phone || null
-  const transactionId = body.data?.purchase?.transaction || null
-  const productId = body.data?.product?.id?.toString() || null
-
-  // order_date (ms desde epoch) = data real da compra; ancora o gate de 7 dias.
-  const orderDateMs = body.data?.purchase?.order_date
-  const purchaseTimestamp =
-    typeof orderDateMs === "number" && orderDateMs > 0
-      ? new Date(orderDateMs).toISOString()
-      : new Date().toISOString()
-
-  if (ehEventoDeTeste(buyerEmail, productId)) {
-    console.log(`[hotmart] evento de teste ignorado: ${body.event} · ${buyerEmail}`)
-    return NextResponse.json({ received: true, ignored: true, reason: "test event" })
-  }
+  const lido = await lerPostback(req, "hotmart")
+  if ("resposta" in lido) return lido.resposta
+  const {
+    event,
+    buyerEmail,
+    buyerName,
+    buyerPhone,
+    transactionId,
+    productId,
+    purchaseTimestamp,
+  } = lido.postback
 
   const db = createComunidadeServiceClient()
 
@@ -168,6 +118,20 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // O Mapa tem rota própria (/testemapadir). Se o mesmo postback cair aqui,
+  // seguir em frente o trataria como Método e daria o portal inteiro.
+  if (productId && !extra) {
+    const { data: mapa } = await db
+      .from("mapa_products")
+      .select("hotmart_product_id")
+      .eq("hotmart_product_id", productId)
+      .maybeSingle()
+    if (mapa) {
+      console.log(`[hotmart] ${event} · Mapa (tratado em /testemapadir) · ${buyerEmail}`)
+      return NextResponse.json({ received: true, ignored: true, reason: "mapa" })
+    }
+  }
+
   /**
    * Guarda o evento para a derivação enxergar o que o PORTAL recebeu.
    *
@@ -180,7 +144,7 @@ export async function POST(req: NextRequest) {
       email: buyerEmail,
       hotmart_product_id: productId,
       transaction_id: transactionId,
-      event_type: body.event ?? "DESCONHECIDO",
+      event_type: event ?? "DESCONHECIDO",
       occurred_at: purchaseTimestamp,
     })
     // Postback repetido cai no índice único por (e-mail, transação, evento):
@@ -193,11 +157,11 @@ export async function POST(req: NextRequest) {
   // O id do produto sai no log de todo evento: é assim que se descobre o
   // número de uma oferta nova para cadastrar na tabela dela.
   console.log(
-    `[hotmart] ${body.event} · produto ${productId ?? "?"}${extra ? ` (${extra.nome})` : ""} · ${buyerEmail}`
+    `[hotmart] ${event} · produto ${productId ?? "?"}${extra ? ` (${extra.nome})` : ""} · ${buyerEmail}`
   )
 
   try {
-    switch (body.event) {
+    switch (event) {
       case "PURCHASE_APPROVED":
       case "PURCHASE_COMPLETE": {
         const { data: existing, error: fetchError } = await db
@@ -224,10 +188,9 @@ export async function POST(req: NextRequest) {
           buyer_name: buyerName,
           phone: buyerPhone,
           revoked_at: null,
-          // Compra de um produto extra liga a coluna dele. Compra de outro
-          // produto não mexe em nada: quem já tem o grupo não o perde
-          // comprando mais.
-          ...(extra ? ligaExtra(extra, true) : {}),
+          // Compra de um produto extra liga a coluna dele; qualquer outra é o
+          // Método. Quem já tem o grupo não o perde comprando mais.
+          ...(extra ? ligaExtra(extra, true) : { has_metodo: true }),
         }
 
         // Aluna que já tinha o Método e agora comprou o extra: só liga a
@@ -319,6 +282,26 @@ export async function POST(req: NextRequest) {
           })
         }
 
+        // Reembolso do Método de quem tem o Mapa: perde o Método, fica no
+        // portal — o Mapa dela segue de pé e é ele que dá a entrada.
+        const { data: linha } = await db
+          .from("authorized_emails")
+          .select("has_mapa")
+          .eq("email", buyerEmail)
+          .maybeSingle()
+        if (linha?.has_mapa) {
+          const { error } = await db
+            .from("authorized_emails")
+            .update({ has_metodo: false })
+            .eq("email", buyerEmail)
+          if (error) {
+            console.error("[hotmart] revoke Método error:", error.message)
+            return NextResponse.json({ error: "Database error" }, { status: 500 })
+          }
+          console.log(`[hotmart] Método revogado, Mapa mantém o portal: ${buyerEmail}`)
+          return NextResponse.json({ received: true, status: "metodo_revoked", email: buyerEmail })
+        }
+
         const { error } = await db
           .from("authorized_emails")
           .update({ status: "revoked", revoked_at: new Date().toISOString() })
@@ -332,7 +315,7 @@ export async function POST(req: NextRequest) {
       }
 
       default:
-        console.log(`[hotmart] evento ignorado: ${body.event}`)
+        console.log(`[hotmart] evento ignorado: ${event}`)
         return NextResponse.json({ received: true, ignored: true })
     }
   } catch (error) {

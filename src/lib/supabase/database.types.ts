@@ -43,6 +43,10 @@ export interface Database {
           has_comunidade_vip: boolean
           /** Posse do Desafio 21 Dias. DERIVADA — ver refresh_desafio_entitlement. */
           has_desafio: boolean
+          /** Posse do Método EVP. False só para quem entrou pelo Mapa sem o Método. */
+          has_metodo: boolean
+          /** Posse do Mapa de Direção Profissional. Escrita só por /testemapadir. */
+          has_mapa: boolean
           created_at: string
         }
         Insert: {
@@ -58,6 +62,8 @@ export interface Database {
           phone?: string | null
           has_comunidade_vip?: boolean
           has_desafio?: boolean
+          has_metodo?: boolean
+          has_mapa?: boolean
           created_at?: string
         }
         Update: Partial<Database["comunidade"]["Tables"]["authorized_emails"]["Insert"]>
@@ -310,6 +316,38 @@ export interface Database {
           created_at?: string
         }
         Update: Partial<Database["comunidade"]["Tables"]["desafio_purchases"]["Insert"]>
+        Relationships: []
+      }
+      /** Ids da Hotmart do Mapa de Direção Profissional (cadastro automático). */
+      mapa_products: {
+        Row: { hotmart_product_id: string; label: string | null; created_at: string }
+        Insert: { hotmart_product_id: string; label?: string | null; created_at?: string }
+        Update: Partial<Database["comunidade"]["Tables"]["mapa_products"]["Insert"]>
+        Relationships: []
+      }
+      /** Postbacks do Mapa recebidos em /testemapadir. */
+      mapa_purchases: {
+        Row: {
+          id: string
+          email: string
+          hotmart_product_id: string | null
+          transaction_id: string | null
+          event_type: string
+          origem: string
+          occurred_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          hotmart_product_id?: string | null
+          transaction_id?: string | null
+          event_type: string
+          origem?: string
+          occurred_at?: string
+          created_at?: string
+        }
+        Update: Partial<Database["comunidade"]["Tables"]["mapa_purchases"]["Insert"]>
         Relationships: []
       }
       /**
