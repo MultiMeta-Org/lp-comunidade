@@ -7,6 +7,7 @@ import {
   DESAFIO_HOTMART_URL,
   LIVE_CLASS_URL,
   LOUVORES_URL,
+  MAPA_HOTMART_URL,
   MAPA_URL,
   MARKETPLACE_URL,
   METODO_EVP_URL,
@@ -120,9 +121,19 @@ export function buildProducts({
   temPlantao?: boolean
 }): Product[] {
   return PRODUCTS.flatMap((product): Product[] => {
-    // Sem página de venda, o Mapa só aparece para quem tem: uma capa travada
-    // sem destino não diria nada a quem é do Método.
-    if (product.slug === MAPA_SLUG) return hasMapa ? [product] : []
+    // Quem tem abre o quiz; quem não tem vê a capa travada, à venda.
+    if (product.slug === MAPA_SLUG) {
+      if (hasMapa) return [product]
+      return [
+        {
+          ...product,
+          state: "locked",
+          href: MAPA_HOTMART_URL,
+          cta: "Quero o meu Mapa",
+          meta: "Descubra a sua direção profissional",
+        },
+      ]
+    }
 
     const doMetodo = DO_METODO[product.slug]
     if (doMetodo) {
