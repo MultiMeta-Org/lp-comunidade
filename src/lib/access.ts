@@ -125,7 +125,7 @@ export async function hasDesafio(email: string): Promise<boolean> {
 /**
  * Aluna tem o Método EVP.
  *
- * Até o Mapa de Direção Profissional, estar no portal ERA ter o Método, e a
+ * Até o Mapa de Transição para o Digital, estar no portal ERA ter o Método, e a
  * coluna nasce true para toda a base. Só é false para quem entrou pelo Mapa
  * sem o Método — essa vê o Método, as ferramentas e o Plantão travados.
  *
@@ -137,7 +137,7 @@ export async function hasMetodo(email: string): Promise<boolean> {
 }
 
 /**
- * Aluna tem o Mapa de Direção Profissional. Não é derivada: só o postback em
+ * Aluna tem o Mapa de Transição para o Digital. Não é derivada: só o postback em
  * /testemapadir escreve a coluna.
  */
 export async function hasMapa(email: string): Promise<boolean> {

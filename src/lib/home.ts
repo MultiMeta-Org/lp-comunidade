@@ -8,7 +8,6 @@ import {
   LIVE_CLASS_URL,
   LOUVORES_URL,
   MAPA_HOTMART_URL,
-  MAPA_URL,
   MARKETPLACE_URL,
   METODO_EVP_URL,
   MULTIQUIZ_URL,
@@ -56,7 +55,8 @@ export type Product = {
   /**
    * A capa abre um seletor em vez de um destino. É o caso do Laboratório, que
    * tem dois ambientes (grupo e material) e nenhum deles é "o principal" —
-   * escolher por ela seria chutar.
+   * escolher por ela seria chutar. E do Mapa, que é o quiz e o Guia de
+   * Profissões em PDF.
    */
   chooser?: boolean
   state: ProductState
@@ -68,7 +68,7 @@ export const LAB_SLUG = "laboratorio-de-vendas"
 /** Slug do Desafio 21 Dias na estante. */
 export const DESAFIO_SLUG = "desafio-21-dias"
 
-/** Slug do Mapa de Direção Profissional na estante. */
+/** Slug do Mapa de Transição para o Digital na estante. */
 export const MAPA_SLUG = "mapa-direcao-profissional"
 
 /**
@@ -98,7 +98,7 @@ const DO_METODO: Record<string, { href: string; cta: string }> = {
  * ao plantão e nenhum jeito de descobrir: liberar no servidor sem mostrar a
  * porta não é dar acesso, é esconder melhor.
  *
- * Quem entrou só pelo Mapa de Direção Profissional tem o Mapa e mais nada: o
+ * Quem entrou só pelo Mapa de Transição para o Digital tem o Mapa e mais nada: o
  * Método e as ferramentas que vêm com ele aparecem travados, cada um levando
  * para a própria página. O Plantão também não — ele é de toda aluna DO
  * MÉTODO. Comprou depois, a coluna liga e a capa destrava sozinha.
@@ -115,22 +115,23 @@ export function buildProducts({
   hasDesafio?: boolean
   /** Aluna tem o Método EVP. False só para quem entrou pelo Mapa. */
   hasMetodo?: boolean
-  /** Aluna tem o Mapa de Direção Profissional. */
+  /** Aluna tem o Mapa de Transição para o Digital. */
   hasMapa?: boolean
   /** Existe ao menos uma aula aberta publicada. */
   temPlantao?: boolean
 }): Product[] {
   return PRODUCTS.flatMap((product): Product[] => {
-    // Quem tem abre o quiz; quem não tem vê a capa travada, à venda.
+    // Quem tem escolhe entre o quiz e o Guia em PDF; quem não tem vê a capa
+    // travada, à venda.
     if (product.slug === MAPA_SLUG) {
-      if (hasMapa) return [product]
+      if (hasMapa) return [{ ...product, chooser: true, href: undefined }]
       return [
         {
           ...product,
           state: "locked",
           href: MAPA_HOTMART_URL,
           cta: "Quero o meu Mapa",
-          meta: "Descubra a sua direção profissional",
+          meta: "Descubra o seu caminho para o digital",
         },
       ]
     }
@@ -200,9 +201,10 @@ const PRODUCTS: Product[] = [
     slug: MAPA_SLUG,
     name: MAPA_NAME,
     kicker: "Seu mapa",
-    meta: "Abrir o seu mapa",
+    meta: "O quiz e o Guia de Profissões",
     art: "linear-gradient(160deg,#6E9493,#2F4F51)",
-    href: MAPA_URL,
+    // Sem destino próprio: quem tem abre o seletor (quiz ou PDF), quem não
+    // tem vai para a Hotmart. Os dois decididos em buildProducts.
     state: "owned",
   },
   {

@@ -3,10 +3,17 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowUpRight, BookOpen, Lock, MessageCircle } from "lucide-react"
-import type { Product } from "@/lib/home"
-import { WHATSAPP_VIP_URL } from "@/lib/links"
-import { LAB_NAME, MATERIAL_NAME } from "@/lib/produto"
+import {
+  ArrowUpRight,
+  BookOpen,
+  Compass,
+  Download,
+  Lock,
+  MessageCircle,
+} from "lucide-react"
+import { LAB_SLUG, MAPA_SLUG, type Product } from "@/lib/home"
+import { MAPA_GUIA_PDF_URL, MAPA_URL, WHATSAPP_VIP_URL } from "@/lib/links"
+import { LAB_NAME, MAPA_NAME, MATERIAL_NAME } from "@/lib/produto"
 import { Modal } from "@/components/ui/modal"
 
 /**
@@ -20,10 +27,13 @@ import { Modal } from "@/components/ui/modal"
  *
  * E o quarto: `chooser`. O Laboratório tem dois ambientes dentro do portal, e
  * a capa abre a escolha entre eles — por isso este arquivo é client: a capa
- * precisa de estado para o diálogo.
+ * precisa de estado para o diálogo. O Mapa usa o mesmo seletor para o quiz e o
+ * Guia de Profissões em PDF.
  */
 export function ProductShelf({ products }: { products: Product[] }) {
-  const [escolhendo, setEscolhendo] = useState(false)
+  // Slug da capa cujo seletor está aberto. Um por vez.
+  const [escolhendo, setEscolhendo] = useState<string | null>(null)
+  const fechar = () => setEscolhendo(null)
 
   return (
     <>
@@ -32,13 +42,13 @@ export function ProductShelf({ products }: { products: Product[] }) {
           <ProductCard
             key={product.slug}
             product={product}
-            onChoose={() => setEscolhendo(true)}
+            onChoose={() => setEscolhendo(product.slug)}
           />
         ))}
       </div>
 
-      {escolhendo && (
-        <Modal title={LAB_NAME} size="sm" onClose={() => setEscolhendo(false)}>
+      {escolhendo === LAB_SLUG && (
+        <Modal title={LAB_NAME} size="sm" onClose={fechar}>
           <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
             Sua assinatura tem dois lugares. Por onde você quer entrar?
           </p>
@@ -54,6 +64,29 @@ export function ProductShelf({ products }: { products: Product[] }) {
               label={MATERIAL_NAME}
               description="Vídeos, áudios e PDFs de todas as aulas"
               href="/aulas"
+            />
+          </div>
+        </Modal>
+      )}
+
+      {escolhendo === MAPA_SLUG && (
+        <Modal title={MAPA_NAME} size="sm" onClose={fechar}>
+          <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+            Seu Mapa vem em duas partes. Por onde você quer começar?
+          </p>
+          <div className="grid gap-3">
+            <Door
+              icon={Compass}
+              label="Fazer o quiz"
+              description="Descubra o seu caminho para o digital"
+              href={MAPA_URL}
+            />
+            <Door
+              icon={Download}
+              label="Guia de Profissões"
+              description="Baixar o PDF"
+              href={MAPA_GUIA_PDF_URL}
+              download
             />
           </div>
         </Modal>
@@ -182,19 +215,24 @@ function ProductCard({
 }
 
 /**
- * Uma das portas do Laboratório, dentro do seletor. Mesma linguagem das capas:
- * lavagem terracota, a cor do produto.
+ * Uma das portas do seletor (Laboratório ou Mapa). Mesma linguagem das capas:
+ * lavagem terracota, a cor da marca.
+ *
+ * `download` é para arquivo: `<a download>` direto, sem `Link` (que tentaria
+ * navegar no client) e sem nova aba.
  */
 function Door({
   icon: Icon,
   label,
   description,
   href,
+  download = false,
 }: {
   icon: React.ElementType
   label: string
   description: string
   href: string
+  download?: boolean
 }) {
   const interno = href.startsWith("/")
 
@@ -228,6 +266,14 @@ function Door({
 
   const base =
     "group relative isolate flex items-start gap-4 overflow-hidden rounded-2xl border border-secondary/25 bg-card p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+
+  if (download) {
+    return (
+      <a href={href} download className={base}>
+        {body}
+      </a>
+    )
+  }
 
   if (interno) {
     return (
