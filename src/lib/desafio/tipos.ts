@@ -81,8 +81,14 @@ type Base = {
 
 export type Passo =
   /** Assistir. `videoUrl` ausente = o vídeo ainda não foi gravado (ver
-   *  `diaPublicado`), e o passo mostra a cartela com o rótulo. */
-  | (Base & { tipo: "video"; label: string; videoUrl?: string })
+   *  `diaPublicado`), e o passo mostra a cartela com o rótulo. `formato`
+   *  é a proporção da gravação: as da Nati são de celular, em pé (9:16). */
+  | (Base & {
+      tipo: "video"
+      label: string
+      videoUrl?: string
+      formato?: "horizontal" | "vertical"
+    })
   /** Uma ou mais perguntas numa tela. */
   | (Base & { tipo: "formulario"; campos: readonly Campo[] })
   /** Só ler: resumo do dia, princípio, "guarde isso". Nada a responder. */

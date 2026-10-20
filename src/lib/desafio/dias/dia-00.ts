@@ -290,6 +290,8 @@ export const dia00: Dia = {
       tipo: "video",
       chave: "video-boas-vindas",
       label: "Bem-vinda à Empreendedora Anônima",
+      videoUrl: "https://drive.google.com/file/d/1FC8J9iPn1YD-909M40BF6I3-T9q5aL-T/view",
+      formato: "vertical",
       ask: "Assista ao vídeo de boas-vindas.",
       support:
         "Matrícula feita. Agora você vai entender como funcionam os próximos 21 dias e como usar sua formação.",

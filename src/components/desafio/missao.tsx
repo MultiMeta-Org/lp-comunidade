@@ -16,6 +16,7 @@ import {
 } from "@/app/desafio/actions"
 import type { Empresa, Operacao } from "@/lib/desafio-server"
 import { Celebracao } from "@/components/desafio/celebracao"
+import { isDirectVideoFile, toVideoEmbedUrl } from "@/lib/lessons"
 
 /**
  * O motor da missão: um passo por tela.
@@ -329,7 +330,9 @@ function CorpoDoPasso(props: CorpoProps) {
 
   switch (passo.tipo) {
     case "video":
-      return <Video label={passo.label} src={passo.videoUrl} />
+      return (
+        <Video label={passo.label} src={passo.videoUrl} formato={passo.formato} />
+      )
 
     case "leitura":
       return <Leitura corpo={passo.corpo} destaque={passo.destaque} />
@@ -481,7 +484,15 @@ function Diagnostico({
  * dia cujo texto já está escrito e cuja gravação ainda não existe, e dizer
  * isso é melhor que um player quebrado.
  */
-function Video({ label, src }: { label: string; src?: string }) {
+function Video({
+  label,
+  src,
+  formato = "horizontal",
+}: {
+  label: string
+  src?: string
+  formato?: "horizontal" | "vertical"
+}) {
   if (!src) {
     return (
       <div className="flex items-center gap-3.5 rounded-[18px] border border-dashed border-border bg-muted/60 px-4 py-5 sm:gap-4 sm:px-5 sm:py-6">
@@ -497,15 +508,42 @@ function Video({ label, src }: { label: string; src?: string }) {
       </div>
     )
   }
+
+  // Vertical: a largura sai da altura da tela, para o vídeo inteiro caber sem
+  // rolar — no notebook ele não estica até 672px de largura e 1200px de altura.
+  const quadro =
+    formato === "vertical"
+      ? "mx-auto aspect-[9/16] w-full max-w-[calc(72svh*9/16)]"
+      : "aspect-video w-full"
+
+  // Arquivo direto toca no <video>. Link do Drive/YouTube vai no player deles:
+  // as gravações saem do iPhone em HEVC, que o Chrome não toca num <video>, e
+  // o Drive converte.
+  if (isDirectVideoFile(src)) {
+    return (
+      <video
+        controls
+        preload="metadata"
+        playsInline
+        className={`${quadro} overflow-hidden rounded-[18px] border border-border bg-black object-contain`}
+        aria-label={label}
+      >
+        <source src={src} />
+      </video>
+    )
+  }
   return (
-    <video
-      controls
-      preload="metadata"
-      className="w-full overflow-hidden rounded-[18px] border border-border bg-foreground/5"
-      aria-label={label}
+    <div
+      className={`${quadro} relative overflow-hidden rounded-[18px] border border-border bg-black`}
     >
-      <source src={src} />
-    </video>
+      <iframe
+        src={toVideoEmbedUrl(src)}
+        title={label}
+        className="absolute inset-0 h-full w-full"
+        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+        allowFullScreen
+      />
+    </div>
   )
 }
 
