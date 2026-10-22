@@ -1,6 +1,4 @@
 import { notFound, redirect } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
 import { requireDesafio } from "@/lib/guard"
 import {
   assinarVideosDoDia,
@@ -72,14 +70,6 @@ export default async function DiaPage({
       <Atmosphere variant="lesson" />
 
       <div className="relative z-10 mx-auto w-full max-w-2xl">
-        <Link
-          href="/desafio"
-          className="group mb-6 inline-flex items-center gap-1.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:mb-8"
-        >
-          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-          Minha jornada
-        </Link>
-
         {concluido && (
           <p className="mb-6 rounded-[14px] border border-primary/30 bg-primary-subtle px-4 py-3 text-[13px] leading-relaxed text-foreground">
             Você já concluiu este dia. Pode reler e mudar o que escreveu — o que

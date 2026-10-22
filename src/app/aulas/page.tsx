@@ -9,6 +9,7 @@ import { AudioPlayer } from "@/components/audio-player"
 import { VideoPlayer } from "@/components/video-player"
 import { LessonComplete } from "@/components/lesson-complete"
 import { SiteHeader } from "@/components/site-header"
+import { trilhaDasAulas } from "@/lib/trilha"
 import { LiveBanner } from "@/components/live-banner"
 import { Atmosphere } from "@/components/atmosphere"
 
@@ -36,7 +37,7 @@ export default async function AulasPage() {
   return (
     <div className="min-h-screen">
       <LiveBanner />
-      <SiteHeader />
+      <SiteHeader trilha={trilhaDasAulas(scope)} />
 
       <main className="grain relative overflow-hidden px-5 pb-16 pt-10 sm:pt-14">
         <Atmosphere variant="library" />
