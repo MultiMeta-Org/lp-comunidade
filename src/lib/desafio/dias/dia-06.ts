@@ -44,6 +44,8 @@ export const dia06: Dia = {
       tipo: "video",
       chave: "video-dia-6",
       label: "Dia 6 — Construa sua lista de oportunidades",
+      videoUrl: "storage://videos/desafio/dia-06.mp4",
+      formato: "vertical",
       ask: "Assista ao vídeo de hoje.",
       support:
         "Ele mostra onde procurar empresas e por que uma profissional comercial não pode depender de uma só.",

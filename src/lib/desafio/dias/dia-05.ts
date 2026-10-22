@@ -42,6 +42,8 @@ export const dia05: Dia = {
       tipo: "video",
       chave: "video-dia-5",
       label: "Dia 5 — Prepare-se para se apresentar como profissional",
+      videoUrl: "storage://videos/desafio/dia-05.mp4",
+      formato: "vertical",
       ask: "Assista ao vídeo de hoje.",
       support:
         "Ele mostra como responder “o que você faz?” e “como você poderia me ajudar?” sem gaguejar e sem prometer o que você não controla.",

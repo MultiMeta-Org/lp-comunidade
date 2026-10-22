@@ -1,8 +1,8 @@
 import Link from "next/link"
-import { ArrowRight, BookOpen, Check, PartyPopper, Sparkles, Target } from "lucide-react"
+import { ArrowRight, BookOpen, Check, PartyPopper, Target } from "lucide-react"
 import { requireDesafio } from "@/lib/guard"
 import { getJornada, getOperacao } from "@/lib/desafio-server"
-import { TOTAL_DIAS, diaAtual, getDia } from "@/lib/desafio"
+import { TOTAL_DIAS, dataCurta, diaAtual, getDia, podeAbrir, semanaDoDia } from "@/lib/desafio"
 import { getMemberFirstName } from "@/lib/access"
 import { SUPPORT_URL } from "@/lib/links"
 import { Atmosphere } from "@/components/atmosphere"
@@ -33,6 +33,12 @@ export default async function DesafioPage() {
   const feitoHoje = jornada.concluidos.has(atual)
   const feitos = [...jornada.concluidos].filter((d) => d >= 1).length
   const emMatricula = !jornada.concluidos.has(0)
+  // O dia de hoje existe, mas a semana dele ainda não abriu (liberação por
+  // semana, contando da compra): o cartão diz quando, em vez de um botão.
+  const semanaAbreEm =
+    dia && !podeAbrir(atual, jornada.concluidos, jornada.liberacao)
+      ? jornada.liberacao.proximaSemanaEm
+      : null
 
   // O apelido que ELA escolheu na matrícula manda sobre o nome da Hotmart:
   // foi a primeira coisa que o Desafio perguntou, e ignorá-la depois seria
@@ -59,6 +65,7 @@ export default async function DesafioPage() {
             concluidos={jornada.concluidos}
             atual={atual}
             empresasNoRadar={jornada.empresasNoRadar}
+            liberacao={jornada.liberacao}
           />
         </div>
 
@@ -85,13 +92,14 @@ export default async function DesafioPage() {
                 passos={dia.passos.length}
                 apelido={apelido}
                 comecou={(jornada.dias.get(atual)?.passo ?? 0) > 0}
+                semanaAbreEm={semanaAbreEm}
               />
             )
           ) : (
             <SemConteudo />
           )}
 
-          {/* Na matrícula, a tela é só a matrícula. B.IA, Biblioteca e "Fechei
+          {/* Na matrícula, a tela é só a matrícula. Radar, Biblioteca e "Fechei
               meu primeiro contrato" ao lado do primeiro botão que ela vê geravam
               dúvida sobre por onde começar — e nenhum deles faz sentido antes de
               ela existir no Desafio. Concluída a matrícula, tudo volta. */}
@@ -127,6 +135,7 @@ function CartaoDoDia({
   passos,
   apelido,
   comecou,
+  semanaAbreEm,
 }: {
   n: number
   kicker: string
@@ -136,6 +145,8 @@ function CartaoDoDia({
   passos: number
   apelido: string | null
   comecou: boolean
+  /** A semana deste dia ainda não abriu: quando abre (ISO). */
+  semanaAbreEm: string | null
 }) {
   return (
     <section className="relative flex flex-col items-start gap-3 overflow-hidden rounded-[22px] border border-border bg-card px-5 py-7 shadow-sm sm:rounded-[26px] sm:px-10 sm:py-9">
@@ -168,13 +179,21 @@ function CartaoDoDia({
         </span>
       </div>
 
-      <Link
-        href={`/desafio/dia/${n}`}
-        className="relative mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-auto sm:py-3"
-      >
-        {comecou ? "Continuar de onde parei" : n === 0 ? "Fazer minha matrícula" : "Começar a missão de hoje"}
-        <ArrowRight className="h-4 w-4" />
-      </Link>
+      {semanaAbreEm ? (
+        <p className="relative mt-3 max-w-[46ch] rounded-2xl border border-primary/35 bg-primary-subtle px-4 py-3 text-sm leading-relaxed text-foreground">
+          <b className="font-semibold">A Semana {semanaDoDia(n)} abre em {dataCurta(semanaAbreEm)}.</b>{" "}
+          Você fechou a semana — aproveite a pausa para continuar as conversas que já começou
+          e revisar o Caderno na Biblioteca.
+        </p>
+      ) : (
+        <Link
+          href={`/desafio/dia/${n}`}
+          className="relative mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-auto sm:py-3"
+        >
+          {comecou ? "Continuar de onde parei" : n === 0 ? "Fazer minha matrícula" : "Começar a missão de hoje"}
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      )}
     </section>
   )
 }
@@ -259,11 +278,9 @@ function SemConteudo() {
 /**
  * Os acessos que acompanham a aluna por toda a formação.
  *
- * Biblioteca e B.IA ainda não existem como ambiente, e aparecem dizendo isso
- * em vez de como botão que não leva a nada: a aluna precisa poder confiar que
- * o que está clicável funciona. "Fechei meu primeiro contrato" tem mais
- * destaque que os outros, como o documento pede, e hoje leva ao suporte — que
- * é, de fato, quem conduz a Central Primeiro Contrato.
+ * "Fechei meu primeiro contrato" tem mais destaque que os outros, como o
+ * documento pede, e hoje leva ao suporte — que é, de fato, quem conduz a
+ * Central Primeiro Contrato.
  */
 function AcessosPermanentes({ empresas }: { empresas: number }) {
   return (
@@ -272,9 +289,9 @@ function AcessosPermanentes({ empresas }: { empresas: number }) {
         href={SUPPORT_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative flex items-center gap-3.5 overflow-hidden rounded-2xl border border-secondary/40 bg-secondary-subtle px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:px-5"
+        className="group relative flex items-center gap-3.5 overflow-hidden rounded-2xl border border-primary/45 bg-primary-subtle px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:px-5"
       >
-        <PartyPopper className="h-5 w-5 flex-none text-secondary" />
+        <PartyPopper className="h-5 w-5 flex-none text-primary" />
         <span className="min-w-0 flex-1">
           <b className="block text-sm font-bold text-foreground">
             Fechei meu primeiro contrato
@@ -283,7 +300,7 @@ function AcessosPermanentes({ empresas }: { empresas: number }) {
             Fechou? Não importa em que dia você está. Clique aqui.
           </small>
         </span>
-        <ArrowRight className="h-4 w-4 flex-none text-secondary transition-transform group-hover:translate-x-0.5" />
+        <ArrowRight className="h-4 w-4 flex-none text-primary transition-transform group-hover:translate-x-0.5" />
       </a>
 
       <div className="grid gap-2.5 sm:grid-cols-2">
@@ -303,40 +320,18 @@ function AcessosPermanentes({ empresas }: { empresas: number }) {
           <ArrowRight className="h-3.5 w-3.5 flex-none text-muted-foreground transition-transform group-hover:translate-x-0.5" />
         </Link>
 
-        <EmBreve
-          icone={<BookOpen className="h-4.5 w-4.5 flex-none text-muted-foreground" />}
-          titulo="Biblioteca"
-          sub="Aprofundar meus estudos"
-        />
-        <EmBreve
-          icone={<Sparkles className="h-4.5 w-4.5 flex-none text-muted-foreground" />}
-          titulo="B.IA"
-          sub="Minha assistente de execução"
-        />
+        <Link
+          href="/desafio/biblioteca"
+          className="group flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5 transition-all duration-300 hover:border-primary/45 hover:shadow-md"
+        >
+          <BookOpen className="h-4.5 w-4.5 flex-none text-primary" />
+          <span className="min-w-0 flex-1">
+            <b className="block text-[13px] font-semibold text-foreground">Biblioteca</b>
+            <small className="block text-[11.5px] text-muted-foreground">Caderno de Campo e materiais de apoio</small>
+          </span>
+          <ArrowRight className="h-3.5 w-3.5 flex-none text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+        </Link>
       </div>
     </section>
-  )
-}
-
-function EmBreve({
-  icone,
-  titulo,
-  sub,
-}: {
-  icone: React.ReactNode
-  titulo: string
-  sub: string
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-2xl border border-dashed border-border bg-card/60 px-4 py-3.5">
-      {icone}
-      <span className="min-w-0 flex-1">
-        <b className="block text-[13px] font-semibold text-muted-foreground">{titulo}</b>
-        <small className="block text-[11.5px] text-muted-foreground">{sub}</small>
-      </span>
-      <span className="flex-none text-[9.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
-        em breve
-      </span>
-    </div>
   )
 }

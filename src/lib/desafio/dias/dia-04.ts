@@ -52,6 +52,8 @@ export const dia04: Dia = {
       tipo: "video",
       chave: "video-dia-4",
       label: "Dia 4 — Aprenda a enxergar uma empresa",
+      videoUrl: "storage://videos/desafio/dia-04.mp4",
+      formato: "vertical",
       ask: "Assista ao vídeo de hoje.",
       support:
         "Ele mostra o que dá para saber olhando uma empresa de fora — e, principalmente, o que só dá para saber perguntando.",

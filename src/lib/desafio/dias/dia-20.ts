@@ -92,7 +92,7 @@ export const dia20: Dia = {
         "Você teria disponibilidade para viajar para participar presencialmente?",
       opcoes: ["Sim", "Talvez, dependendo da data e do local", "Não"],
       nota: "Dependendo do evento, ticket, comissão, volume e performance, esse tipo de operação pode gerar remunerações bastante relevantes em períodos concentrados. Os resultados variam e não são garantidos. Entrar na lista não é compra nem compromisso — quando tivermos informações sobre a próxima edição, a equipe pode entrar em contato.",
-      cta: "Quero entrar na lista de interesse",
+      cta: "Seguir para o próximo passo",
     },
 
     {

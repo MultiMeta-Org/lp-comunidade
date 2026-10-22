@@ -29,9 +29,12 @@ type QuickLink = {
 }
 
 /**
- * Os links que a aluna usa sempre, numa superfície só, separados por fios de
- * 1px. O Notion entra travado até a liberação do 8º dia — `lockedNote` mostra
- * quanto falta.
+ * Os links que a aluna usa sempre, cada um num cartão próprio. Já foram uma
+ * grade única separada por fios de 1px, mas lia como tabela, não como botão:
+ * ícone cinza e seta da cor da borda só ganhavam cor no hover — e no celular
+ * não existe hover. Agora o ícone e a seta têm cor sempre, e o cartão inteiro
+ * é o alvo. O Notion entra travado até a liberação do 8º dia — `lockedNote`
+ * mostra quanto falta.
  *
  * Laboratório de Vendas e Marketplace não vivem aqui: são produtos, e aparecem como
  * capa na estante lá em cima. Repetir o mesmo destino nas duas superfícies só
@@ -102,28 +105,10 @@ export function QuickLinks({
     },
   ]
 
-  // A grade é "sem gap": o fundo do container é o fio de 1px que separa os
-  // cartões. Buraco na última linha, então, não fica vazio — vira um bloco
-  // chapado da cor do fio. Estas células cegas tapam o buraco com a cor do
-  // cartão. Quantas faltam depende do número de colunas, que muda por
-  // breakpoint, então cada uma só aparece onde é necessária.
-  const missing2 = (2 - (links.length % 2)) % 2
-  const missing3 = (3 - (links.length % 3)) % 3
-  const fillers = Array.from({ length: Math.max(missing2, missing3) }, (_, i) =>
-    i < missing2
-      ? i < missing3
-        ? "hidden sm:block"
-        : "hidden sm:block lg:hidden"
-      : "hidden lg:block"
-  )
-
   return (
-    <div className="grid gap-px overflow-hidden rounded-3xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {links.map((link) => (
         <QuickLinkItem key={link.label} link={link} />
-      ))}
-      {fillers.map((visibility, i) => (
-        <div key={`filler-${i}`} aria-hidden className={`bg-card ${visibility}`} />
       ))}
     </div>
   )
@@ -135,34 +120,36 @@ function QuickLinkItem({ link }: { link: QuickLink }) {
   const inner = (
     <>
       <span
-        className={`flex h-9 w-9 flex-none items-center justify-center rounded-full transition-colors ${
+        className={`flex h-11 w-11 flex-none items-center justify-center rounded-xl transition-colors ${
           locked
             ? "bg-muted text-muted-foreground"
-            : "bg-muted text-muted-foreground group-hover:bg-primary-subtle group-hover:text-primary"
+            : "bg-primary-subtle text-primary group-hover:bg-primary group-hover:text-primary-foreground"
         }`}
       >
-        <Icon className="h-[18px] w-[18px]" />
+        <Icon className="h-5 w-5" />
       </span>
 
       <span className="flex min-w-0 flex-col gap-0.5">
-        <b className="truncate text-sm font-semibold text-foreground">{label}</b>
+        <b className="truncate text-[15px] font-semibold text-foreground">{label}</b>
         <small className="truncate text-xs text-muted-foreground">{description}</small>
       </span>
 
       {locked ? (
         <Lock className="ml-auto h-4 w-4 flex-none text-muted-foreground" />
       ) : (
-        <ArrowUpRight className="ml-auto h-4 w-4 flex-none text-border transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+        <span className="ml-auto flex h-8 w-8 flex-none items-center justify-center rounded-full border border-primary/30 text-primary transition-all duration-200 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
+          <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-px group-hover:translate-x-px" />
+        </span>
       )}
     </>
   )
 
   const base =
-    "group flex items-center gap-3.5 bg-card px-5 py-4 text-left transition-colors"
+    "group flex items-center gap-3.5 rounded-2xl border px-4 py-4 text-left transition-all duration-200 sm:px-5"
 
   if (!href) {
     return (
-      <div aria-disabled className={`${base} cursor-not-allowed bg-card/60`}>
+      <div aria-disabled className={`${base} cursor-not-allowed border-dashed border-border bg-card/60 opacity-80`}>
         {inner}
       </div>
     )
@@ -173,7 +160,7 @@ function QuickLinkItem({ link }: { link: QuickLink }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`${base} hover:bg-muted/70`}
+      className={`${base} border-border bg-card shadow-sm hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md`}
     >
       {inner}
     </a>

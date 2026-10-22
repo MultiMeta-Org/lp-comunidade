@@ -26,7 +26,7 @@ export default async function DesafioLayout({
   children: React.ReactNode
 }) {
   const { email } = await requireDesafio()
-  const { concluidos, empresasNoRadar } = await getJornada(email)
+  const { concluidos, empresasNoRadar, liberacao } = await getJornada(email)
 
   // O Dia Zero é matrícula, não missão: a barra conta os 21.
   const feitos = [...concluidos].filter((d) => d >= 1).length
@@ -57,6 +57,7 @@ export default async function DesafioLayout({
             concluidos={concluidos}
             atual={diaAtual(concluidos)}
             empresasNoRadar={empresasNoRadar}
+            liberacao={liberacao}
             className="ml-auto inline-flex flex-none items-center gap-1.5 rounded-full border border-border bg-background/60 px-2.5 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/45 hover:text-primary"
           >
             <ListOrdered className="h-3.5 w-3.5" />

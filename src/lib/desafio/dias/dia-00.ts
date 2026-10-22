@@ -226,14 +226,14 @@ export const dia00: Dia = {
     {
       tipo: "formulario",
       chave: "disponibilidade",
-      ask: "Quanto tempo você consegue reservar?",
+      ask: "Quanto tempo por dia você consegue reservar para o Desafio?",
       support:
-        "Me diz o que cabe na sua vida de verdade, não o que você gostaria que cabesse. É com o real que a gente trabalha.",
+        "Conta tudo: assistir ao vídeo, estudar e fazer a missão. Me diz o que cabe na sua vida de verdade, não o que você gostaria que coubesse. É com o real que a gente trabalha.",
       campos: [
         {
           tipo: "radio",
           chave: "tempo_disponivel",
-          rotulo: "Quanto tempo você consegue reservar nos dias de execução?",
+          rotulo: "Quanto tempo por dia você consegue dedicar ao Desafio (vídeo, estudo e missão)?",
           opcoes: [
             "Até 30 minutos",
             "30 a 60 minutos",
@@ -290,12 +290,29 @@ export const dia00: Dia = {
       tipo: "video",
       chave: "video-boas-vindas",
       label: "Bem-vinda à Empreendedora Anônima",
-      videoUrl: "https://drive.google.com/file/d/1FC8J9iPn1YD-909M40BF6I3-T9q5aL-T/view",
+      // H.264 720p no bucket privado (o original do iPhone é HEVC e só tocava
+      // pelo player do Drive, com tarja preta e sem duração). Original no Drive:
+      // https://drive.google.com/file/d/1FC8J9iPn1YD-909M40BF6I3-T9q5aL-T/view
+      videoUrl: "storage://videos/desafio/dia-00-boas-vindas.mp4",
       formato: "vertical",
       ask: "Assista ao vídeo de boas-vindas.",
       support:
         "Matrícula feita. Agora você vai entender como funcionam os próximos 21 dias e como usar sua formação.",
       nota: "Não precisa anotar nada agora. Depois do vídeo eu te digo exatamente o que fazer.",
+      cta: "Já assisti",
+    },
+    // Fase 0: a carreira, antes do Dia 1 — para ela entender o caminho que
+    // pode seguir nessa área. O texto de apoio embaixo do vídeo a Nati ainda
+    // vai escrever (mais visual); por enquanto, uma linha só.
+    {
+      tipo: "video",
+      chave: "video-carreira",
+      label: "Fase 0 — A carreira que você pode seguir",
+      videoUrl: "storage://videos/desafio/fase-0-carreira.mp4",
+      formato: "vertical",
+      ask: "Agora entenda a carreira que você está começando.",
+      support:
+        "Antes do Dia 1, conheça os caminhos que essa área abre para você — e onde o Desafio te coloca neles.",
       cta: "Já assisti",
     },
     {

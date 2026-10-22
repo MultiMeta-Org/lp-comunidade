@@ -53,6 +53,8 @@ export const dia02: Dia = {
       tipo: "video",
       chave: "video-dia-2",
       label: "Dia 2 — Como é o trabalho de uma SDR + Closer na prática",
+      videoUrl: "storage://videos/desafio/dia-02.mp4",
+      formato: "vertical",
       ask: "Assista ao vídeo de hoje.",
       support:
         "Como é um dia de SDR, como é um dia de Closer, e o que acontece antes, durante e depois de uma reunião.",

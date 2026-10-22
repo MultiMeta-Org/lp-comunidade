@@ -52,7 +52,7 @@ async function abrirDia(n: number) {
   if (!dia) return { erro: "Esse dia ainda não existe." as const }
 
   const jornada = await getJornada(email)
-  if (!podeAbrir(n, jornada.concluidos)) {
+  if (!podeAbrir(n, jornada.concluidos, jornada.liberacao)) {
     return { erro: "Esse dia ainda não está liberado para você." as const }
   }
   return { email, dia, jornada }
