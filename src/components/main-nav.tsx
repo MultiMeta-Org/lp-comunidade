@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Flag, House, Settings } from "lucide-react"
+import { House, Settings } from "lucide-react"
 
 type Item = {
   href: string
@@ -18,15 +18,15 @@ type Item = {
  *
  * É a MESMA em todo o portal, Desafio incluído: antes o Desafio tinha
  * cabeçalho próprio, com a logo levando à jornada e uma setinha "← Portal",
- * e entrar e sair dele confundia. Agora a logo sempre leva ao Início e o
- * Desafio é uma aba.
+ * e entrar e sair dele confundia. Agora a logo sempre leva ao Início. O
+ * Desafio não tem aba: a porta dele é o card na home.
  *
  * O material de aulas não entra aqui: é uma porta de dentro do Laboratório de
  * Vendas, e vive na seção dele na home. Quem não assina tem a sua própria porta
  * ali (o Plantão Tira Dúvidas) — e o recorte do que cada uma vê é decidido no
  * servidor (requireLessonsViewer), não por link escondido.
  */
-export function MainNav({ admin = false, desafio = false }: { admin?: boolean; desafio?: boolean }) {
+export function MainNav({ admin = false }: { admin?: boolean }) {
   const pathname = usePathname() ?? "/"
 
   const items: Item[] = [
@@ -36,16 +36,6 @@ export function MainNav({ admin = false, desafio = false }: { admin?: boolean; d
       icon: House,
       isActive: (p) => p === "/",
     },
-    ...(desafio
-      ? [
-          {
-            href: "/desafio",
-            label: "Desafio",
-            icon: Flag,
-            isActive: (p: string) => p.startsWith("/desafio"),
-          },
-        ]
-      : []),
     ...(admin
       ? [
           {

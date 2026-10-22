@@ -1,14 +1,12 @@
 import Link from "next/link"
 import { currentUserEmail, isAdmin } from "@/lib/guard"
-import { hasDesafio } from "@/lib/access"
 import { LogoutButton } from "@/components/logout-button"
 import { MultiMetaLogo } from "@/components/multimeta-logo"
 import { MainNav } from "@/components/main-nav"
 
 /**
  * Header compartilhado de TODAS as páginas autenticadas, Desafio incluído:
- * marca (sempre leva ao Início) + navegação principal (Início / Desafio /
- * Admin, com o item atual destacado) + logout.
+ * marca (sempre leva ao Início) + navegação principal (Início / Admin, com o item atual destacado) + logout.
  *
  * `wide` alinha o header ao container mais largo (max-w-5xl).
  * `faixa` é uma segunda linha, dentro do mesmo cabeçalho fixo, para o
@@ -26,9 +24,7 @@ export async function SiteHeader({
   children?: React.ReactNode
 }) {
   const email = await currentUserEmail()
-  const [admin, desafio] = email
-    ? await Promise.all([isAdmin(email), hasDesafio(email)])
-    : [false, false]
+  const admin = email ? await isAdmin(email) : false
 
   return (
     <header className="sticky top-0 z-30 border-b border-border/80 bg-card/85 backdrop-blur-md supports-[backdrop-filter]:bg-card/70">
@@ -48,7 +44,7 @@ export async function SiteHeader({
 
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {children}
-          <MainNav admin={admin} desafio={desafio || admin} />
+          <MainNav admin={admin} />
           <span className="h-5 w-px bg-border hidden sm:block" />
           <LogoutButton />
         </div>
