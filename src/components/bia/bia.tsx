@@ -10,7 +10,6 @@ import {
 import { createPortal } from "react-dom"
 import { usePathname } from "next/navigation"
 import { ArrowUp, Sparkles, X } from "lucide-react"
-import { supabase } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { Markdown } from "./markdown"
 
@@ -27,6 +26,14 @@ import { Markdown } from "./markdown"
  */
 
 const BIA_URL = process.env.NEXT_PUBLIC_BIA_URL?.replace(/\/$/, "") ?? ""
+
+/**
+ * O client do Supabase só é carregado no navegador, quando a B.IA precisa da
+ * sessão. O provider mora no layout raiz: importar o client no topo do módulo
+ * o criaria até no prerender do build, que em preview não tem as variáveis do
+ * Supabase — e derrubava o build inteiro.
+ */
+const supabaseDoNavegador = async () => (await import("@/lib/supabase/client")).supabase
 
 /** Onde o botão flutuante não aparece: sem sessão de aluna ou área da equipe. */
 const ROTAS_SEM_BIA = ["/login", "/admin"]
@@ -49,12 +56,16 @@ export function BiaProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!BIA_URL) return
-    supabase.auth.getSession().then(({ data }) => setTemSessao(Boolean(data.session)))
-    const { data } = supabase.auth.onAuthStateChange((_e, sessao) => {
-      setTemSessao(Boolean(sessao))
-      if (!sessao) setAberto(false)
+    let cancelar = () => {}
+    supabaseDoNavegador().then((supabase) => {
+      supabase.auth.getSession().then(({ data }) => setTemSessao(Boolean(data.session)))
+      const { data } = supabase.auth.onAuthStateChange((_e, sessao) => {
+        setTemSessao(Boolean(sessao))
+        if (!sessao) setAberto(false)
+      })
+      cancelar = () => data.subscription.unsubscribe()
     })
-    return () => data.subscription.unsubscribe()
+    return () => cancelar()
   }, [])
 
   const rotaPermitida = !ROTAS_SEM_BIA.some((r) => pathname.startsWith(r))
@@ -97,7 +108,7 @@ function BotaoFlutuante({ onClick }: { onClick: () => void }) {
 // ─────────────────────────────────────────────────────────────
 
 async function chamarBia(metodo: "GET" | "POST", corpo?: { texto: string }) {
-  const { data } = await supabase.auth.getSession()
+  const { data } = await (await supabaseDoNavegador()).auth.getSession()
   const token = data.session?.access_token
   if (!token) throw new Error("Sua sessão expirou. Entre de novo no portal.")
 
