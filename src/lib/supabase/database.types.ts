@@ -384,6 +384,9 @@ export interface Database {
           nome: string
           segmento: string | null
           contato: string | null
+          telefone: string | null
+          /** Data do primeiro contato (informada, ou a da primeira abordagem). */
+          primeiro_contato_em: string | null
           origem: string | null
           dia_origem: number | null
           /** Raio-X e respostas de missão ligadas a esta empresa — exercício,
@@ -405,6 +408,8 @@ export interface Database {
           nome: string
           segmento?: string | null
           contato?: string | null
+          telefone?: string | null
+          primeiro_contato_em?: string | null
           origem?: string | null
           dia_origem?: number | null
           notas?: Json

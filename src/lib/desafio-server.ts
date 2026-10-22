@@ -264,6 +264,10 @@ export type Empresa = {
   nome: string
   segmento: string | null
   contato: string | null
+  /** Telefone/WhatsApp de quem ela vai abordar. */
+  telefone: string | null
+  /** AAAA-MM-DD. Ela pode informar; senão, é gravado na primeira abordagem. */
+  primeiroContatoEm: string | null
   origem: string | null
   diaOrigem: number | null
   /** Estágio comercial. "no-radar" até ela mandar a primeira abordagem. */
@@ -279,7 +283,7 @@ export async function getRadar(email: string): Promise<Empresa[]> {
   const { data, error } = await db
     .from("desafio_radar")
     .select(
-      "id, nome, segmento, contato, origem, dia_origem, status, proxima_acao, proxima_acao_em, notas"
+      "id, nome, segmento, contato, telefone, primeiro_contato_em, origem, dia_origem, status, proxima_acao, proxima_acao_em, notas"
     )
     .eq("email", norm(email))
     .is("arquivada_em", null)
@@ -298,6 +302,8 @@ function paraEmpresa(r: {
   nome: string
   segmento: string | null
   contato: string | null
+  telefone: string | null
+  primeiro_contato_em: string | null
   origem: string | null
   dia_origem: number | null
   status: string
@@ -310,6 +316,8 @@ function paraEmpresa(r: {
     nome: r.nome,
     segmento: r.segmento,
     contato: r.contato,
+    telefone: r.telefone,
+    primeiroContatoEm: r.primeiro_contato_em,
     origem: r.origem,
     diaOrigem: r.dia_origem,
     status: r.status,
@@ -323,6 +331,9 @@ export type AddEmpresa = {
   nome: string
   segmento?: string | null
   contato?: string | null
+  telefone?: string | null
+  /** AAAA-MM-DD. */
+  primeiroContatoEm?: string | null
   origem?: string | null
   diaOrigem?: number | null
 }
@@ -354,11 +365,17 @@ export async function addEmpresa(
       nome,
       segmento: empresa.segmento?.trim() || null,
       contato: empresa.contato?.trim() || null,
+      telefone: empresa.telefone?.trim().slice(0, 40) || null,
+      // `date` no banco: qualquer coisa fora de AAAA-MM-DD derrubaria o insert.
+      primeiro_contato_em:
+        empresa.primeiroContatoEm && /^\d{4}-\d{2}-\d{2}$/.test(empresa.primeiroContatoEm)
+          ? empresa.primeiroContatoEm
+          : null,
       origem: empresa.origem ?? null,
       dia_origem: empresa.diaOrigem ?? null,
     })
     .select(
-      "id, nome, segmento, contato, origem, dia_origem, status, proxima_acao, proxima_acao_em, notas"
+      "id, nome, segmento, contato, telefone, primeiro_contato_em, origem, dia_origem, status, proxima_acao, proxima_acao_em, notas"
     )
     .single()
 
@@ -408,7 +425,24 @@ export async function moverStatus(
     console.error("[desafio] moverStatus:", error.message)
     return error.message
   }
+
+  // Saiu de "no-radar" = ela fez a abordagem: é o primeiro contato, se ainda
+  // não havia data. O filtro `is null` não deixa sobrescrever a que ela
+  // informou (ou a de uma abordagem anterior).
+  if (status && status !== "no-radar") {
+    await db
+      .from("desafio_radar")
+      .update({ primeiro_contato_em: hojeEmSaoPaulo() })
+      .eq("email", norm(email))
+      .eq("id", id)
+      .is("primeiro_contato_em", null)
+  }
   return null
+}
+
+/** AAAA-MM-DD no fuso das alunas — "hoje" às 22h de Brasília ainda é hoje. */
+function hojeEmSaoPaulo(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date())
 }
 
 /**

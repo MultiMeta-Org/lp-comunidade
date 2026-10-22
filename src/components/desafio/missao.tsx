@@ -997,6 +997,8 @@ export function RadarEditor({
   const [nome, setNome] = useState("")
   const [segmento, setSegmento] = useState("")
   const [contato, setContato] = useState("")
+  const [telefone, setTelefone] = useState("")
+  const [primeiroContato, setPrimeiroContato] = useState("")
   const [aviso, setAviso] = useState<string | null>(null)
   const [salvando, startSalvar] = useTransition()
 
@@ -1010,6 +1012,8 @@ export function RadarEditor({
         nome: limpo,
         segmento,
         contato,
+        telefone,
+        primeiroContatoEm: primeiroContato || undefined,
         origem,
       })
       if (!res.ok) {
@@ -1020,6 +1024,8 @@ export function RadarEditor({
       setNome("")
       setSegmento("")
       setContato("")
+      setTelefone("")
+      setPrimeiroContato("")
       setAviso(null)
       setErro(null)
     })
@@ -1084,7 +1090,17 @@ export function RadarEditor({
                 )}
                 {/* O contato que ela cadastrou tem que voltar à vista — e
                     clicável: é dali que sai a abordagem. */}
-                {empresa.contato && <Contato contato={empresa.contato} />}
+                {(empresa.contato || empresa.telefone || empresa.primeiroContatoEm) && (
+                  <span className="flex min-w-0 flex-wrap items-center gap-x-2.5">
+                    {empresa.contato && <Contato contato={empresa.contato} />}
+                    {empresa.telefone && <Telefone telefone={empresa.telefone} />}
+                    {empresa.primeiroContatoEm && (
+                      <small className="text-[11.5px] text-muted-foreground">
+                        1º contato {formataData(empresa.primeiroContatoEm)}
+                      </small>
+                    )}
+                  </span>
+                )}
               </span>
               {empresa.status !== "no-radar" && (
                 <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
@@ -1143,6 +1159,28 @@ export function RadarEditor({
             aria-label="Instagram ou site"
             className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
           />
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            type="tel"
+            inputMode="tel"
+            value={telefone}
+            onChange={(e) => setTelefone(e.target.value)}
+            placeholder="Telefone ou WhatsApp"
+            aria-label="Telefone ou WhatsApp"
+            className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
+          />
+          {/* Opcional: se ela já falou com a empresa antes de cadastrar. Senão,
+              a data entra sozinha quando ela registra a abordagem. */}
+          <label className="flex w-full items-center gap-2 rounded-xl border border-input bg-background px-4 py-1.5 text-sm text-muted-foreground focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/25">
+            <span className="flex-none text-xs">1º contato em</span>
+            <input
+              type="date"
+              value={primeiroContato}
+              onChange={(e) => setPrimeiroContato(e.target.value)}
+              className="min-w-0 flex-1 bg-transparent py-1 text-sm text-foreground focus:outline-none"
+            />
+          </label>
         </div>
         <button
           type="button"
@@ -1661,6 +1699,29 @@ function Contato({ contato }: { contato: string }) {
     </a>
   ) : (
     <small className={`${classe} text-muted-foreground`}>{contato}</small>
+  )
+}
+
+/**
+ * Telefone como link do WhatsApp — é por onde a abordagem acontece. Só os
+ * dígitos; sem DDI, assume Brasil (55).
+ */
+function Telefone({ telefone }: { telefone: string }) {
+  const digitos = telefone.replace(/\D/g, "")
+  const classe = "block truncate text-[11.5px]"
+  if (digitos.length < 10) {
+    return <small className={`${classe} text-muted-foreground`}>{telefone}</small>
+  }
+  const comDdi = digitos.length <= 11 ? `55${digitos}` : digitos
+  return (
+    <a
+      href={`https://wa.me/${comDdi}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${classe} text-primary underline-offset-2 hover:underline`}
+    >
+      {telefone}
+    </a>
   )
 }
 
