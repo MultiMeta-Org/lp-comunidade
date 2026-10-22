@@ -1,6 +1,14 @@
 import Link from "next/link"
 import { Check, Lock } from "lucide-react"
-import { NUMEROS_DOS_DIAS, TOTAL_DIAS, diaDisponivel, getDia, podeAbrir } from "@/lib/desafio"
+import {
+  SEMANAS,
+  TOTAL_DIAS,
+  dataCurta,
+  diaDisponivel,
+  getDia,
+  podeAbrir,
+  type Liberacao,
+} from "@/lib/desafio"
 
 /**
  * A jornada inteira: os 21 dias (mais o Zero) de uma vez.
@@ -14,6 +22,9 @@ import { NUMEROS_DOS_DIAS, TOTAL_DIAS, diaDisponivel, getDia, podeAbrir } from "
  * Dia concluído é clicável: o documento pede que os anteriores sejam
  * revisitáveis e editáveis.
  *
+ * Os dias vêm agrupados nas três semanas do Caderno de Campo. A semana que
+ * ainda não abriu diz QUANDO abre — um cadeado sem data parece defeito.
+ *
  * O conteúdo é separado do `aside` porque ele vive em dois lugares: a coluna
  * da esquerda na tela larga e o painel do `JornadaMenu` no celular — onde 22
  * linhas antes da missão de hoje empurrariam para baixo a única coisa que ela
@@ -23,6 +34,7 @@ export function Jornada(props: {
   concluidos: ReadonlySet<number>
   atual: number
   empresasNoRadar: number
+  liberacao: Liberacao
 }) {
   return (
     <aside className="w-full min-w-0 lg:sticky lg:top-24">
@@ -35,10 +47,12 @@ export function ConteudoDaJornada({
   concluidos,
   atual,
   empresasNoRadar,
+  liberacao,
 }: {
   concluidos: ReadonlySet<number>
   atual: number
   empresasNoRadar: number
+  liberacao: Liberacao
 }) {
   const feitos = [...concluidos].filter((d) => d >= 1).length
 
@@ -46,16 +60,46 @@ export function ConteudoDaJornada({
     <div className="flex w-full min-w-0 flex-col gap-3.5">
       <AnelDoProgresso feitos={feitos} />
 
-      <nav aria-label="Os 21 dias" className="flex min-w-0 flex-col gap-0.5">
-        {NUMEROS_DOS_DIAS.map((n) => (
-          <LinhaDoDia
-            key={n}
-            n={n}
-            concluido={concluidos.has(n)}
-            atual={n === atual}
-            aberto={podeAbrir(n, concluidos)}
-          />
-        ))}
+      <nav aria-label="Os 21 dias" className="flex min-w-0 flex-col gap-3">
+        {SEMANAS.map((semana) => {
+          const aberta = semana.n <= liberacao.semanasAbertas
+          // A data só faz sentido para a PRÓXIMA semana; a seguinte vem 7 dias depois dela.
+          const abreEm =
+            !aberta && liberacao.proximaSemanaEm
+              ? new Date(
+                  new Date(liberacao.proximaSemanaEm).getTime() +
+                    (semana.n - liberacao.semanasAbertas - 1) * 7 * 24 * 60 * 60 * 1000
+                ).toISOString()
+              : null
+          const dias = Array.from({ length: semana.ate - semana.de + 1 }, (_, i) => semana.de + i)
+          return (
+            <section key={semana.n} aria-label={`Semana ${semana.n}`} className="flex min-w-0 flex-col gap-0.5">
+              <header className="flex items-baseline gap-2 px-2.5 pb-1">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  Semana {semana.n}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-[11.5px] font-semibold text-foreground">
+                  {semana.titulo}
+                </span>
+                {abreEm && (
+                  <span className="inline-flex flex-none items-center gap-1 text-[10.5px] font-semibold text-muted-foreground">
+                    <Lock className="h-3 w-3" />
+                    abre {dataCurta(abreEm)}
+                  </span>
+                )}
+              </header>
+              {dias.map((n) => (
+                <LinhaDoDia
+                  key={n}
+                  n={n}
+                  concluido={concluidos.has(n)}
+                  atual={n === atual}
+                  aberto={podeAbrir(n, concluidos, liberacao)}
+                />
+              ))}
+            </section>
+          )
+        })}
       </nav>
 
       <div className="flex gap-6 rounded-2xl bg-muted px-4 py-4 sm:px-5">
@@ -139,7 +183,7 @@ function LinhaDoDia({
         concluido
           ? "bg-primary text-primary-foreground"
           : atual
-            ? "bg-secondary text-secondary-foreground"
+            ? "bg-primary text-primary-foreground ring-[3px] ring-primary/20"
             : "bg-muted text-muted-foreground"
       }`}
     >
@@ -151,7 +195,7 @@ function LinhaDoDia({
     <span
       className={`min-w-0 flex-1 truncate text-[13px] leading-snug sm:text-[12.5px] ${
         atual
-          ? "font-bold text-secondary"
+          ? "font-bold text-foreground"
           : concluido
             ? "font-medium text-foreground"
             : "text-muted-foreground"
@@ -185,14 +229,14 @@ function LinhaDoDia({
       aria-current={atual ? "page" : undefined}
       className={`group flex items-center gap-2.5 rounded-xl border px-2.5 py-2.5 transition-all duration-200 sm:py-2 ${
         atual
-          ? "border-secondary/40 bg-secondary-subtle"
+          ? "border-primary/40 bg-primary-subtle"
           : "border-transparent hover:border-primary/35 hover:bg-primary-subtle"
       }`}
     >
       {numero}
       {texto}
       {atual ? (
-        <span className="flex-none text-[9.5px] font-bold uppercase tracking-[0.1em] text-secondary">
+        <span className="flex-none text-[9.5px] font-bold uppercase tracking-[0.1em] text-primary">
           hoje
         </span>
       ) : (

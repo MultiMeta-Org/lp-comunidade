@@ -57,11 +57,13 @@ export const dia15: Dia = {
   passos: [
     {
       tipo: "video",
-      chave: "video-dia-15",
-      label: "Dia 15 — Agora isso precisa caber na sua vida",
-      ask: "Assista ao vídeo de hoje.",
+      chave: "video-fase-3",
+      label: "Fase 3 — Torne-se profissional",
+      videoUrl: "storage://videos/desafio/fase-3.mp4",
+      formato: "vertical",
+      ask: "Assista ao vídeo da Fase 3.",
       support:
-        "Ele mostra como montar uma rotina comercial que sobrevive à vida real — a sua, com as coisas que já existem nela.",
+        "Ele abre a sua terceira semana: o que você vai aprender e fazer do Dia 15 ao Dia 21. Se precisar, volte nele nos próximos dias.",
       cta: "Já assisti",
     },
 

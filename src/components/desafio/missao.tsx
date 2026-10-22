@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Check, Copy, Play, Plus, Trash2, X } from "lucide-react"
-import type { Campo, Dia, Passo, Respostas, StatusRadar } from "@/lib/desafio"
+import type { Campo, Dia, Passo, ProximoDia, Respostas, StatusRadar } from "@/lib/desafio"
 import { STATUS_RADAR, rotuloDoBotao } from "@/lib/desafio"
 import {
   addEmpresaAction,
@@ -39,6 +39,7 @@ export function Missao({
   jaConcluido,
   interesses,
   operacao,
+  proximo,
   vizinhos,
 }: {
   dia: Dia
@@ -50,6 +51,8 @@ export function Missao({
   interesses: Record<string, string | null>
   /** O funil dela, para o passo `funil` do Dia 14. */
   operacao: Operacao
+  /** O dia seguinte, para o botão da celebração levar direto a ele. */
+  proximo: ProximoDia
   /**
    * A navegação entre os dias (`DiasVizinhos`), montada no servidor e entregue
    * pronta. Entra por aqui, e não na página, porque só este componente sabe
@@ -112,7 +115,7 @@ export function Missao({
       <Celebracao
         fim={dia.fim}
         empresasNoRadar={radar.length}
-        proximoDia={dia.dia + 1}
+        proximo={proximo}
       />
     )
   }
@@ -1287,7 +1290,7 @@ function EmpresaDoPasso({
             onClick={() => setEscolhida(disponiveis[0].id)}
             className="w-fit text-xs font-semibold text-primary underline underline-offset-2"
           >
-            {livre ? "Trabalhar mais uma conversa" : "Quero fazer uma empresa a mais"}
+            {livre ? "Trabalhar mais uma conversa" : "Quero adicionar uma empresa a mais"}
           </button>
         )}
       </div>
@@ -1569,13 +1572,13 @@ function Interesse({
             setDentro(true)
             registrar(null)
           }}
-          className="inline-flex w-fit items-center gap-2 rounded-full bg-secondary px-6 py-3 text-sm font-semibold text-secondary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+          className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/50 bg-card px-6 py-3 text-sm font-semibold text-primary transition-all duration-300 hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
         >
           Quero entrar na lista
         </button>
         <p className="text-xs text-muted-foreground">
           Sem compromisso nenhum. Se não for para você, é só seguir para o próximo
-          passo.
+          passo, no botão abaixo.
         </p>
       </div>
     )

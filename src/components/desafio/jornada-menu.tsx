@@ -6,6 +6,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ArrowRight, X } from "lucide-react"
 import { ConteudoDaJornada } from "@/components/desafio/jornada"
+import type { Liberacao } from "@/lib/desafio"
 
 /** Nada muda nunca: a "assinatura" existe só para satisfazer a API. */
 const assinaNada = () => () => {}
@@ -35,12 +36,14 @@ export function JornadaMenu({
   concluidos,
   atual,
   empresasNoRadar,
+  liberacao,
   className,
   children,
 }: {
   concluidos: ReadonlySet<number>
   atual: number
   empresasNoRadar: number
+  liberacao: Liberacao
   /** Aparência do gatilho — ele muda de lugar para lugar; o painel, não. */
   className?: string
   children: React.ReactNode
@@ -129,6 +132,7 @@ export function JornadaMenu({
                   concluidos={concluidos}
                   atual={atual}
                   empresasNoRadar={empresasNoRadar}
+                  liberacao={liberacao}
                 />
               </div>
 

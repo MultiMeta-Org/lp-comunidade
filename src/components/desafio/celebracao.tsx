@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 import { ArrowRight, Check } from "lucide-react"
-import type { Fim } from "@/lib/desafio"
-import { diaDisponivel } from "@/lib/desafio"
+import type { Fim, ProximoDia } from "@/lib/desafio"
+import { dataCurta, diaDisponivel, semanaDoDia } from "@/lib/desafio"
 
 /**
  * A tela de conquista, no fim da missão.
@@ -20,13 +20,13 @@ import { diaDisponivel } from "@/lib/desafio"
 export function Celebracao({
   fim,
   empresasNoRadar,
-  proximoDia,
+  proximo,
 }: {
   fim: Fim
   empresasNoRadar: number
-  proximoDia: number
+  proximo: ProximoDia
 }) {
-  const temProximo = diaDisponivel(proximoDia)
+  const temProximo = diaDisponivel(proximo.n)
 
   const placar =
     fim.placar?.de === "radar"
@@ -82,19 +82,29 @@ export function Celebracao({
 
       <section className="mt-4 flex w-full flex-col gap-1.5 rounded-[20px] border border-dashed border-border bg-card px-5 py-5 text-left sm:px-6">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
-          {temProximo ? "Amanhã" : "Em breve"}
+          {proximo.aberto ? "Próximo dia" : temProximo ? "Amanhã" : "Em breve"}
         </p>
         <p className="text-sm leading-relaxed text-muted-foreground">{fim.amanha}</p>
+        {proximo.semanaAbreEm && (
+          <p className="mt-1 text-xs font-semibold text-foreground">
+            A Semana {semanaDoDia(proximo.n)} abre em {dataCurta(proximo.semanaAbreEm)}.
+          </p>
+        )}
       </section>
 
-      {/* O destino é sempre a jornada, nunca o dia seguinte direto: o Desafio é
-          feito para ser vivido um pouquinho por dia, e emendar um dia no outro
-          seria desfazer isso com um botão. */}
+      {/* O botão leva direto ao dia seguinte quando ele já abre: voltar para a
+          lista só para clicar no próximo é um passo a mais sem motivo. O ritmo
+          do Desafio vem da liberação por semana, não deste botão. Quando o
+          seguinte não abre (semana fechada, ou não existe), volta à jornada. */}
       <Link
-        href="/desafio"
+        href={proximo.aberto ? `/desafio/dia/${proximo.n}` : "/desafio"}
         className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-auto sm:py-3"
       >
-        Voltar para a minha jornada
+        {proximo.aberto
+          ? proximo.n === 1
+            ? "Começar o Dia 1"
+            : `Ir para o Dia ${proximo.n}`
+          : "Voltar para a minha jornada"}
         <ArrowRight className="h-4 w-4" />
       </Link>
     </div>

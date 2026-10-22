@@ -55,6 +55,8 @@ export const dia03: Dia = {
       tipo: "video",
       chave: "video-dia-3",
       label: "Dia 3 — Onde estão suas primeiras oportunidades?",
+      videoUrl: "storage://videos/desafio/dia-03.mp4",
+      formato: "vertical",
       ask: "Assista ao vídeo de hoje.",
       support:
         "Ele mostra as suas quatro fontes de oportunidade: sua formação, sua experiência, sua rede e o que você já consome.",

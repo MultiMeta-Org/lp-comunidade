@@ -3,12 +3,13 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { requireDesafio } from "@/lib/guard"
 import {
+  assinarVideosDoDia,
   getInteresses,
   getJornada,
   getOperacao,
   getRadar,
 } from "@/lib/desafio-server"
-import { diaAtual, getDia, podeAbrir } from "@/lib/desafio"
+import { diaAtual, diaDisponivel, getDia, podeAbrir, semanaAberta, type ProximoDia } from "@/lib/desafio"
 import { Atmosphere } from "@/components/atmosphere"
 import { Missao } from "@/components/desafio/missao"
 import { DiasVizinhos } from "@/components/desafio/vizinhos"
@@ -37,16 +38,31 @@ export default async function DiaPage({
   const dia = getDia(numero)
   if (!dia || dia.passos.length === 0) notFound()
 
-  const [jornada, radar, interesses, operacao] = await Promise.all([
+  const [jornada, radar, interesses, operacao, diaComVideos] = await Promise.all([
     getJornada(email),
     getRadar(email),
     getInteresses(email),
     getOperacao(email),
+    assinarVideosDoDia(dia),
   ])
 
   // Correr na frente não dá: o Desafio é um dia por vez. Volta para a jornada,
   // onde o dia dela está em destaque — não para um erro.
-  if (!podeAbrir(numero, jornada.concluidos)) redirect("/desafio")
+  if (!podeAbrir(numero, jornada.concluidos, jornada.liberacao)) redirect("/desafio")
+
+  // Para o botão do fim: depois de concluir este, o seguinte já abre? Só não
+  // abre se não existe ainda ou se a semana dele está fechada — aí a
+  // celebração diz quando, em vez de mandar para um dia trancado.
+  const seguinte = numero + 1
+  const abreJa = podeAbrir(seguinte, new Set([...jornada.concluidos, numero]), jornada.liberacao)
+  const proximo: ProximoDia = {
+    n: seguinte,
+    aberto: abreJa,
+    semanaAbreEm:
+      !abreJa && diaDisponivel(seguinte) && !semanaAberta(seguinte, jornada.liberacao)
+        ? jornada.liberacao.proximaSemanaEm
+        : null,
+  }
 
   const progresso = jornada.dias.get(numero)
   const concluido = jornada.concluidos.has(numero)
@@ -72,7 +88,7 @@ export default async function DiaPage({
         )}
 
         <Missao
-          dia={dia}
+          dia={diaComVideos}
           respostasIniciais={progresso?.respostas ?? {}}
           // Dia concluído reabre no começo: ela voltou para reler, não para
           // continuar de onde parou.
@@ -81,6 +97,7 @@ export default async function DiaPage({
           jaConcluido={concluido}
           interesses={Object.fromEntries(interesses)}
           operacao={operacao}
+          proximo={proximo}
           // A navegação entre os dias desce montada do servidor: a Missao só
           // decide SE mostra (não mostra depois da celebração).
           vizinhos={
@@ -89,6 +106,7 @@ export default async function DiaPage({
               concluidos={jornada.concluidos}
               atual={diaAtual(jornada.concluidos)}
               empresasNoRadar={jornada.empresasNoRadar}
+              liberacao={jornada.liberacao}
             />
           }
         />

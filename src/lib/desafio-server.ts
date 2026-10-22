@@ -1,6 +1,7 @@
 import "server-only"
+import { createClient } from "@supabase/supabase-js"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
-import type { Respostas } from "@/lib/desafio"
+import { calcularLiberacao, type Dia, type Liberacao, type Respostas } from "@/lib/desafio"
 
 /**
  * A jornada da aluna no Desafio 21 Dias (comunidade.desafio_*).
@@ -36,6 +37,8 @@ export type Jornada = {
   concluidos: Set<number>
   /** Quantas empresas ela tem no Radar hoje (as não arquivadas). */
   empresasNoRadar: number
+  /** Até que semana ela pode ir, contando da compra do Desafio. */
+  liberacao: Liberacao
 }
 
 /**
@@ -47,7 +50,7 @@ export async function getJornada(email: string): Promise<Jornada> {
   const db = createComunidadeServiceClient()
   const e = norm(email)
 
-  const [progresso, radar] = await Promise.all([
+  const [progresso, radar, inicio] = await Promise.all([
     db
       .from("desafio_progresso")
       .select("dia, passo, respostas, completed_at")
@@ -57,6 +60,7 @@ export async function getJornada(email: string): Promise<Jornada> {
       .select("id", { count: "exact", head: true })
       .eq("email", e)
       .is("arquivada_em", null),
+    getInicioDoDesafio(e),
   ])
 
   if (progresso.error) {
@@ -80,7 +84,116 @@ export async function getJornada(email: string): Promise<Jornada> {
     if (row.completed_at !== null) concluidos.add(row.dia)
   }
 
-  return { dias, concluidos, empresasNoRadar: radar.count ?? 0 }
+  return {
+    dias,
+    concluidos,
+    empresasNoRadar: radar.count ?? 0,
+    liberacao: calcularLiberacao(inicio),
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Vídeos no bucket privado
+// ─────────────────────────────────────────────────────────────
+
+/** Longa o bastante para um dia aberto numa aba e assistido horas depois. */
+const VIDEO_TTL = 60 * 60 * 12
+
+/**
+ * Troca o `storage://bucket/caminho` dos vídeos do dia por uma signed URL.
+ *
+ * O conteúdo do dia é estático (vive no código), mas o arquivo mora num
+ * bucket privado: a URL que chega ao navegador é gerada aqui, por quem já
+ * passou pelo guard do Desafio. Falhou a assinatura, o passo fica sem vídeo
+ * e mostra a cartela "a gravação está sendo preparada" — melhor que um player
+ * quebrado.
+ */
+export async function assinarVideosDoDia(dia: Dia): Promise<Dia> {
+  const db = createComunidadeServiceClient()
+  const passos = await Promise.all(
+    dia.passos.map(async (passo) => {
+      if (passo.tipo !== "video" || !passo.videoUrl?.startsWith("storage://")) return passo
+      const caminho = passo.videoUrl.slice("storage://".length)
+      const barra = caminho.indexOf("/")
+      const { data, error } = await db.storage
+        .from(caminho.slice(0, barra))
+        .createSignedUrl(caminho.slice(barra + 1), VIDEO_TTL)
+      if (error) console.error("[desafio] assinar vídeo:", error.message)
+      return { ...passo, videoUrl: data?.signedUrl }
+    })
+  )
+  return { ...dia, passos }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Início do Desafio (para a liberação por semana)
+// ─────────────────────────────────────────────────────────────
+
+const POSITIVOS = new Set(["PURCHASE_APPROVED", "PURCHASE_COMPLETE"])
+const NEGATIVOS = new Set(["PURCHASE_REFUNDED", "PURCHASE_CHARGEBACK"])
+
+/** Escapa curingas do ILIKE: o e-mail é comparado sem caixa, não como padrão. */
+const semCuringas = (s: string) => s.replace(/[\\%_]/g, (c) => `\\${c}`)
+
+/**
+ * Quando o Desafio dela começou a contar: a compra válida mais recente.
+ *
+ * Lê as MESMAS duas origens de `comunidade.refresh_desafio_entitlement` — o
+ * postback que chega no CRM (public.hotmart_transactions, filtrado pelos
+ * produtos de `desafio_products`) e o que o portal recebe por conta própria
+ * (desafio_purchases). "Válida mais recente" = a primeira aprovação depois do
+ * último reembolso/chargeback: quem pediu reembolso e comprou de novo recomeça
+ * a contar; o PURCHASE_COMPLETE que chega semanas depois da aprovação não
+ * empurra a data para frente.
+ *
+ * Sem compra mas com cortesia, vale a data da cortesia. Sem nada (admin
+ * conferindo, ou dado faltando), null — e aí nada trava por semana: errar
+ * para o lado de não bloquear uma aluna que pagou.
+ */
+async function getInicioDoDesafio(e: string): Promise<Date | null> {
+  const db = createComunidadeServiceClient()
+  // public.hotmart_transactions é do CRM e não está nos tipos do portal.
+  const publico = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+
+  const [produtos, doPortal, cortesia] = await Promise.all([
+    db.from("desafio_products").select("hotmart_product_id"),
+    db.from("desafio_purchases").select("event_type, occurred_at").ilike("email", semCuringas(e)),
+    db.from("desafio_grants").select("created_at").ilike("email", semCuringas(e)).maybeSingle(),
+  ])
+
+  const ids = (produtos.data ?? []).map((p) => p.hotmart_product_id)
+  const doCrm = ids.length
+    ? await publico
+        .from("hotmart_transactions")
+        .select("event_type, creation_date")
+        .in("hotmart_product_id", ids)
+        .ilike("buyer_email", semCuringas(e))
+    : { data: [], error: null }
+
+  for (const r of [produtos, doPortal, cortesia, doCrm]) {
+    if (r.error) console.error("[desafio] getInicioDoDesafio:", r.error.message)
+  }
+
+  const eventos = [
+    ...(doPortal.data ?? []).map((r) => ({ tipo: r.event_type, quando: r.occurred_at })),
+    ...((doCrm.data ?? []) as { event_type: string; creation_date: string }[]).map((r) => ({
+      tipo: r.event_type,
+      quando: r.creation_date,
+    })),
+  ]
+    .filter((ev) => ev.quando && (POSITIVOS.has(ev.tipo) || NEGATIVOS.has(ev.tipo)))
+    .sort((a, b) => new Date(a.quando).getTime() - new Date(b.quando).getTime())
+
+  let inicio: string | null = null
+  for (const ev of eventos) {
+    if (NEGATIVOS.has(ev.tipo)) inicio = null
+    else if (inicio === null) inicio = ev.quando
+  }
+
+  const data = inicio ?? cortesia.data?.created_at ?? null
+  return data ? new Date(data) : null
 }
 
 /**

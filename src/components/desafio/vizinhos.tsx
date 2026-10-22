@@ -1,6 +1,15 @@
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, ListOrdered } from "lucide-react"
-import { TOTAL_DIAS, diaDisponivel, getDia, podeAbrir } from "@/lib/desafio"
+import {
+  TOTAL_DIAS,
+  dataCurta,
+  diaDisponivel,
+  getDia,
+  podeAbrir,
+  semanaAberta,
+  semanaDoDia,
+  type Liberacao,
+} from "@/lib/desafio"
 import { JornadaMenu } from "@/components/desafio/jornada-menu"
 
 /**
@@ -21,14 +30,16 @@ export function DiasVizinhos({
   concluidos,
   atual,
   empresasNoRadar,
+  liberacao,
 }: {
   n: number
   concluidos: ReadonlySet<number>
   atual: number
   empresasNoRadar: number
+  liberacao: Liberacao
 }) {
-  const anterior = vizinho(n, -1, concluidos)
-  const proximo = vizinho(n, +1, concluidos)
+  const anterior = vizinho(n, -1, concluidos, liberacao)
+  const proximo = vizinho(n, +1, concluidos, liberacao)
 
   return (
     <nav
@@ -45,7 +56,7 @@ export function DiasVizinhos({
         )}
 
         {proximo === null ? (
-          <AindaNao n={n} />
+          <AindaNao n={n} liberacao={liberacao} />
         ) : (
           <CartaoDoVizinho n={proximo} sentido="proximo" />
         )}
@@ -55,6 +66,7 @@ export function DiasVizinhos({
         concluidos={concluidos}
         atual={atual}
         empresasNoRadar={empresasNoRadar}
+        liberacao={liberacao}
         className="mx-auto inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/45 hover:text-primary"
       >
         <ListOrdered className="h-3.5 w-3.5 flex-none" />
@@ -70,10 +82,11 @@ export function DiasVizinhos({
 function vizinho(
   n: number,
   passo: 1 | -1,
-  concluidos: ReadonlySet<number>
+  concluidos: ReadonlySet<number>,
+  liberacao: Liberacao
 ): number | null {
   for (let m = n + passo; m >= 0 && m <= TOTAL_DIAS; m += passo) {
-    if (podeAbrir(m, concluidos)) return m
+    if (podeAbrir(m, concluidos, liberacao)) return m
   }
   return null
 }
@@ -126,7 +139,7 @@ function CartaoDoVizinho({
  * é a regra do Desafio. Depois do 21 não existe Dia 22, e prometer um
  * transformaria a formatura em sala de espera.
  */
-function AindaNao({ n }: { n: number }) {
+function AindaNao({ n, liberacao }: { n: number; liberacao: Liberacao }) {
   const seguinte = n + 1
 
   const aviso =
@@ -134,7 +147,9 @@ function AindaNao({ n }: { n: number }) {
       ? "Você está no último dia dos 21."
       : !diaDisponivel(seguinte)
         ? "O próximo dia ainda está sendo preparado."
-        : `O Dia ${seguinte} abre quando você concluir este.`
+        : !semanaAberta(seguinte, liberacao) && liberacao.proximaSemanaEm
+          ? `A Semana ${semanaDoDia(seguinte)} abre em ${dataCurta(liberacao.proximaSemanaEm)}.`
+          : `O Dia ${seguinte} abre quando você concluir este.`
 
   return (
     <p className="flex min-w-0 flex-col gap-1 rounded-2xl border border-dashed border-border px-4 py-3.5 sm:items-end sm:text-right">

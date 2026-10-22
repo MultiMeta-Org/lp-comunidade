@@ -127,18 +127,97 @@ export function diaAtual(concluidos: ReadonlySet<number>): number {
  */
 const TODOS_OS_DIAS_LIBERADOS = true
 
+// ─────────────────────────────────────────────────────────────
+// Semanas
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * As três semanas do Desafio, as mesmas do Caderno de Campo. O Dia Zero
+ * (matrícula) entra na primeira.
+ */
+export const SEMANAS = [
+  { n: 1, titulo: "Entre no mercado", de: 0, ate: 7 },
+  { n: 2, titulo: "Aprenda a vender", de: 8, ate: 14 },
+  { n: 3, titulo: "Torne-se profissional", de: 15, ate: 21 },
+] as const
+
+export function semanaDoDia(n: number): 1 | 2 | 3 {
+  return n <= 7 ? 1 : n <= 14 ? 2 : 3
+}
+
+const DIA_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Até onde ela pode ir por enquanto. Dentro de uma semana, ela anda no ritmo
+ * dela (pode fazer os sete dias num dia só); a semana seguinte só abre 7 dias
+ * depois da anterior, contando da COMPRA do Desafio.
+ *
+ * Contar da compra é o que casa com a garantia de 7 dias da Hotmart: dentro
+ * dela, só a primeira semana está aberta — ninguém leva o Desafio inteiro e
+ * pede reembolso. Quem compra e começa semanas depois encontra as semanas já
+ * abertas, mas segue fazendo um dia depois do outro.
+ */
+export type Liberacao = {
+  /** 1 a 3. */
+  semanasAbertas: number
+  /** Quando abre a próxima semana (ISO), ou null se todas já abriram. */
+  proximaSemanaEm: string | null
+}
+
+/** Sem data de compra (admin, cortesia sem data): nada trava por semana. */
+export const TUDO_LIBERADO: Liberacao = { semanasAbertas: SEMANAS.length, proximaSemanaEm: null }
+
+export function calcularLiberacao(inicio: Date | null, agora: Date = new Date()): Liberacao {
+  if (!inicio) return TUDO_LIBERADO
+  const passadas = Math.floor((agora.getTime() - inicio.getTime()) / (7 * DIA_MS))
+  const semanasAbertas = Math.min(SEMANAS.length, Math.max(1, 1 + passadas))
+  const proximaSemanaEm =
+    semanasAbertas < SEMANAS.length
+      ? new Date(inicio.getTime() + semanasAbertas * 7 * DIA_MS).toISOString()
+      : null
+  return { semanasAbertas, proximaSemanaEm }
+}
+
+export function semanaAberta(n: number, liberacao: Liberacao): boolean {
+  return semanaDoDia(n) <= liberacao.semanasAbertas
+}
+
+/** O que a tela de conclusão precisa saber do dia seguinte. */
+export type ProximoDia = {
+  n: number
+  /** Ela pode abrir já, depois de concluir este. */
+  aberto: boolean
+  /** Não abre porque a semana dele ainda está fechada: quando abre (ISO). */
+  semanaAbreEm: string | null
+}
+
+/** `2026-10-29T…` → `29/10`, no fuso da aluna (Brasília). */
+export function dataCurta(iso: string): string {
+  return new Date(iso).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "America/Sao_Paulo",
+  })
+}
+
 /**
  * A aluna pode abrir este dia?
  *
  * Sim se já concluiu (revisão — o documento pede que os dias anteriores sejam
- * revisitáveis e editáveis) ou se é o dia atual dela. Não dá para correr na
- * frente: o Desafio é feito para ser vivido um pouquinho por dia, e liberar
- * tudo de uma vez o transformaria em curso para maratonar.
+ * revisitáveis e editáveis) ou se é o dia atual dela E a semana dele já abriu.
+ * Não dá para correr na frente do dia atual, nem da semana: o Desafio é feito
+ * para ser vivido ao longo de três semanas, e liberar tudo de uma vez o
+ * transformaria em curso para maratonar.
  */
-export function podeAbrir(n: number, concluidos: ReadonlySet<number>): boolean {
+export function podeAbrir(
+  n: number,
+  concluidos: ReadonlySet<number>,
+  liberacao: Liberacao
+): boolean {
   if (!diaDisponivel(n)) return false
   if (TODOS_OS_DIAS_LIBERADOS) return true
-  return concluidos.has(n) || n === diaAtual(concluidos)
+  if (concluidos.has(n)) return true
+  return n === diaAtual(concluidos) && semanaAberta(n, liberacao)
 }
 
 /**

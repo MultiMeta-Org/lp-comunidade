@@ -47,6 +47,8 @@ export const dia01: Dia = {
       tipo: "video",
       chave: "video-dia-1",
       label: "Dia 1 — Entenda a profissão que você acabou de começar",
+      videoUrl: "storage://videos/desafio/dia-01.mp4",
+      formato: "vertical",
       ask: "Assista ao vídeo de hoje.",
       support:
         "Ele explica o que acontece antes, durante e depois de uma venda. Depois eu te mostro sua missão.",
@@ -160,7 +162,7 @@ export const dia01: Dia = {
         "Você teria disponibilidade para viajar para Brasília para participar de uma edição presencial?",
       opcoes: ["Sim", "Talvez, dependendo da data", "Neste momento, não"],
       nota: "Quando uma nova edição for aberta, as alunas da lista recebem as informações sobre datas, funcionamento e participação.",
-      cta: "Quero entrar na lista",
+      cta: "Seguir para o próximo passo",
     },
   ],
 

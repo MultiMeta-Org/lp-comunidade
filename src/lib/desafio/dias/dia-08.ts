@@ -46,11 +46,13 @@ export const dia08: Dia = {
   passos: [
     {
       tipo: "video",
-      chave: "video-dia-8",
-      label: "Dia 8 — Transforme uma resposta em conversa",
-      ask: "Assista ao vídeo de hoje.",
+      chave: "video-fase-2",
+      label: "Fase 2 — Aprenda a vender",
+      videoUrl: "storage://videos/desafio/fase-2.mp4",
+      formato: "vertical",
+      ask: "Assista ao vídeo da Fase 2.",
       support:
-        "Ele mostra as perguntas que abrem a conversa, como confirmar o que você entendeu e como convidar para uma reunião sem forçar.",
+        "Ele abre a sua segunda semana: o que você vai aprender e fazer do Dia 8 ao Dia 14. Se precisar, volte nele nos próximos dias.",
       cta: "Já assisti",
     },
 
