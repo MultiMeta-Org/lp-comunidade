@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
+import { Fragment, useMemo, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Check, Copy, Play, Plus, Trash2, X } from "lucide-react"
@@ -17,6 +17,7 @@ import {
 import type { Empresa, Operacao } from "@/lib/desafio-server"
 import { Celebracao } from "@/components/desafio/celebracao"
 import { isDirectVideoFile, toVideoEmbedUrl } from "@/lib/lessons"
+import { formatarTelefone, problemaNoTelefone, telefoneParaWhatsApp } from "@/lib/telefone"
 
 /**
  * O motor da missão: um passo por tela.
@@ -1001,10 +1002,19 @@ export function RadarEditor({
   const [primeiroContato, setPrimeiroContato] = useState("")
   const [aviso, setAviso] = useState<string | null>(null)
   const [salvando, startSalvar] = useTransition()
+  // O aviso do telefone só aparece depois que ela sai do campo (ou tenta
+  // salvar): acusar "faltam números" no meio da digitação é bronca antes da hora.
+  const [telefoneTocado, setTelefoneTocado] = useState(false)
+  const erroTelefone = problemaNoTelefone(telefone)
+  const erroData = problemaNaData(primeiroContato)
 
   function adicionar() {
     const limpo = nome.trim()
     if (!limpo) return
+    if (erroTelefone || erroData) {
+      setTelefoneTocado(true)
+      return
+    }
 
     startSalvar(async () => {
       const res = await addEmpresaAction({
@@ -1025,6 +1035,7 @@ export function RadarEditor({
       setSegmento("")
       setContato("")
       setTelefone("")
+      setTelefoneTocado(false)
       setPrimeiroContato("")
       setAviso(null)
       setErro(null)
@@ -1066,62 +1077,34 @@ export function RadarEditor({
           {radar.map((empresa) => (
             <li
               key={empresa.id}
-              className="group flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-2.5"
+              className="group flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3"
             >
-              <Check className="h-3.5 w-3.5 flex-none text-primary" strokeWidth={3} />
-              <span className="min-w-0 flex-1">
-                <b className="block truncate text-[13px] font-semibold text-foreground">
+              <div className="flex items-center gap-2">
+                <b className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
                   {empresa.nome}
                 </b>
-                {/* O estágio e o próximo passo são o que faz o Radar valer como
-                    ferramenta de trabalho, e não como lista. Escondê-los aqui
-                    obrigaria a aluna a abrir uma por uma para saber o que fazer. */}
-                {empresa.proximaAcao ? (
-                  <small className="block truncate text-[11.5px] text-muted-foreground">
-                    {empresa.proximaAcao}
-                    {empresa.proximaAcaoEm && ` · ${formataData(empresa.proximaAcaoEm)}`}
-                  </small>
-                ) : (
-                  empresa.segmento && (
-                    <small className="block truncate text-[11.5px] text-muted-foreground">
-                      {empresa.segmento}
-                    </small>
-                  )
-                )}
-                {/* O contato que ela cadastrou tem que voltar à vista — e
-                    clicável: é dali que sai a abordagem. */}
-                {(empresa.contato || empresa.telefone || empresa.primeiroContatoEm) && (
-                  <span className="flex min-w-0 flex-wrap items-center gap-x-2.5">
-                    {empresa.contato && <Contato contato={empresa.contato} />}
-                    {empresa.telefone && <Telefone telefone={empresa.telefone} />}
-                    {empresa.primeiroContatoEm && (
-                      <small className="text-[11.5px] text-muted-foreground">
-                        1º contato {formataData(empresa.primeiroContatoEm)}
-                      </small>
-                    )}
+                {empresa.status !== "no-radar" && (
+                  <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
+                    {STATUS_RADAR[empresa.status as StatusRadar] ?? empresa.status}
                   </span>
                 )}
-              </span>
-              {empresa.status !== "no-radar" && (
-                <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
-                  {STATUS_RADAR[empresa.status as StatusRadar] ?? empresa.status}
-                </span>
-              )}
-              <button
-                type="button"
-                aria-label={`Tirar ${empresa.nome} do Radar`}
-                onClick={() =>
-                  startSalvar(async () => {
-                    const res = await arquivarEmpresaAction(empresa.id)
-                    if (res.ok) setRadar((r) => r.filter((e) => e.id !== empresa.id))
-                  })
-                }
-                // Visível no celular: sem hover, um botão que só aparece ao
-                // passar o mouse simplesmente não existe para quem toca.
-                className="flex-none p-1 text-muted-foreground transition-opacity hover:text-destructive lg:opacity-0 lg:group-hover:opacity-100"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+                <button
+                  type="button"
+                  aria-label={`Tirar ${empresa.nome} do Radar`}
+                  onClick={() =>
+                    startSalvar(async () => {
+                      const res = await arquivarEmpresaAction(empresa.id)
+                      if (res.ok) setRadar((r) => r.filter((e) => e.id !== empresa.id))
+                    })
+                  }
+                  // Visível no celular: sem hover, um botão que só aparece ao
+                  // passar o mouse simplesmente não existe para quem toca.
+                  className="flex-none p-1 text-muted-foreground transition-opacity hover:text-destructive lg:opacity-0 lg:group-hover:opacity-100"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <DadosDaEmpresa empresa={empresa} />
             </li>
           ))}
         </ul>
@@ -1164,11 +1147,15 @@ export function RadarEditor({
           <input
             type="tel"
             inputMode="tel"
+            autoComplete="off"
             value={telefone}
-            onChange={(e) => setTelefone(e.target.value)}
-            placeholder="Telefone ou WhatsApp"
+            onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
+            onBlur={() => setTelefoneTocado(true)}
+            placeholder="(11) 98765-4321"
             aria-label="Telefone ou WhatsApp"
-            className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
+            aria-invalid={telefoneTocado && erroTelefone !== null}
+            aria-describedby={telefoneTocado && erroTelefone ? "radar-telefone-erro" : undefined}
+            className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25 aria-[invalid=true]:border-destructive"
           />
           {/* Opcional: se ela já falou com a empresa antes de cadastrar. Senão,
               a data entra sozinha quando ela registra a abordagem. */}
@@ -1176,12 +1163,23 @@ export function RadarEditor({
             <span className="flex-none text-xs">1º contato em</span>
             <input
               type="date"
+              max={hojeLocal()}
               value={primeiroContato}
               onChange={(e) => setPrimeiroContato(e.target.value)}
               className="min-w-0 flex-1 bg-transparent py-1 text-sm text-foreground focus:outline-none"
             />
           </label>
         </div>
+        {telefoneTocado && erroTelefone && (
+          <small id="radar-telefone-erro" role="alert" className="text-xs font-semibold text-destructive">
+            {erroTelefone}
+          </small>
+        )}
+        {erroData && (
+          <small role="alert" className="text-xs font-semibold text-destructive">
+            {erroData}
+          </small>
+        )}
         <button
           type="button"
           onClick={adicionar}
@@ -1673,6 +1671,51 @@ function Interesse({
 }
 
 /**
+ * Os dados de uma empresa do Radar, cada um com o seu rótulo.
+ *
+ * Antes eram linhas soltas embaixo do nome, e não dava para saber o que era o
+ * quê ("Instagram ou Direct" é o canal? o segmento?). Agora é rótulo → valor,
+ * e só aparece o que ela preencheu. O próximo passo vem primeiro: é o que faz
+ * o Radar valer como ferramenta de trabalho, e não como lista.
+ */
+function DadosDaEmpresa({ empresa }: { empresa: Empresa }) {
+  const linhas: { rotulo: string; valor: React.ReactNode }[] = []
+  if (empresa.proximaAcao) {
+    linhas.push({
+      rotulo: "Próximo passo",
+      valor: (
+        <span className="block truncate">
+          {empresa.proximaAcao}
+          {empresa.proximaAcaoEm && ` · ${formataData(empresa.proximaAcaoEm)}`}
+        </span>
+      ),
+    })
+  }
+  if (empresa.segmento) {
+    linhas.push({ rotulo: "O que faz", valor: <span className="block truncate">{empresa.segmento}</span> })
+  }
+  if (empresa.contato) linhas.push({ rotulo: "Contato", valor: <Contato contato={empresa.contato} /> })
+  if (empresa.telefone) linhas.push({ rotulo: "Telefone", valor: <Telefone telefone={empresa.telefone} /> })
+  if (empresa.primeiroContatoEm) {
+    linhas.push({ rotulo: "1º contato", valor: formataData(empresa.primeiroContatoEm) })
+  }
+  if (linhas.length === 0) return null
+
+  return (
+    <dl className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 gap-y-1 border-t border-border/60 pt-2 text-[12.5px] text-foreground">
+      {linhas.map(({ rotulo, valor }) => (
+        <Fragment key={rotulo}>
+          <dt className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+            {rotulo}
+          </dt>
+          <dd className="min-w-0">{valor}</dd>
+        </Fragment>
+      ))}
+    </dl>
+  )
+}
+
+/**
  * O "Instagram ou site" da empresa, como link quando dá para saber para onde:
  * `@perfil` (ou `instagram.com/...`) vai ao Instagram, algo com cara de
  * domínio vira https. O resto — um telefone, um "falar com a Ana" — fica texto.
@@ -1687,7 +1730,7 @@ function linkDoContato(contato: string): string | null {
 
 function Contato({ contato }: { contato: string }) {
   const href = linkDoContato(contato)
-  const classe = "block truncate text-[11.5px]"
+  const classe = "block truncate"
   return href ? (
     <a
       href={href}
@@ -1698,31 +1741,43 @@ function Contato({ contato }: { contato: string }) {
       {contato}
     </a>
   ) : (
-    <small className={`${classe} text-muted-foreground`}>{contato}</small>
+    <span className={classe}>{contato}</span>
   )
 }
 
 /**
- * Telefone como link do WhatsApp — é por onde a abordagem acontece. Só os
- * dígitos; sem DDI, assume Brasil (55).
+ * Telefone como link do WhatsApp — é por onde a abordagem acontece. Número
+ * que não passa na validação (cadastrado antes dela existir) fica só texto.
  */
 function Telefone({ telefone }: { telefone: string }) {
-  const digitos = telefone.replace(/\D/g, "")
-  const classe = "block truncate text-[11.5px]"
-  if (digitos.length < 10) {
-    return <small className={`${classe} text-muted-foreground`}>{telefone}</small>
-  }
-  const comDdi = digitos.length <= 11 ? `55${digitos}` : digitos
+  const whatsapp = telefoneParaWhatsApp(telefone)
+  const classe = "block truncate"
+  if (!whatsapp) return <span className={classe}>{telefone}</span>
   return (
     <a
-      href={`https://wa.me/${comDdi}`}
+      href={`https://wa.me/${whatsapp}`}
       target="_blank"
       rel="noopener noreferrer"
       className={`${classe} text-primary underline-offset-2 hover:underline`}
     >
-      {telefone}
+      {formatarTelefone(telefone)}
     </a>
   )
+}
+
+/** AAAA-MM-DD de hoje no relógio dela — o `max` do campo de data. */
+function hojeLocal(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+}
+
+/** O primeiro contato não pode ser no futuro: é algo que já aconteceu. */
+function problemaNaData(iso: string): string | null {
+  if (!iso) return null
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "Data inválida."
+  if (iso > hojeLocal()) return "O primeiro contato não pode ser numa data futura."
+  if (iso < "2020-01-01") return "Confira o ano do primeiro contato."
+  return null
 }
 
 /** `2026-10-12` → `12/10`. A aluna não precisa do ano para amanhã. */
