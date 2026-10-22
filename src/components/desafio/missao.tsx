@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
+import { Fragment, useMemo, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Check, Copy, Play, Plus, Trash2, X } from "lucide-react"
@@ -1077,62 +1077,34 @@ export function RadarEditor({
           {radar.map((empresa) => (
             <li
               key={empresa.id}
-              className="group flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-2.5"
+              className="group flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3"
             >
-              <Check className="h-3.5 w-3.5 flex-none text-primary" strokeWidth={3} />
-              <span className="min-w-0 flex-1">
-                <b className="block truncate text-[13px] font-semibold text-foreground">
+              <div className="flex items-center gap-2">
+                <b className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
                   {empresa.nome}
                 </b>
-                {/* O estágio e o próximo passo são o que faz o Radar valer como
-                    ferramenta de trabalho, e não como lista. Escondê-los aqui
-                    obrigaria a aluna a abrir uma por uma para saber o que fazer. */}
-                {empresa.proximaAcao ? (
-                  <small className="block truncate text-[11.5px] text-muted-foreground">
-                    {empresa.proximaAcao}
-                    {empresa.proximaAcaoEm && ` · ${formataData(empresa.proximaAcaoEm)}`}
-                  </small>
-                ) : (
-                  empresa.segmento && (
-                    <small className="block truncate text-[11.5px] text-muted-foreground">
-                      {empresa.segmento}
-                    </small>
-                  )
-                )}
-                {/* O contato que ela cadastrou tem que voltar à vista — e
-                    clicável: é dali que sai a abordagem. */}
-                {(empresa.contato || empresa.telefone || empresa.primeiroContatoEm) && (
-                  <span className="flex min-w-0 flex-wrap items-center gap-x-2.5">
-                    {empresa.contato && <Contato contato={empresa.contato} />}
-                    {empresa.telefone && <Telefone telefone={empresa.telefone} />}
-                    {empresa.primeiroContatoEm && (
-                      <small className="text-[11.5px] text-muted-foreground">
-                        1º contato {formataData(empresa.primeiroContatoEm)}
-                      </small>
-                    )}
+                {empresa.status !== "no-radar" && (
+                  <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
+                    {STATUS_RADAR[empresa.status as StatusRadar] ?? empresa.status}
                   </span>
                 )}
-              </span>
-              {empresa.status !== "no-radar" && (
-                <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
-                  {STATUS_RADAR[empresa.status as StatusRadar] ?? empresa.status}
-                </span>
-              )}
-              <button
-                type="button"
-                aria-label={`Tirar ${empresa.nome} do Radar`}
-                onClick={() =>
-                  startSalvar(async () => {
-                    const res = await arquivarEmpresaAction(empresa.id)
-                    if (res.ok) setRadar((r) => r.filter((e) => e.id !== empresa.id))
-                  })
-                }
-                // Visível no celular: sem hover, um botão que só aparece ao
-                // passar o mouse simplesmente não existe para quem toca.
-                className="flex-none p-1 text-muted-foreground transition-opacity hover:text-destructive lg:opacity-0 lg:group-hover:opacity-100"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+                <button
+                  type="button"
+                  aria-label={`Tirar ${empresa.nome} do Radar`}
+                  onClick={() =>
+                    startSalvar(async () => {
+                      const res = await arquivarEmpresaAction(empresa.id)
+                      if (res.ok) setRadar((r) => r.filter((e) => e.id !== empresa.id))
+                    })
+                  }
+                  // Visível no celular: sem hover, um botão que só aparece ao
+                  // passar o mouse simplesmente não existe para quem toca.
+                  className="flex-none p-1 text-muted-foreground transition-opacity hover:text-destructive lg:opacity-0 lg:group-hover:opacity-100"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <DadosDaEmpresa empresa={empresa} />
             </li>
           ))}
         </ul>
@@ -1699,6 +1671,51 @@ function Interesse({
 }
 
 /**
+ * Os dados de uma empresa do Radar, cada um com o seu rótulo.
+ *
+ * Antes eram linhas soltas embaixo do nome, e não dava para saber o que era o
+ * quê ("Instagram ou Direct" é o canal? o segmento?). Agora é rótulo → valor,
+ * e só aparece o que ela preencheu. O próximo passo vem primeiro: é o que faz
+ * o Radar valer como ferramenta de trabalho, e não como lista.
+ */
+function DadosDaEmpresa({ empresa }: { empresa: Empresa }) {
+  const linhas: { rotulo: string; valor: React.ReactNode }[] = []
+  if (empresa.proximaAcao) {
+    linhas.push({
+      rotulo: "Próximo passo",
+      valor: (
+        <span className="block truncate">
+          {empresa.proximaAcao}
+          {empresa.proximaAcaoEm && ` · ${formataData(empresa.proximaAcaoEm)}`}
+        </span>
+      ),
+    })
+  }
+  if (empresa.segmento) {
+    linhas.push({ rotulo: "O que faz", valor: <span className="block truncate">{empresa.segmento}</span> })
+  }
+  if (empresa.contato) linhas.push({ rotulo: "Contato", valor: <Contato contato={empresa.contato} /> })
+  if (empresa.telefone) linhas.push({ rotulo: "Telefone", valor: <Telefone telefone={empresa.telefone} /> })
+  if (empresa.primeiroContatoEm) {
+    linhas.push({ rotulo: "1º contato", valor: formataData(empresa.primeiroContatoEm) })
+  }
+  if (linhas.length === 0) return null
+
+  return (
+    <dl className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 gap-y-1 border-t border-border/60 pt-2 text-[12.5px] text-foreground">
+      {linhas.map(({ rotulo, valor }) => (
+        <Fragment key={rotulo}>
+          <dt className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+            {rotulo}
+          </dt>
+          <dd className="min-w-0">{valor}</dd>
+        </Fragment>
+      ))}
+    </dl>
+  )
+}
+
+/**
  * O "Instagram ou site" da empresa, como link quando dá para saber para onde:
  * `@perfil` (ou `instagram.com/...`) vai ao Instagram, algo com cara de
  * domínio vira https. O resto — um telefone, um "falar com a Ana" — fica texto.
@@ -1713,7 +1730,7 @@ function linkDoContato(contato: string): string | null {
 
 function Contato({ contato }: { contato: string }) {
   const href = linkDoContato(contato)
-  const classe = "block truncate text-[11.5px]"
+  const classe = "block truncate"
   return href ? (
     <a
       href={href}
@@ -1724,7 +1741,7 @@ function Contato({ contato }: { contato: string }) {
       {contato}
     </a>
   ) : (
-    <small className={`${classe} text-muted-foreground`}>{contato}</small>
+    <span className={classe}>{contato}</span>
   )
 }
 
@@ -1734,8 +1751,8 @@ function Contato({ contato }: { contato: string }) {
  */
 function Telefone({ telefone }: { telefone: string }) {
   const whatsapp = telefoneParaWhatsApp(telefone)
-  const classe = "block truncate text-[11.5px]"
-  if (!whatsapp) return <small className={`${classe} text-muted-foreground`}>{telefone}</small>
+  const classe = "block truncate"
+  if (!whatsapp) return <span className={classe}>{telefone}</span>
   return (
     <a
       href={`https://wa.me/${whatsapp}`}
