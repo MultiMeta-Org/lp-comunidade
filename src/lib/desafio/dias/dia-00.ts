@@ -22,7 +22,7 @@ export const dia00: Dia = {
   dia: 0,
   kicker: "Comece por aqui",
   titulo: "Que bom que você chegou.",
-  lede: "Hoje você não precisa saber de nada ainda. É só preencher sua matrícula e assistir os vídeos. Eu vou com você no resto.",
+  lede: "Hoje tudo isso pode ser novo para você... e tá tudo bem, de verdade! É só preencher sua matrícula e começar a assistir os vídeos. Eu estarei aqui com você, passo a passo.",
   tempo: "20 minutinhos",
   objetivo:
     "Acolher, explicar a jornada dos 21 dias e a Missão Primeiro Sim, apresentar o portal e colher a matrícula — inclusive o ponto de partida (baseline) que vai ser comparado no Dia 21.",
@@ -33,7 +33,7 @@ export const dia00: Dia = {
       tipo: "formulario",
       chave: "sobre-voce",
       ask: "Vamos começar por você.",
-      support: "São seis etapas no total. Uma coisa de cada vez, para você não se perder.",
+      support: "Aqui eu quero saber um pouco mais sobre você.",
       campos: [
         { tipo: "texto", chave: "nome_completo", rotulo: "Nome completo" },
         {
@@ -107,7 +107,15 @@ export const dia00: Dia = {
             "Estou fora do mercado de trabalho",
             "Cuido integralmente da casa e dos filhos",
             "Outro",
+            "Prefiro não informar",
           ],
+        },
+        {
+          tipo: "texto",
+          chave: "momento_profissional_outro",
+          rotulo: "Conta para mim qual é o seu momento",
+          mostrarSe: { chave: "momento_profissional", valor: "Outro" },
+          obrigatorio: false,
         },
         {
           tipo: "texto",
@@ -153,8 +161,9 @@ export const dia00: Dia = {
         {
           tipo: "checks",
           chave: "motivos",
-          rotulo: "Qual é o principal motivo que fez você entrar na Empreendedora Anônima?",
-          ajuda: "Escolha até 2.",
+          // "Escolha até 2" no rótulo, e não na ajuda (que fica embaixo das
+          // opções): ela precisa saber ANTES de escolher, não depois.
+          rotulo: "Quais são os principais motivos que fizeram você entrar no Desafio? Escolha até 2.",
           max: 2,
           opcoes: [
             "Quero voltar ao mercado de trabalho",
@@ -169,10 +178,16 @@ export const dia00: Dia = {
           ],
         },
         {
+          tipo: "texto",
+          chave: "motivos_outro",
+          rotulo: "Qual outro motivo?",
+          mostrarSe: { chave: "motivos", valor: "Outro" },
+          obrigatorio: false,
+        },
+        {
           tipo: "radio",
           chave: "maior_dificuldade",
-          rotulo: "Qual é hoje sua MAIOR dificuldade para construir uma nova carreira?",
-          ajuda: "Escolha uma.",
+          rotulo: "Qual é hoje sua MAIOR dificuldade para construir uma nova carreira? Escolha uma.",
           opcoes: [
             "Não sei por onde começar",
             "Falta de experiência",
@@ -185,6 +200,13 @@ export const dia00: Dia = {
             "Falta de apoio",
             "Outra",
           ],
+        },
+        {
+          tipo: "texto",
+          chave: "maior_dificuldade_outra",
+          rotulo: "Qual é ela?",
+          mostrarSe: { chave: "maior_dificuldade", valor: "Outra" },
+          obrigatorio: false,
         },
         {
           tipo: "area",
@@ -200,8 +222,8 @@ export const dia00: Dia = {
     {
       tipo: "formulario",
       chave: "objetivo-financeiro",
-      ask: "Qual é o seu objetivo com isso?",
-      support: "Saber onde você quer chegar me ajuda a te acompanhar melhor.",
+      ask: "Qual é o seu objetivo financeiro?",
+      support: "Saber onde você quer chegar te ajuda a entender o esforço necessário.",
       campos: [
         {
           tipo: "radio",
@@ -247,7 +269,7 @@ export const dia00: Dia = {
           tipo: "radio",
           chave: "periodo",
           rotulo: "Qual período tende a funcionar melhor?",
-          opcoes: ["Manhã", "Tarde", "Noite", "Varia"],
+          opcoes: ["Manhã", "Tarde", "Noite", "Tenho flexibilidade de horários"],
           inline: true,
         },
       ],
@@ -259,7 +281,7 @@ export const dia00: Dia = {
       chave: "baseline",
       ask: "Onde você está hoje?",
       support:
-        "Responda com sinceridade, inclusive se a resposta for zero. Essas mesmas três perguntas voltam no Dia 21, e é aí que você vai ver o tamanho do que mudou.",
+        "Responda com sinceridade, inclusive se a resposta for zero. Essas mesmas três perguntas voltam no final do Desafio, e aí você vai conseguir ver toda a sua evolução!",
       campos: [
         {
           tipo: "escala",
@@ -289,18 +311,19 @@ export const dia00: Dia = {
     {
       tipo: "video",
       chave: "video-boas-vindas",
-      label: "Bem-vinda à Empreendedora Anônima",
+      label: "Bem-vinda ao Desafio 21 Dias",
       // H.264 720p no bucket privado (o original do iPhone é HEVC e só tocava
       // pelo player do Drive, com tarja preta e sem duração). Original no Drive:
       // https://drive.google.com/file/d/1FC8J9iPn1YD-909M40BF6I3-T9q5aL-T/view
       videoUrl: "storage://videos/desafio/dia-00-boas-vindas.mp4",
       formato: "vertical",
-      ask: "Assista ao vídeo de boas-vindas.",
-      support:
-        "Matrícula feita. Agora você vai entender como funcionam os próximos 21 dias e como usar sua formação.",
+      ask: "Seja bem-vinda!",
+      support: "Gravei alguns recadinhos importantes para você:",
       nota: "Não precisa anotar nada agora. Depois do vídeo eu te digo exatamente o que fazer.",
       cta: "Já assisti",
     },
+    // O tour do portal saiu: o vídeo de boas-vindas já mostra o portal, e um
+    // terceiro vídeo seguido pesava sem acrescentar.
     // Fase 0: a carreira, antes do Dia 1 — para ela entender o caminho que
     // pode seguir nessa área. O texto de apoio embaixo do vídeo a Nati ainda
     // vai escrever (mais visual); por enquanto, uma linha só.
@@ -313,16 +336,6 @@ export const dia00: Dia = {
       ask: "Agora entenda a carreira que você está começando.",
       support:
         "Antes do Dia 1, conheça os caminhos que essa área abre para você — e onde o Desafio te coloca neles.",
-      cta: "Já assisti",
-    },
-    {
-      tipo: "video",
-      chave: "video-tour",
-      label: "Conheça seu Portal — tour rápido",
-      ask: "Agora um tour rápido pelo portal.",
-      support:
-        "Dois minutinhos para você saber onde fica cada coisa: os 21 dias, a Biblioteca, o Radar, a B.IA, o seu progresso e o botão de quando você fechar seu primeiro contrato.",
-      nota: "Todos os dias: assista → execute → registre → avance.",
       cta: "Já assisti",
     },
 

@@ -113,6 +113,8 @@ export async function addEmpresaAction(entrada: {
   nome: string
   segmento?: string
   contato?: string
+  telefone?: string
+  primeiroContatoEm?: string
   origem?: string
 }): Promise<EmpresaResult> {
   const { email } = await requireDesafio()
@@ -129,6 +131,8 @@ export async function addEmpresaAction(entrada: {
     nome: entrada.nome,
     segmento: entrada.segmento,
     contato: entrada.contato,
+    telefone: entrada.telefone,
+    primeiroContatoEm: entrada.primeiroContatoEm,
     origem: entrada.origem,
     diaOrigem: typeof entrada.dia === "number" ? entrada.dia : null,
   })

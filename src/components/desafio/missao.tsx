@@ -234,7 +234,10 @@ export function Missao({
 /** Um campo escondido por `mostrarSe` conta como respondido — ela não o vê. */
 function visivel(campo: Campo, respostas: Respostas): boolean {
   if (!campo.mostrarSe) return true
-  return respostas[campo.mostrarSe.chave] === campo.mostrarSe.valor
+  const valor = respostas[campo.mostrarSe.chave]
+  // Múltipla escolha: basta a opção estar entre as marcadas.
+  if (Array.isArray(valor)) return valor.includes(campo.mostrarSe.valor)
+  return valor === campo.mostrarSe.valor
 }
 
 function vazio(valor: Respostas[string] | undefined): boolean {
@@ -720,7 +723,13 @@ function Opcao({
   )
 }
 
-/** Múltipla escolha, com teto quando a pergunta diz "escolha até 2". */
+/**
+ * Múltipla escolha, com teto quando a pergunta diz "escolha até 2".
+ *
+ * No teto, marcar outra TROCA pela mais antiga, em vez de travar as demais:
+ * travar obrigava a desmarcar antes de mudar de ideia, e quem testou achou
+ * duro (a pergunta de escolha única do lado deixava trocar livremente).
+ */
 function Multipla({
   campo,
   valor,
@@ -733,6 +742,11 @@ function Multipla({
   const atuais = Array.isArray(valor) ? valor : []
   const cheio = campo.max !== undefined && atuais.length >= campo.max
 
+  function alternar(opcao: string) {
+    if (atuais.includes(opcao)) return set(campo.chave, atuais.filter((o) => o !== opcao))
+    set(campo.chave, cheio ? [...atuais.slice(1), opcao] : [...atuais, opcao])
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {campo.opcoes.map((opcao) => {
@@ -741,22 +755,12 @@ function Multipla({
           <button
             key={opcao}
             type="button"
-            onClick={() =>
-              set(
-                campo.chave,
-                marcado ? atuais.filter((o) => o !== opcao) : [...atuais, opcao]
-              )
-            }
+            onClick={() => alternar(opcao)}
             aria-pressed={marcado}
-            // Teto atingido: as não marcadas apagam em vez de desaparecer, para
-            // ela entender que precisa desmarcar uma antes de trocar.
-            disabled={!marcado && cheio}
             className={`flex w-full items-center gap-2.5 rounded-xl border px-4 py-3 text-left text-sm transition-all duration-200 ${
               marcado
                 ? "border-primary bg-primary-subtle font-semibold text-foreground"
-                : cheio
-                  ? "border-border bg-card text-muted-foreground/50"
-                  : "border-border bg-card text-muted-foreground hover:border-primary/45 hover:text-foreground"
+                : "border-border bg-card text-muted-foreground hover:border-primary/45 hover:text-foreground"
             }`}
           >
             <span
@@ -993,6 +997,8 @@ export function RadarEditor({
   const [nome, setNome] = useState("")
   const [segmento, setSegmento] = useState("")
   const [contato, setContato] = useState("")
+  const [telefone, setTelefone] = useState("")
+  const [primeiroContato, setPrimeiroContato] = useState("")
   const [aviso, setAviso] = useState<string | null>(null)
   const [salvando, startSalvar] = useTransition()
 
@@ -1006,6 +1012,8 @@ export function RadarEditor({
         nome: limpo,
         segmento,
         contato,
+        telefone,
+        primeiroContatoEm: primeiroContato || undefined,
         origem,
       })
       if (!res.ok) {
@@ -1016,6 +1024,8 @@ export function RadarEditor({
       setNome("")
       setSegmento("")
       setContato("")
+      setTelefone("")
+      setPrimeiroContato("")
       setAviso(null)
       setErro(null)
     })
@@ -1078,6 +1088,19 @@ export function RadarEditor({
                     </small>
                   )
                 )}
+                {/* O contato que ela cadastrou tem que voltar à vista — e
+                    clicável: é dali que sai a abordagem. */}
+                {(empresa.contato || empresa.telefone || empresa.primeiroContatoEm) && (
+                  <span className="flex min-w-0 flex-wrap items-center gap-x-2.5">
+                    {empresa.contato && <Contato contato={empresa.contato} />}
+                    {empresa.telefone && <Telefone telefone={empresa.telefone} />}
+                    {empresa.primeiroContatoEm && (
+                      <small className="text-[11.5px] text-muted-foreground">
+                        1º contato {formataData(empresa.primeiroContatoEm)}
+                      </small>
+                    )}
+                  </span>
+                )}
               </span>
               {empresa.status !== "no-radar" && (
                 <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
@@ -1137,6 +1160,28 @@ export function RadarEditor({
             className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
           />
         </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            type="tel"
+            inputMode="tel"
+            value={telefone}
+            onChange={(e) => setTelefone(e.target.value)}
+            placeholder="Telefone ou WhatsApp"
+            aria-label="Telefone ou WhatsApp"
+            className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
+          />
+          {/* Opcional: se ela já falou com a empresa antes de cadastrar. Senão,
+              a data entra sozinha quando ela registra a abordagem. */}
+          <label className="flex w-full items-center gap-2 rounded-xl border border-input bg-background px-4 py-1.5 text-sm text-muted-foreground focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/25">
+            <span className="flex-none text-xs">1º contato em</span>
+            <input
+              type="date"
+              value={primeiroContato}
+              onChange={(e) => setPrimeiroContato(e.target.value)}
+              className="min-w-0 flex-1 bg-transparent py-1 text-sm text-foreground focus:outline-none"
+            />
+          </label>
+        </div>
         <button
           type="button"
           onClick={adicionar}
@@ -1154,7 +1199,7 @@ export function RadarEditor({
       </div>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Seu Radar não termina hoje. Sempre que encontrar uma empresa nova durante a
+        Seu Radar não acaba hoje. Sempre que encontrar uma empresa nova durante a
         jornada, volte aqui e adicione.
       </p>
     </div>
@@ -1624,6 +1669,59 @@ function Interesse({
         Mudei de ideia
       </button>
     </div>
+  )
+}
+
+/**
+ * O "Instagram ou site" da empresa, como link quando dá para saber para onde:
+ * `@perfil` (ou `instagram.com/...`) vai ao Instagram, algo com cara de
+ * domínio vira https. O resto — um telefone, um "falar com a Ana" — fica texto.
+ */
+function linkDoContato(contato: string): string | null {
+  const c = contato.trim()
+  if (/^@[\w.]+$/.test(c)) return `https://instagram.com/${c.slice(1)}`
+  if (/^https?:\/\//i.test(c)) return c
+  if (/^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(c)) return `https://${c}`
+  return null
+}
+
+function Contato({ contato }: { contato: string }) {
+  const href = linkDoContato(contato)
+  const classe = "block truncate text-[11.5px]"
+  return href ? (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${classe} text-primary underline-offset-2 hover:underline`}
+    >
+      {contato}
+    </a>
+  ) : (
+    <small className={`${classe} text-muted-foreground`}>{contato}</small>
+  )
+}
+
+/**
+ * Telefone como link do WhatsApp — é por onde a abordagem acontece. Só os
+ * dígitos; sem DDI, assume Brasil (55).
+ */
+function Telefone({ telefone }: { telefone: string }) {
+  const digitos = telefone.replace(/\D/g, "")
+  const classe = "block truncate text-[11.5px]"
+  if (digitos.length < 10) {
+    return <small className={`${classe} text-muted-foreground`}>{telefone}</small>
+  }
+  const comDdi = digitos.length <= 11 ? `55${digitos}` : digitos
+  return (
+    <a
+      href={`https://wa.me/${comDdi}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${classe} text-primary underline-offset-2 hover:underline`}
+    >
+      {telefone}
+    </a>
   )
 }
 
