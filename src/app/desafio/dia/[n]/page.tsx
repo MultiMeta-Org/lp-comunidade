@@ -68,7 +68,7 @@ export default async function DiaPage({
   const concluido = jornada.concluidos.has(numero)
 
   return (
-    <main className="grain relative min-h-[calc(100vh-3.5rem)] overflow-hidden px-4 pb-20 pt-6 sm:px-5 sm:pt-8">
+    <main className="grain relative min-h-[calc(100vh-6.5rem)] overflow-hidden px-4 pb-20 pt-6 sm:px-5 sm:pt-8">
       <Atmosphere variant="lesson" />
 
       <div className="relative z-10 mx-auto w-full max-w-2xl">

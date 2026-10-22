@@ -37,7 +37,7 @@ export function Jornada(props: {
   liberacao: Liberacao
 }) {
   return (
-    <aside className="w-full min-w-0 lg:sticky lg:top-24">
+    <aside className="w-full min-w-0 lg:sticky lg:top-32">
       <ConteudoDaJornada {...props} />
     </aside>
   )

@@ -35,8 +35,12 @@ const BIA_URL = process.env.NEXT_PUBLIC_BIA_URL?.replace(/\/$/, "") ?? ""
  */
 const supabaseDoNavegador = async () => (await import("@/lib/supabase/client")).supabase
 
-/** Onde o botão flutuante não aparece: sem sessão de aluna ou área da equipe. */
-const ROTAS_SEM_BIA = ["/login", "/admin"]
+/**
+ * Onde o botão flutuante não aparece. A B.IA mora no portal (início, aulas):
+ * o Desafio é um ambiente próprio, focado na missão do dia, e fica sem ela.
+ * Login e admin não têm aluna para atender.
+ */
+const ROTAS_SEM_BIA = ["/login", "/admin", "/desafio"]
 
 const SUGESTOES = [
   "Qual é a minha missão de hoje?",
