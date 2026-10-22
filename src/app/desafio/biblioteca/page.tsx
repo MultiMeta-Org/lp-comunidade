@@ -1,5 +1,4 @@
-import Link from "next/link"
-import { ArrowLeft, ArrowUpRight, BookOpen } from "lucide-react"
+import { ArrowUpRight, BookOpen } from "lucide-react"
 import { requireDesafio } from "@/lib/guard"
 import { getJornada } from "@/lib/desafio-server"
 import { diaAtual } from "@/lib/desafio"
@@ -24,14 +23,6 @@ export default async function BibliotecaPage() {
       <Atmosphere variant="library" />
 
       <div className="relative z-10 mx-auto w-full max-w-2xl">
-        <Link
-          href="/desafio"
-          className="group mb-6 inline-flex items-center gap-1.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:mb-8"
-        >
-          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-          Minha jornada
-        </Link>
-
         <header className="mb-8">
           <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
             Biblioteca

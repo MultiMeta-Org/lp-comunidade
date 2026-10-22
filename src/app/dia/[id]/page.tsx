@@ -4,13 +4,13 @@ import Link from "next/link"
 import { ArrowLeft, ArrowRight, Download, FileText, MessageCircle } from "lucide-react"
 import { type Lesson, categoryLabel, hasMedia } from "@/lib/lessons"
 import { WHATSAPP_VIP_URL } from "@/lib/links"
-import { MATERIAL_NAME, PLANTAO_NAME } from "@/lib/produto"
 import { getLessonWithNeighbors } from "@/lib/lessons-server"
 import { requireLessonsViewer } from "@/lib/guard"
 import { getCompletedLessonIds, markLessonViewed } from "@/lib/progress-server"
 import { LessonComplete } from "@/components/lesson-complete"
 import { AudioPlayer } from "@/components/audio-player"
 import { SiteHeader } from "@/components/site-header"
+import { trilhaDasAulas } from "@/lib/trilha"
 import { LiveBanner } from "@/components/live-banner"
 import { Atmosphere } from "@/components/atmosphere"
 import { VideoPlayer } from "@/components/video-player"
@@ -39,24 +39,14 @@ export default async function LessonPage({
   return (
     <div className="min-h-screen">
       <LiveBanner />
-      <SiteHeader />
+      <SiteHeader trilha={trilhaDasAulas(scope, lesson.topic)} />
 
       <main className="grain relative overflow-hidden px-5 pb-16 pt-8">
         <Atmosphere variant="lesson" />
 
         <div className="relative z-10 mx-auto w-full max-w-2xl space-y-12">
-          {/* ── Volta para o acervo ── */}
-          <Link
-            href="/aulas"
-            className="group -mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors animate-rise"
-            style={{ "--d": "0ms" } as React.CSSProperties}
-          >
-            <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-            {scope === "lab" ? MATERIAL_NAME : PLANTAO_NAME}
-          </Link>
-
           {/* ── Lesson header ── */}
-          <div className="animate-rise" style={{ "--d": "70ms" } as React.CSSProperties}>
+          <div className="animate-rise" style={{ "--d": "0ms" } as React.CSSProperties}>
             <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
               {lesson.weekday} · {lesson.date}
             </p>

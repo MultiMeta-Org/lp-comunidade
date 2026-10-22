@@ -1,6 +1,5 @@
-import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeft, Check, Eye, UserX } from "lucide-react"
+import { Check, Eye, UserX } from "lucide-react"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
 import {
   getLessonAusentes,
@@ -53,15 +52,7 @@ export default async function AulaProgressoPage({
   return (
     <section className="space-y-6">
       <div>
-        <Link
-          href="/admin/aulas"
-          className="group inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-          Aulas
-        </Link>
-
-        <h2 className="mt-3 font-display text-2xl font-bold text-foreground">
+        <h2 className="font-display text-2xl font-bold text-foreground">
           Aula {lesson.dia} · {lesson.topic}
         </h2>
         <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
