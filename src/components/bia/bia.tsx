@@ -36,11 +36,11 @@ const BIA_URL = process.env.NEXT_PUBLIC_BIA_URL?.replace(/\/$/, "") ?? ""
 const supabaseDoNavegador = async () => (await import("@/lib/supabase/client")).supabase
 
 /**
- * Onde o botão flutuante não aparece. A B.IA mora no portal (início, aulas):
- * o Desafio é um ambiente próprio, focado na missão do dia, e fica sem ela.
- * Login e admin não têm aluna para atender.
+ * Onde o botão flutuante aparece: só no Desafio 21 Dias (jornada, dias, Radar,
+ * Biblioteca). É ali que a aluna está executando e trava numa missão; no resto
+ * do portal ela não aparece.
  */
-const ROTAS_SEM_BIA = ["/login", "/admin", "/desafio"]
+const ROTAS_COM_BIA = ["/desafio"]
 
 const SUGESTOES = [
   "Qual é a minha missão de hoje?",
@@ -72,7 +72,7 @@ export function BiaProvider({ children }: { children: React.ReactNode }) {
     return () => cancelar()
   }, [])
 
-  const rotaPermitida = !ROTAS_SEM_BIA.some((r) => pathname.startsWith(r))
+  const rotaPermitida = ROTAS_COM_BIA.some((r) => pathname.startsWith(r))
   const disponivel = Boolean(BIA_URL) && temSessao && rotaPermitida
 
   const fechar = useCallback(() => setAberto(false), [])
