@@ -2,6 +2,7 @@
 
 import { refresh } from "next/cache"
 import { requireDesafio } from "@/lib/guard"
+import { formatarTelefone, problemaNoTelefone } from "@/lib/telefone"
 import {
   MAX_EMPRESAS_NO_RADAR,
   filtrarRespostas,
@@ -119,6 +120,11 @@ export async function addEmpresaAction(entrada: {
 }): Promise<EmpresaResult> {
   const { email } = await requireDesafio()
 
+  // A mesma regra do campo, de novo aqui: a máscara é conforto, não garantia.
+  const telefone = entrada.telefone?.trim() ?? ""
+  const erroTelefone = problemaNoTelefone(telefone)
+  if (erroTelefone) return { ok: false, error: erroTelefone }
+
   const radar = await getRadar(email)
   if (radar.length >= MAX_EMPRESAS_NO_RADAR) {
     return {
@@ -131,7 +137,7 @@ export async function addEmpresaAction(entrada: {
     nome: entrada.nome,
     segmento: entrada.segmento,
     contato: entrada.contato,
-    telefone: entrada.telefone,
+    telefone: telefone ? formatarTelefone(telefone) : null,
     primeiroContatoEm: entrada.primeiroContatoEm,
     origem: entrada.origem,
     diaOrigem: typeof entrada.dia === "number" ? entrada.dia : null,

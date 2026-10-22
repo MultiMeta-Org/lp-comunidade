@@ -17,6 +17,7 @@ import {
 import type { Empresa, Operacao } from "@/lib/desafio-server"
 import { Celebracao } from "@/components/desafio/celebracao"
 import { isDirectVideoFile, toVideoEmbedUrl } from "@/lib/lessons"
+import { formatarTelefone, problemaNoTelefone, telefoneParaWhatsApp } from "@/lib/telefone"
 
 /**
  * O motor da missão: um passo por tela.
@@ -1001,10 +1002,19 @@ export function RadarEditor({
   const [primeiroContato, setPrimeiroContato] = useState("")
   const [aviso, setAviso] = useState<string | null>(null)
   const [salvando, startSalvar] = useTransition()
+  // O aviso do telefone só aparece depois que ela sai do campo (ou tenta
+  // salvar): acusar "faltam números" no meio da digitação é bronca antes da hora.
+  const [telefoneTocado, setTelefoneTocado] = useState(false)
+  const erroTelefone = problemaNoTelefone(telefone)
+  const erroData = problemaNaData(primeiroContato)
 
   function adicionar() {
     const limpo = nome.trim()
     if (!limpo) return
+    if (erroTelefone || erroData) {
+      setTelefoneTocado(true)
+      return
+    }
 
     startSalvar(async () => {
       const res = await addEmpresaAction({
@@ -1025,6 +1035,7 @@ export function RadarEditor({
       setSegmento("")
       setContato("")
       setTelefone("")
+      setTelefoneTocado(false)
       setPrimeiroContato("")
       setAviso(null)
       setErro(null)
@@ -1164,11 +1175,15 @@ export function RadarEditor({
           <input
             type="tel"
             inputMode="tel"
+            autoComplete="off"
             value={telefone}
-            onChange={(e) => setTelefone(e.target.value)}
-            placeholder="Telefone ou WhatsApp"
+            onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
+            onBlur={() => setTelefoneTocado(true)}
+            placeholder="(11) 98765-4321"
             aria-label="Telefone ou WhatsApp"
-            className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
+            aria-invalid={telefoneTocado && erroTelefone !== null}
+            aria-describedby={telefoneTocado && erroTelefone ? "radar-telefone-erro" : undefined}
+            className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25 aria-[invalid=true]:border-destructive"
           />
           {/* Opcional: se ela já falou com a empresa antes de cadastrar. Senão,
               a data entra sozinha quando ela registra a abordagem. */}
@@ -1176,12 +1191,23 @@ export function RadarEditor({
             <span className="flex-none text-xs">1º contato em</span>
             <input
               type="date"
+              max={hojeLocal()}
               value={primeiroContato}
               onChange={(e) => setPrimeiroContato(e.target.value)}
               className="min-w-0 flex-1 bg-transparent py-1 text-sm text-foreground focus:outline-none"
             />
           </label>
         </div>
+        {telefoneTocado && erroTelefone && (
+          <small id="radar-telefone-erro" role="alert" className="text-xs font-semibold text-destructive">
+            {erroTelefone}
+          </small>
+        )}
+        {erroData && (
+          <small role="alert" className="text-xs font-semibold text-destructive">
+            {erroData}
+          </small>
+        )}
         <button
           type="button"
           onClick={adicionar}
@@ -1703,26 +1729,38 @@ function Contato({ contato }: { contato: string }) {
 }
 
 /**
- * Telefone como link do WhatsApp — é por onde a abordagem acontece. Só os
- * dígitos; sem DDI, assume Brasil (55).
+ * Telefone como link do WhatsApp — é por onde a abordagem acontece. Número
+ * que não passa na validação (cadastrado antes dela existir) fica só texto.
  */
 function Telefone({ telefone }: { telefone: string }) {
-  const digitos = telefone.replace(/\D/g, "")
+  const whatsapp = telefoneParaWhatsApp(telefone)
   const classe = "block truncate text-[11.5px]"
-  if (digitos.length < 10) {
-    return <small className={`${classe} text-muted-foreground`}>{telefone}</small>
-  }
-  const comDdi = digitos.length <= 11 ? `55${digitos}` : digitos
+  if (!whatsapp) return <small className={`${classe} text-muted-foreground`}>{telefone}</small>
   return (
     <a
-      href={`https://wa.me/${comDdi}`}
+      href={`https://wa.me/${whatsapp}`}
       target="_blank"
       rel="noopener noreferrer"
       className={`${classe} text-primary underline-offset-2 hover:underline`}
     >
-      {telefone}
+      {formatarTelefone(telefone)}
     </a>
   )
+}
+
+/** AAAA-MM-DD de hoje no relógio dela — o `max` do campo de data. */
+function hojeLocal(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+}
+
+/** O primeiro contato não pode ser no futuro: é algo que já aconteceu. */
+function problemaNaData(iso: string): string | null {
+  if (!iso) return null
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "Data inválida."
+  if (iso > hojeLocal()) return "O primeiro contato não pode ser numa data futura."
+  if (iso < "2020-01-01") return "Confira o ano do primeiro contato."
+  return null
 }
 
 /** `2026-10-12` → `12/10`. A aluna não precisa do ano para amanhã. */

@@ -368,7 +368,10 @@ export async function addEmpresa(
       telefone: empresa.telefone?.trim().slice(0, 40) || null,
       // `date` no banco: qualquer coisa fora de AAAA-MM-DD derrubaria o insert.
       primeiro_contato_em:
-        empresa.primeiroContatoEm && /^\d{4}-\d{2}-\d{2}$/.test(empresa.primeiroContatoEm)
+        empresa.primeiroContatoEm &&
+        /^\d{4}-\d{2}-\d{2}$/.test(empresa.primeiroContatoEm) &&
+        // Data futura não é primeiro contato: descarta em vez de gravar errado.
+        empresa.primeiroContatoEm <= hojeEmSaoPaulo()
           ? empresa.primeiroContatoEm
           : null,
       origem: empresa.origem ?? null,
