@@ -92,7 +92,7 @@ export const dia15: Dia = {
           tipo: "radio",
           chave: "periodo_rotina",
           rotulo: "Meu principal período é:",
-          opcoes: ["Manhã", "Tarde", "Noite", "Varia"],
+          opcoes: ["Manhã", "Tarde", "Noite", "Tenho flexibilidade de horários"],
           inline: true,
         },
         {

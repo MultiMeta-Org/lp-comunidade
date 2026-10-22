@@ -29,8 +29,8 @@ export default async function RadarPage() {
             Minhas empresas e oportunidades
           </h1>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-            Toda empresa que você encontrar termina aqui. É daqui que vão sair as
-            suas conversas.
+            Toda empresa em que você enxergar uma oportunidade, anote aqui! É
+            daqui que vão sair os seus potenciais clientes.
           </p>
         </header>
 

@@ -234,7 +234,10 @@ export function Missao({
 /** Um campo escondido por `mostrarSe` conta como respondido — ela não o vê. */
 function visivel(campo: Campo, respostas: Respostas): boolean {
   if (!campo.mostrarSe) return true
-  return respostas[campo.mostrarSe.chave] === campo.mostrarSe.valor
+  const valor = respostas[campo.mostrarSe.chave]
+  // Múltipla escolha: basta a opção estar entre as marcadas.
+  if (Array.isArray(valor)) return valor.includes(campo.mostrarSe.valor)
+  return valor === campo.mostrarSe.valor
 }
 
 function vazio(valor: Respostas[string] | undefined): boolean {
@@ -720,7 +723,13 @@ function Opcao({
   )
 }
 
-/** Múltipla escolha, com teto quando a pergunta diz "escolha até 2". */
+/**
+ * Múltipla escolha, com teto quando a pergunta diz "escolha até 2".
+ *
+ * No teto, marcar outra TROCA pela mais antiga, em vez de travar as demais:
+ * travar obrigava a desmarcar antes de mudar de ideia, e quem testou achou
+ * duro (a pergunta de escolha única do lado deixava trocar livremente).
+ */
 function Multipla({
   campo,
   valor,
@@ -733,6 +742,11 @@ function Multipla({
   const atuais = Array.isArray(valor) ? valor : []
   const cheio = campo.max !== undefined && atuais.length >= campo.max
 
+  function alternar(opcao: string) {
+    if (atuais.includes(opcao)) return set(campo.chave, atuais.filter((o) => o !== opcao))
+    set(campo.chave, cheio ? [...atuais.slice(1), opcao] : [...atuais, opcao])
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {campo.opcoes.map((opcao) => {
@@ -741,22 +755,12 @@ function Multipla({
           <button
             key={opcao}
             type="button"
-            onClick={() =>
-              set(
-                campo.chave,
-                marcado ? atuais.filter((o) => o !== opcao) : [...atuais, opcao]
-              )
-            }
+            onClick={() => alternar(opcao)}
             aria-pressed={marcado}
-            // Teto atingido: as não marcadas apagam em vez de desaparecer, para
-            // ela entender que precisa desmarcar uma antes de trocar.
-            disabled={!marcado && cheio}
             className={`flex w-full items-center gap-2.5 rounded-xl border px-4 py-3 text-left text-sm transition-all duration-200 ${
               marcado
                 ? "border-primary bg-primary-subtle font-semibold text-foreground"
-                : cheio
-                  ? "border-border bg-card text-muted-foreground/50"
-                  : "border-border bg-card text-muted-foreground hover:border-primary/45 hover:text-foreground"
+                : "border-border bg-card text-muted-foreground hover:border-primary/45 hover:text-foreground"
             }`}
           >
             <span
@@ -1078,6 +1082,9 @@ export function RadarEditor({
                     </small>
                   )
                 )}
+                {/* O contato que ela cadastrou tem que voltar à vista — e
+                    clicável: é dali que sai a abordagem. */}
+                {empresa.contato && <Contato contato={empresa.contato} />}
               </span>
               {empresa.status !== "no-radar" && (
                 <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
@@ -1154,7 +1161,7 @@ export function RadarEditor({
       </div>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Seu Radar não termina hoje. Sempre que encontrar uma empresa nova durante a
+        Seu Radar não acaba hoje. Sempre que encontrar uma empresa nova durante a
         jornada, volte aqui e adicione.
       </p>
     </div>
@@ -1624,6 +1631,36 @@ function Interesse({
         Mudei de ideia
       </button>
     </div>
+  )
+}
+
+/**
+ * O "Instagram ou site" da empresa, como link quando dá para saber para onde:
+ * `@perfil` (ou `instagram.com/...`) vai ao Instagram, algo com cara de
+ * domínio vira https. O resto — um telefone, um "falar com a Ana" — fica texto.
+ */
+function linkDoContato(contato: string): string | null {
+  const c = contato.trim()
+  if (/^@[\w.]+$/.test(c)) return `https://instagram.com/${c.slice(1)}`
+  if (/^https?:\/\//i.test(c)) return c
+  if (/^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(c)) return `https://${c}`
+  return null
+}
+
+function Contato({ contato }: { contato: string }) {
+  const href = linkDoContato(contato)
+  const classe = "block truncate text-[11.5px]"
+  return href ? (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${classe} text-primary underline-offset-2 hover:underline`}
+    >
+      {contato}
+    </a>
+  ) : (
+    <small className={`${classe} text-muted-foreground`}>{contato}</small>
   )
 }
 
