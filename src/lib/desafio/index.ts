@@ -112,21 +112,6 @@ export function diaAtual(concluidos: ReadonlySet<number>): number {
   return escritos[escritos.length - 1] ?? 0
 }
 
-/**
- * ⚠️ TEMPORÁRIO — todos os dias abertos, para a Nati gravar o vídeo da
- * plataforma (out/2026).
- *
- * Com isto em `true`, qualquer aluna abre qualquer dia escrito, em qualquer
- * ordem — a jornada, os vizinhos e as Server Actions passam todos por
- * `podeAbrir`, então é aqui e só aqui que a trava cai. O dia ATUAL continua
- * sendo o primeiro não concluído (`diaAtual` não muda): a home segue mostrando
- * a missão certa, só deixa de impedir que ela corra na frente.
- *
- * Gravado o vídeo, voltar para `false` — é a lógica normal descrita abaixo,
- * que não foi apagada.
- */
-const TODOS_OS_DIAS_LIBERADOS = true
-
 // ─────────────────────────────────────────────────────────────
 // Semanas
 // ─────────────────────────────────────────────────────────────
@@ -215,7 +200,6 @@ export function podeAbrir(
   liberacao: Liberacao
 ): boolean {
   if (!diaDisponivel(n)) return false
-  if (TODOS_OS_DIAS_LIBERADOS) return true
   if (concluidos.has(n)) return true
   return n === diaAtual(concluidos) && semanaAberta(n, liberacao)
 }
