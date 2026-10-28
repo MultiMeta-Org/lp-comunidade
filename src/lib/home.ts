@@ -224,7 +224,9 @@ const PRODUCTS: Product[] = [
     name: LAB_NAME,
     kicker: "Assinatura",
     meta: "Grupo no WhatsApp e material das aulas",
-    art: "linear-gradient(160deg,#C76E49,#9d4f2f)",
+    // O verde-escuro da arte: é o que aparece enquanto a imagem carrega.
+    art: "#2B2F1F",
+    image: "/produtos/laboratorio-de-vendas.webp",
     state: "owned",
   },
   {
