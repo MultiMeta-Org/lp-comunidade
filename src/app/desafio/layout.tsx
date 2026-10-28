@@ -2,7 +2,7 @@ import { ListOrdered } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { requireDesafio } from "@/lib/guard"
 import { getJornada } from "@/lib/desafio-server"
-import { TOTAL_DIAS, diaAtual } from "@/lib/desafio"
+import { TOTAL_DIAS, diaAtual, diasFeitos } from "@/lib/desafio"
 import { JornadaMenu } from "@/components/desafio/jornada-menu"
 
 /**
@@ -26,7 +26,7 @@ export default async function DesafioLayout({
   const { concluidos, empresasNoRadar, liberacao } = await getJornada(email)
 
   // O Dia Zero é matrícula, não missão: a barra conta os 21.
-  const feitos = [...concluidos].filter((d) => d >= 1).length
+  const feitos = diasFeitos(concluidos)
   const pct = Math.round((feitos / TOTAL_DIAS) * 100)
 
   return (

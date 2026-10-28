@@ -2,7 +2,7 @@ import Link from "next/link"
 import { ArrowRight, BookOpen, Check, PartyPopper, Target } from "lucide-react"
 import { requireDesafio } from "@/lib/guard"
 import { getJornada, getOperacao } from "@/lib/desafio-server"
-import { TOTAL_DIAS, dataCurta, diaAtual, getDia, podeAbrir, semanaDoDia } from "@/lib/desafio"
+import { TOTAL_DIAS, dataCurta, diaAtual, diasFeitos, getDia, podeAbrir, semanaDoDia } from "@/lib/desafio"
 import { getMemberFirstName } from "@/lib/access"
 import { SUPPORT_URL } from "@/lib/links"
 import { Atmosphere } from "@/components/atmosphere"
@@ -31,7 +31,7 @@ export default async function DesafioPage() {
   const atual = diaAtual(jornada.concluidos)
   const dia = getDia(atual)
   const feitoHoje = jornada.concluidos.has(atual)
-  const feitos = [...jornada.concluidos].filter((d) => d >= 1).length
+  const feitos = diasFeitos(jornada.concluidos)
   const emMatricula = !jornada.concluidos.has(0)
   // O dia de hoje existe, mas a semana dele ainda não abriu (liberação por
   // semana, contando da compra): o cartão diz quando, em vez de um botão.

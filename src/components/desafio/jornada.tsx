@@ -5,6 +5,7 @@ import {
   TOTAL_DIAS,
   dataCurta,
   diaDisponivel,
+  diasFeitos,
   getDia,
   podeAbrir,
   type Liberacao,
@@ -54,7 +55,7 @@ export function ConteudoDaJornada({
   empresasNoRadar: number
   liberacao: Liberacao
 }) {
-  const feitos = [...concluidos].filter((d) => d >= 1).length
+  const feitos = diasFeitos(concluidos)
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-3.5">

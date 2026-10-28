@@ -25,7 +25,7 @@ import { dia21 } from "./dias/dia-21"
 export * from "./tipos"
 
 /**
- * O conteúdo do Desafio 21 Dias, dia por dia.
+ * O conteúdo do Desafio Empreendedora Anônima, dia por dia.
  *
  * O registro é um mapa, e não um array, por um motivo prático: dia que ainda
  * não foi escrito simplesmente não está aqui, e a jornada o mostra como "em
@@ -95,16 +95,38 @@ export function passoOpcional(passo: Passo): boolean {
 }
 
 /**
+ * Até que dia da jornada ela já chegou: o maior dia de missão concluído (o
+ * Dia Zero é matrícula e não entra nos 21).
+ *
+ * É o número do cabeçalho, do anel e do "dias feitos". Com a trava normal,
+ * um dia só abre depois do anterior e isto é igual à contagem; com os dias
+ * liberados, contar os concluídos mostraria "2 de 21" para quem está no Dia 3
+ * tendo pulado o 2 — e ela lê isso como o sistema não acompanhando.
+ */
+export function diasFeitos(concluidos: ReadonlySet<number>): number {
+  let maior = 0
+  for (const n of concluidos) if (n >= 1 && n > maior) maior = n
+  return maior
+}
+
+/**
  * Qual dia a aluna deve abrir ao entrar no Desafio.
  *
- * O primeiro não concluído, limitado ao último disponível — ela não "pula"
- * para um dia sem conteúdo nem volta para o começo depois de concluir tudo.
+ * O primeiro não concluído depois do mais adiantado que ela fez, limitado ao
+ * último disponível — ela não "pula" para um dia sem conteúdo nem volta para o começo depois de concluir tudo.
  * A regra é a mesma do documento: um dia por vez, e a próxima ação sempre
  * visível.
  */
 export function diaAtual(concluidos: ReadonlySet<number>): number {
+  // A matrícula vem antes de tudo, feita ou não a missão de algum dia.
+  if (!concluidos.has(0) && diaDisponivel(0)) return 0
+  // Conta a partir do dia MAIS ADIANTADO que ela concluiu, e não do primeiro
+  // buraco: com os dias liberados, quem fez o 3 sem fechar o 2 está no 4 — e
+  // voltar a home para o 2 parece que o sistema perdeu o que ela fez. O dia
+  // que ficou para trás continua sem o check na lista, para ela ver.
+  const desde = diasFeitos(concluidos) + 1
   for (const n of NUMEROS_DOS_DIAS) {
-    if (!concluidos.has(n) && diaDisponivel(n)) return n
+    if (n >= desde && !concluidos.has(n) && diaDisponivel(n)) return n
   }
   // Tudo que existe já foi feito: fica no último escrito, que é onde ela
   // acabou de estar — e não num dia em branco com cara de erro.
@@ -125,7 +147,7 @@ export function diaAtual(concluidos: ReadonlySet<number>): number {
  * Gravado o vídeo, voltar para `false` — é a lógica normal descrita abaixo,
  * que não foi apagada.
  */
-const TODOS_OS_DIAS_LIBERADOS = true
+const TODOS_OS_DIAS_LIBERADOS = false
 
 // ─────────────────────────────────────────────────────────────
 // Semanas
