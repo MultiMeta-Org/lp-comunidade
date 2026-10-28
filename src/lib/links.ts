@@ -10,7 +10,7 @@ export const COMUNIDADE_VIP_HOTMART_URL =
   "https://hotmart.com/pt-br/marketplace/produtos/hagsxd-comunidade-vip-evp-j2b07/Y106820903X?sck=HOTMART_PRODUCT_PAGE"
 
 /**
- * Desafio 21 Dias na Hotmart — onde quem não tem compra.
+ * Desafio Empreendedora Anônima na Hotmart — onde quem não tem compra.
  *
  * `null` enquanto o produto não existir na Hotmart: a capa travada fica inerte,
  * sem botão. Mandar quem clicou com vontade de comprar para a página de OUTRO

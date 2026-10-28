@@ -22,7 +22,7 @@ export function trilhaDaRota(pathname: string): Passo[] {
   const partes = pathname.split("/").filter(Boolean)
 
   if (partes[0] === "desafio") {
-    const trilha: Passo[] = [{ label: "Desafio 21 Dias", href: "/desafio" }]
+    const trilha: Passo[] = [{ label: "Desafio Empreendedora Anônima", href: "/desafio" }]
     if (partes[1] === "dia" && partes[2] !== undefined) {
       const n = Number(partes[2])
       trilha.push({ label: n === 0 ? "Matrícula" : `Dia ${n}` })

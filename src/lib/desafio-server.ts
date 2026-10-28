@@ -4,7 +4,7 @@ import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
 import { calcularLiberacao, type Dia, type Liberacao, type Respostas } from "@/lib/desafio"
 
 /**
- * A jornada da aluna no Desafio 21 Dias (comunidade.desafio_*).
+ * A jornada da aluna no Desafio Empreendedora Anônima (comunidade.desafio_*).
  *
  * Nada aqui é cacheado entre requests: é dado de uma aluna só, e uma missão
  * que aparece como pendente depois de concluída seria pior que não ter

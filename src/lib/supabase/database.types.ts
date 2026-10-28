@@ -41,7 +41,7 @@ export interface Database {
           buyer_name: string | null
           phone: string | null
           has_comunidade_vip: boolean
-          /** Posse do Desafio 21 Dias. DERIVADA — ver refresh_desafio_entitlement. */
+          /** Posse do Desafio Empreendedora Anônima. DERIVADA — ver refresh_desafio_entitlement. */
           has_desafio: boolean
           /** Posse do Método EVP. False só para quem entrou pelo Mapa sem o Método. */
           has_metodo: boolean
@@ -278,7 +278,7 @@ export interface Database {
         Relationships: []
       }
 
-      // ── Desafio 21 Dias ──────────────────────────────────────────
+      // ── Desafio Empreendedora Anônima ──────────────────────────────────────────
       /** Ids de produto da Hotmart que valem como Desafio. */
       desafio_products: {
         Row: { hotmart_product_id: string; label: string | null; created_at: string }

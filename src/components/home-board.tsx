@@ -65,7 +65,7 @@ export function HomeBoard({
   banners: Banner[]
   unlock: FeatureUnlock
   hasLab: boolean
-  /** Aluna tem o Desafio 21 Dias. */
+  /** Aluna tem o Desafio Empreendedora Anônima. */
   hasDesafio?: boolean
   /** Aluna tem o Método EVP. False só para quem entrou pelo Mapa. */
   hasMetodo?: boolean

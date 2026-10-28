@@ -8,7 +8,7 @@ import {
   type Ranking,
 } from "@/lib/desafio-admin"
 
-export const metadata = { title: "Desafio 21 Dias · Admin" }
+export const metadata = { title: "Desafio Empreendedora Anônima · Admin" }
 
 const ORDENS: { chave: OrdemDasAlunas; label: string }[] = [
   { chave: "paradas", label: "Quem parou" },
@@ -17,7 +17,7 @@ const ORDENS: { chave: OrdemDasAlunas; label: string }[] = [
 ]
 
 /**
- * O painel do Desafio 21 Dias.
+ * O painel do Desafio Empreendedora Anônima.
  *
  * A ordem dos blocos é uma decisão de produto, não estética: começa pelo FUNIL
  * DOS 21 DIAS, porque a pergunta que a Nati traz para esta tela é "onde as
@@ -45,7 +45,7 @@ export default async function AdminDesafioPage({
     return (
       <section className="rounded-2xl border border-dashed border-border bg-card px-8 py-10">
         <h2 className="font-display text-2xl font-bold text-foreground">
-          Desafio 21 Dias
+          Desafio Empreendedora Anônima
         </h2>
         <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
           Nenhuma aluna tem o Desafio ainda. O produto libera por compra na Hotmart
@@ -66,7 +66,7 @@ export default async function AdminDesafioPage({
       <section className="space-y-5">
         <div>
           <h2 className="font-display text-2xl font-bold text-foreground">
-            Desafio 21 Dias
+            Desafio Empreendedora Anônima
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Onde as alunas estão, o que elas construíram e quem precisa de você hoje.

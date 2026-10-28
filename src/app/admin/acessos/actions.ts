@@ -141,7 +141,7 @@ export async function setLabAccess(
 }
 
 /**
- * Dá ou tira o Desafio 21 Dias à mão.
+ * Dá ou tira o Desafio Empreendedora Anônima à mão.
  *
  * Mesma mecânica do Laboratório (ver setLabAccess) e pelo mesmo motivo:
  * `has_desafio` é derivada, e escrever direto na coluna "funcionaria" até o

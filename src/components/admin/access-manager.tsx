@@ -22,7 +22,7 @@ export type AuthorizedRow = {
   availableAt: string
   /** Tem a assinatura (coluna has_comunidade_vip, derivada das compras). */
   hasLab: boolean
-  /** Tem o Desafio 21 Dias (coluna has_desafio, derivada das compras). */
+  /** Tem o Desafio Empreendedora Anônima (coluna has_desafio, derivada das compras). */
   hasDesafio: boolean
 }
 
@@ -102,7 +102,7 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
     setError("")
     setAviso("")
     const tinha = produto === "lab" ? row.hasLab : row.hasDesafio
-    const nome = produto === "lab" ? LAB_NAME : "Desafio 21 Dias"
+    const nome = produto === "lab" ? LAB_NAME : "Desafio Empreendedora Anônima"
     const acao = produto === "lab" ? setLabAccess : setDesafioAccess
 
     startTransition(async () => {
@@ -219,7 +219,7 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
                 <td className="px-4 py-3">
                   <BotaoDePosse
                     tem={r.hasDesafio}
-                    nome="Desafio 21 Dias"
+                    nome="Desafio Empreendedora Anônima"
                     disabled={pending}
                     onClick={() => togglePosse(r, "desafio")}
                   />

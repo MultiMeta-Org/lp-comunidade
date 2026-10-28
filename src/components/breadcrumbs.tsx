@@ -7,7 +7,7 @@ import { ChevronRight, House } from "lucide-react"
 import { type Passo, trilhaDaRota } from "@/lib/trilha"
 
 /**
- * A trilha de onde a aluna está: 🏠 › Desafio 21 Dias › Dia 3.
+ * A trilha de onde a aluna está: 🏠 › Desafio Empreendedora Anônima › Dia 3.
  *
  * Substitui as abas e as setinhas "← voltar" soltas em cada página — uma
  * forma só de subir um nível, no mesmo lugar em todo o portal. O último passo

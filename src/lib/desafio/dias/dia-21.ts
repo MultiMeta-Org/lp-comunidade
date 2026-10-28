@@ -272,7 +272,7 @@ export const dia21: Dia = {
     kicker: "Desafio concluído",
     titulo: "Você não apenas estudou uma carreira. Você entrou em campo.",
     lede: "Cem empresas encontradas, cem abordadas, vinte e um dias de execução. Você falou com mercado real, recebeu silêncio real, resposta real, objeção real. Isso não se aprende assistindo — e agora ninguém pode tirar de você.",
-    badge: "Desafio 21 Dias — Empreendedora Anônima",
+    badge: "Desafio Empreendedora Anônima",
     placar: { de: "radar", label: "empresas no seu radar" },
     feito: [
       "Fechou cem empresas abordadas",

@@ -140,7 +140,7 @@ export default async function AcessosPage({
         <p className="mt-1 text-sm text-muted-foreground">
           Compras do Hotmart entram automáticas (liberam {waitDays} dias após a
           compra). Reembolso/chargeback revoga sozinho. Aqui você adiciona à mão
-          e também dá ou tira o {LAB_NAME} e o Desafio 21 Dias.
+          e também dá ou tira o {LAB_NAME} e o Desafio Empreendedora Anônima.
         </p>
       </div>
 

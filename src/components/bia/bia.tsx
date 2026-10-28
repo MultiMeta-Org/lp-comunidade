@@ -36,7 +36,7 @@ const BIA_URL = process.env.NEXT_PUBLIC_BIA_URL?.replace(/\/$/, "") ?? ""
 const supabaseDoNavegador = async () => (await import("@/lib/supabase/client")).supabase
 
 /**
- * Onde o botão flutuante aparece: só no Desafio 21 Dias (jornada, dias, Radar,
+ * Onde o botão flutuante aparece: só no Desafio Empreendedora Anônima (jornada, dias, Radar,
  * Biblioteca). É ali que a aluna está executando e trava numa missão; no resto
  * do portal ela não aparece.
  */

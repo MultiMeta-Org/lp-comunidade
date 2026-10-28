@@ -26,7 +26,7 @@ export const runtime = "nodejs"
  * e usa a mais recente, então o portal concede sozinho e o cron não desfaz.
  * Sem esse registro, o desacoplamento seria só aparente.
  *
- * O Desafio 21 Dias funciona EXATAMENTE igual, com as tabelas irmãs
+ * O Desafio Empreendedora Anônima funciona EXATAMENTE igual, com as tabelas irmãs
  * (comunidade.desafio_products / desafio_purchases) e a coluna has_desafio.
  * Os dois produtos extras são tratados pelo mesmo caminho de código, parametrizado
  * por `EXTRAS` abaixo: a diferença entre eles é dado, não lógica.
@@ -60,7 +60,7 @@ const EXTRAS = [
     coluna: "has_comunidade_vip",
   },
   {
-    nome: "Desafio 21 Dias",
+    nome: "Desafio Empreendedora Anônima",
     produtos: "desafio_products",
     compras: "desafio_purchases",
     coluna: "has_desafio",

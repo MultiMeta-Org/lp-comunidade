@@ -1,5 +1,5 @@
 /**
- * O formato do conteúdo do Desafio 21 Dias.
+ * O formato do conteúdo do Desafio Empreendedora Anônima.
  *
  * Os 22 dias moram em código (src/lib/desafio/dias/dia-NN.ts) e não no banco.
  * A razão: quase todo dia tem um passo com interface própria — o Radar com

@@ -65,7 +65,7 @@ export type Product = {
 /** Slug do Laboratório na estante. O produto na Hotmart continua o mesmo. */
 export const LAB_SLUG = "laboratorio-de-vendas"
 
-/** Slug do Desafio 21 Dias na estante. */
+/** Slug do Desafio Empreendedora Anônima na estante. */
 export const DESAFIO_SLUG = "desafio-21-dias"
 
 /** Slug do Mapa de Transição para o Digital na estante. */
@@ -111,7 +111,7 @@ export function buildProducts({
   temPlantao = false,
 }: {
   hasLab: boolean
-  /** Aluna tem o Desafio 21 Dias (coluna derivada has_desafio). */
+  /** Aluna tem o Desafio Empreendedora Anônima (coluna derivada has_desafio). */
   hasDesafio?: boolean
   /** Aluna tem o Método EVP. False só para quem entrou pelo Mapa. */
   hasMetodo?: boolean
@@ -229,10 +229,12 @@ const PRODUCTS: Product[] = [
   },
   {
     slug: DESAFIO_SLUG,
-    name: "Desafio 21 Dias",
+    name: "Desafio Empreendedora Anônima",
     kicker: "21 missões",
     meta: "Sua missão do primeiro contrato",
-    art: "linear-gradient(155deg,#2A2A2A,#3b332e 55%,#7a4127)",
+    // O creme do fundo da arte: é o que aparece enquanto a imagem carrega.
+    art: "#FBF8F0",
+    image: "/produtos/desafio-empreendedora-anonima.webp",
     // O destino e o estado são decididos em buildProducts, pela posse.
     state: "owned",
   },

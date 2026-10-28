@@ -106,7 +106,7 @@ export async function hasLab(email: string): Promise<boolean> {
 }
 
 /**
- * Aluna tem o Desafio 21 Dias — o ambiente de /desafio.
+ * Aluna tem o Desafio Empreendedora Anônima — o ambiente de /desafio.
  *
  * Produto à parte, com entitlement próprio: compra registrada na Hotmart
  * (postback no CRM ou no portal) ou cortesia em `comunidade.desafio_grants`.
@@ -163,7 +163,7 @@ export async function refreshVipEntitlement(email: string): Promise<void> {
 }
 
 /**
- * O mesmo para o Desafio 21 Dias, e pelo mesmo motivo: fechar a janela entre
+ * O mesmo para o Desafio Empreendedora Anônima, e pelo mesmo motivo: fechar a janela entre
  * comprar e ver o produto liberado, sem perguntar à Hotmart no login.
  *
  * Roda em paralelo com a do Laboratório (ver a rota de verify-otp) porque são

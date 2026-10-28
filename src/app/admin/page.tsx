@@ -89,7 +89,7 @@ export default async function AdminOverviewPage() {
           />
           <Numero
             valor={comDesafio}
-            label="Com o Desafio 21 Dias"
+            label="Com o Desafio Empreendedora Anônima"
             nota={
               comDesafio > 0
                 ? "ver onde elas pararam"

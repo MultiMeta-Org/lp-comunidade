@@ -311,7 +311,7 @@ export const dia00: Dia = {
     {
       tipo: "video",
       chave: "video-boas-vindas",
-      label: "Bem-vinda ao Desafio 21 Dias",
+      label: "Bem-vinda ao Desafio Empreendedora Anônima",
       // H.264 720p no bucket privado (o original do iPhone é HEVC e só tocava
       // pelo player do Drive, com tarja preta e sem duração). Original no Drive:
       // https://drive.google.com/file/d/1FC8J9iPn1YD-909M40BF6I3-T9q5aL-T/view
