@@ -92,7 +92,6 @@ export const dia03: Dia = {
         },
       ],
       nota: "Essas respostas são suas, não vão para o Radar. Elas me ajudam a entender por onde você tem mais facilidade para começar.",
-      cta: "Salvar e continuar",
     },
 
     // ── Missão 2: as 10 empresas ──
@@ -117,12 +116,12 @@ export const dia03: Dia = {
         {
           titulo: "Para alguém mais próximo",
           texto:
-            "Oi, [nome]! Tudo bem? Estou começando uma nova atuação profissional na área comercial como SDR e Closer e estou fazendo um mapeamento de empresas e profissionais para conhecer melhor esse mercado. Você conhece alguém que tenha empresa ou um negócio e que acha que faria sentido eu conhecer? Pode ser de qualquer área. Se lembrar de alguém, me manda o nome ou o Instagram? ❤️",
+            "Oi, [nome]! Tudo bem? ❤️\n\nEstou começando uma nova atuação profissional na área comercial, ajudando empresas a encontrar potenciais clientes, iniciar conversas e conduzir oportunidades até o fechamento de vendas, funções conhecidas como SDR e Closer.\n\nEstou mapeando empresas que possam precisar desse tipo de apoio, de qualquer segmento, e queria te pedir uma ajuda!\n\nVocê conhece algum empresário ou profissional que tenha um negócio e que poderia se beneficiar desse trabalho? Se lembrar de alguém, pode me mandar o nome ou o Instagram? 🥰",
         },
         {
           titulo: "Uma versão mais profissional",
           texto:
-            "Oi, [nome]! Tudo bem? Estou iniciando uma nova atuação profissional na área comercial como SDR e Closer e estou mapeando empresas e profissionais para ampliar meu conhecimento desse mercado. Você conhece algum empresário ou profissional que tenha um negócio e que acha que faria sentido eu conhecer? Se lembrar de alguém, pode me enviar o nome ou Instagram?",
+            "Olá, [nome]! Tudo bem?\n\nEstou iniciando uma nova etapa profissional na área comercial, atuando na prospecção de potenciais clientes, qualificação de oportunidades e condução de negociações até o fechamento das vendas, funções conhecidas como SDR e Closer.\n\nNeste momento, estou buscando conhecer empresas de diferentes segmentos que possam se beneficiar desse tipo de atuação.\n\nVocê conhece algum empresário ou profissional que tenha um negócio e com quem eu poderia conversar para apresentar meu trabalho?\n\nAgradeço muito se puder me indicar alguém!",
         },
       ],
       // O documento é explícito em NÃO perguntar para quem ela enviou, o

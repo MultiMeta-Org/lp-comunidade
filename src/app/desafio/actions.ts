@@ -166,7 +166,10 @@ export async function salvarNotasAction(
   n: number,
   empresaId: string,
   notas: Record<string, unknown>,
-  acao?: { proxima?: string; proximaEm?: string }
+  acao?: { proxima?: string; proximaEm?: string },
+  /** `rascunho`: o salvamento automático enquanto ela responde. Grava as
+   *  notas e mais nada — o status só anda quando ela fecha a rodada. */
+  opcoes?: { rascunho?: boolean }
 ): Promise<ActionResult> {
   const ctx = await abrirDia(n)
   if ("erro" in ctx) return { ok: false, error: ctx.erro }
@@ -193,6 +196,7 @@ export async function salvarNotasAction(
 
   const error = await salvarNotasDaEmpresa(ctx.email, empresaId, n, limpas)
   if (error) return { ok: false, error: "Não consegui salvar agora. Tenta de novo?" }
+  if (opcoes?.rascunho) return { ok: true }
 
   /**
    * O estágio sai do CONTEÚDO do dia, nunca do cliente: terminar a rodada do

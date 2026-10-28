@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useMemo, useState, useTransition } from "react"
+import { Fragment, useEffect, useRef, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Check, Copy, Play, Plus, Trash2, X } from "lucide-react"
@@ -31,6 +31,12 @@ import { formatarTelefone, problemaNoTelefone, telefoneParaWhatsApp } from "@/li
  * O avanço é gravado a cada passo, não no fim: se o celular morrer no passo 4,
  * ela volta no passo 4. O `passo` do banco nunca retrocede, então voltar para
  * reler não desfaz nada.
+ *
+ * E o que ela escreve se grava sozinho, enquanto escreve. Existe UM botão por
+ * tela — o de seguir (no último passo, o de concluir o dia). Um "Salvar"
+ * dentro do passo ao lado de um "Salvar missão de hoje" embaixo deixava a
+ * aluna sem saber qual apertar, e quem apertava só o de baixo perdia a
+ * empresa que tinha acabado de preencher.
  */
 export function Missao({
   dia,
@@ -69,14 +75,33 @@ export function Missao({
   const [erro, setErro] = useState<string | null>(null)
   const [celebrando, setCelebrando] = useState(false)
   const [salvando, startSalvar] = useTransition()
+  const [autosalvo, setAutosalvo] = useState(false)
+  /** O passo `empresa` grava a rodada dele aqui, quando ela aperta o botão. */
+  const antesDeAvancarRef = useRef<AntesDeAvancar | null>(null)
+  /** O passo `empresa` troca o texto do botão no meio das rodadas. */
+  const [rotuloDoPasso, setRotuloDoPasso] = useState<string | null>(null)
 
   const passo = dia.passos[i]
   const ultimo = i === dia.passos.length - 1
 
-  const pendencia = useMemo(
-    () => oQueFalta(passo, respostas, radar),
-    [passo, respostas, radar]
-  )
+  // Salvamento automático: um instante depois que ela para de mexer, o que
+  // respondeu vai para o banco no passo em que ela está. O RPC mescla as
+  // respostas e não deixa o passo voltar, então gravar de novo é inofensivo.
+  const primeiraVez = useRef(true)
+  useEffect(() => {
+    if (primeiraVez.current) {
+      primeiraVez.current = false
+      return
+    }
+    setAutosalvo(false)
+    const t = window.setTimeout(async () => {
+      const res = await salvarPassoAction(dia.dia, i, respostas)
+      if (res.ok) setAutosalvo(true)
+    }, 900)
+    return () => window.clearTimeout(t)
+    // `i` fica de fora de propósito: trocar de passo já grava no `avancar`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [respostas, dia.dia])
 
   function set(chave: string, valor: Respostas[string]) {
     setRespostas((r) => ({ ...r, [chave]: valor }))
@@ -84,16 +109,37 @@ export function Missao({
   }
 
   function avancar() {
-    if (pendencia) {
-      setErro(pendencia)
-      return
-    }
-
     startSalvar(async () => {
-      // As notas de um passo `empresa` já foram salvas rodada por rodada, na
-      // empresa delas (ver EmpresaDoPasso). Aqui só o dia avança.
+      let atuais = respostas
+
+      // O passo `empresa` grava a rodada aberta antes de qualquer coisa —
+      // é o que dispensa o botão de salvar dentro dele.
+      if (antesDeAvancarRef.current) {
+        const rodada = await antesDeAvancarRef.current()
+        if (!rodada.ok) {
+          setErro(rodada.erro)
+          return
+        }
+        if (rodada.respostas) {
+          atuais = { ...atuais, ...rodada.respostas }
+          setRespostas(atuais)
+        }
+        // Ainda faltam empresas neste passo: a próxima rodada abre aqui mesmo.
+        if (rodada.ficar) {
+          setErro(null)
+          await salvarPassoAction(dia.dia, i, atuais)
+          return
+        }
+      }
+
+      const pendencia = oQueFalta(passo, atuais, radar)
+      if (pendencia) {
+        setErro(pendencia)
+        return
+      }
+
       if (ultimo) {
-        const res = await concluirDiaAction(dia.dia, respostas)
+        const res = await concluirDiaAction(dia.dia, atuais)
         if (!res.ok) {
           setErro(res.error ?? "Não consegui concluir agora.")
           return
@@ -102,11 +148,13 @@ export function Missao({
         return
       }
 
-      const res = await salvarPassoAction(dia.dia, i + 1, respostas)
+      const res = await salvarPassoAction(dia.dia, i + 1, atuais)
       if (!res.ok) {
         setErro(res.error ?? "Não consegui salvar agora.")
         return
       }
+      setErro(null)
+      setAutosalvo(false)
       setI(i + 1)
     })
   }
@@ -149,8 +197,8 @@ export function Missao({
           {passo.ask}
         </h1>
         {passo.support && (
-          <p className="max-w-[48ch] text-[14.5px] leading-relaxed text-muted-foreground">
-            {passo.support}
+          <p className="max-w-[48ch] whitespace-pre-line text-[14.5px] leading-relaxed text-muted-foreground">
+            <Negrito texto={passo.support} />
           </p>
         )}
 
@@ -165,6 +213,8 @@ export function Missao({
             interesses={interesses}
             operacao={operacao}
             setErro={setErro}
+            antesDeAvancarRef={antesDeAvancarRef}
+            setRotulo={setRotuloDoPasso}
           />
         </div>
 
@@ -218,9 +268,14 @@ export function Missao({
             disabled={salvando}
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md disabled:pointer-events-none disabled:opacity-60 sm:ml-auto sm:w-auto sm:min-w-[180px] sm:py-3"
           >
-            {salvando ? "Salvando…" : rotuloDoBotao(passo, ultimo)}
+            {salvando ? "Salvando…" : (rotuloDoPasso ?? rotuloDoBotao(passo, ultimo))}
           </button>
         </div>
+        {autosalvo && !erro && (
+          <small role="status" className="text-[11px] text-muted-foreground sm:text-right">
+            Suas respostas foram salvas automaticamente.
+          </small>
+        )}
       </div>
 
       {vizinhos}
@@ -320,6 +375,15 @@ function oQueFalta(
 // O corpo de cada tipo de passo
 // ─────────────────────────────────────────────────────────────
 
+/**
+ * O que o passo `empresa` faz quando ela aperta o botão principal: grava a
+ * rodada aberta e diz se o passo acabou ou se ainda falta empresa.
+ */
+type AntesDeAvancar = () => Promise<
+  | { ok: false; erro: string }
+  | { ok: true; respostas?: Respostas; ficar: boolean }
+>
+
 type CorpoProps = {
   passo: Passo
   dia: number
@@ -330,6 +394,8 @@ type CorpoProps = {
   interesses: Record<string, string | null>
   operacao: Operacao
   setErro: (e: string | null) => void
+  antesDeAvancarRef: React.MutableRefObject<AntesDeAvancar | null>
+  setRotulo: (r: string | null) => void
 }
 
 function CorpoDoPasso(props: CorpoProps) {
@@ -375,7 +441,8 @@ function CorpoDoPasso(props: CorpoProps) {
       )
 
     case "empresa":
-      return <EmpresaDoPasso {...props} passo={passo} />
+      // Dois passos `empresa` seguidos (Dia 8, 9…) não podem herdar a rodada um do outro.
+      return <EmpresaDoPasso key={passo.chave} {...props} passo={passo} />
 
     case "interesse":
       return <Interesse {...props} passo={passo} />
@@ -566,7 +633,7 @@ function Leitura({
       {corpo.map((linha, n) => (
         <p
           key={n}
-          className="rounded-[14px] border border-border bg-card px-4 py-3 text-sm leading-relaxed text-muted-foreground"
+          className="whitespace-pre-line rounded-[14px] border border-border bg-card px-4 py-3 text-sm leading-relaxed text-muted-foreground"
         >
           <Negrito texto={linha} />
         </p>
@@ -912,7 +979,7 @@ function Copiar({
               {msg.titulo}
             </p>
           )}
-          <p className="text-sm leading-relaxed text-foreground">{msg.texto}</p>
+          <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">{msg.texto}</p>
           <button
             type="button"
             onClick={async () => {
@@ -1221,14 +1288,18 @@ export function RadarEditor({
  * Com `quantidade > 1`, percorre uma empresa por rodada. Cada rodada salva e
  * começa limpa: é o Raio-X do Dia 4 (três empresas) e as cinco escolhas do
  * Dia 6.
+ *
+ * Não tem botão próprio: a rodada se grava sozinha como rascunho enquanto ela
+ * responde, e quem a fecha é o botão principal da missão (`antesDeAvancarRef`).
  */
 function EmpresaDoPasso({
   passo,
   dia,
   respostas,
-  set,
   radar,
   setRadar,
+  antesDeAvancarRef,
+  setRotulo,
 }: { passo: Extract<Passo, { tipo: "empresa" }> } & CorpoProps) {
   const chaveFeitas = `${passo.chave}:empresas`
   const feitasRaw = respostas[chaveFeitas]
@@ -1245,8 +1316,6 @@ function EmpresaDoPasso({
   const [nome, setNome] = useState("")
   const [segmento, setSegmento] = useState("")
   const [canal, setCanal] = useState<string | null>(null)
-  const [aviso, setAviso] = useState<string | null>(null)
-  const [salvando, startSalvar] = useTransition()
 
   const empresa = radar.find((e) => e.id === escolhida)
   const disponiveis = radar.filter((e) => !feitas.includes(e.id))
@@ -1256,41 +1325,130 @@ function EmpresaDoPasso({
     setRodada((r) => ({ ...r, [chave]: valor }))
   }
 
-  /** Grava as notas desta empresa e abre a rodada seguinte, já limpa. */
-  function guardarRodada() {
-    if (!escolhida) return
-    const faltando = passo.campos.some(
-      (c) => c.obrigatorio !== false && visivel(c, rodada) && vazio(rodada[c.chave])
-    )
-    if (faltando) {
-      setAviso("Faltou responder alguma coisa aqui em cima.")
-      return
-    }
-    if (passo.proximaAcao && proxima.trim() === "") {
-      setAviso("Escreva o próximo passo dessa conversa — é ele que não deixa ela esfriar.")
-      return
-    }
-
-    startSalvar(async () => {
-      const notas: Record<string, unknown> = {}
-      for (const campo of passo.campos) notas[campo.chave] = rodada[campo.chave]
-
-      const res = await salvarNotasAction(dia, escolhida, notas, {
-        proxima: passo.proximaAcao ? proxima : undefined,
-        proximaEm: passo.proximaAcao && proximaEm ? proximaEm : undefined,
-      })
-      if (!res.ok) {
-        setAviso(res.error ?? "Não consegui salvar agora.")
-        return
+  /**
+   * Abre a rodada de uma empresa. Se ela já respondeu sobre essa empresa
+   * neste dia (revisão, ou o rascunho salvo sozinho antes de recarregar), as
+   * respostas voltam preenchidas.
+   */
+  function escolher(id: string) {
+    const salvas = radar.find((e) => e.id === id)?.notas?.[`dia-${dia}`]
+    const deste: Respostas = {}
+    if (salvas && typeof salvas === "object") {
+      for (const campo of passo.campos) {
+        const v = (salvas as Record<string, unknown>)[campo.chave]
+        if (v !== undefined && v !== null) deste[campo.chave] = v as Respostas[string]
       }
-      set(chaveFeitas, [...feitas, escolhida])
-      setEscolhida(null)
-      setRodada({})
-      setProxima("")
-      setProximaEm("")
-      setAviso(null)
-    })
+    }
+    setEscolhida(id)
+    setRodada(deste)
+    setProxima("")
+    setProximaEm("")
   }
+
+  function notasDaRodada(): Record<string, unknown> {
+    const notas: Record<string, unknown> = {}
+    for (const campo of passo.campos) notas[campo.chave] = rodada[campo.chave]
+    return notas
+  }
+
+  /** Espelha no Radar local o que foi gravado: reabrir a empresa traz isso de volta. */
+  function lembrarNotas(id: string, notas: Record<string, unknown>) {
+    const chave = `dia-${dia}`
+    setRadar((r) =>
+      r.map((e) => {
+        if (e.id !== id) return e
+        const antes = e.notas?.[chave]
+        const base = antes && typeof antes === "object" ? (antes as Record<string, unknown>) : {}
+        return { ...e, notas: { ...e.notas, [chave]: { ...base, ...notas } } }
+      })
+    )
+  }
+
+  // Rascunho automático da rodada aberta, direto na empresa. Sem mexer no
+  // status: o estágio só anda quando ela fecha a rodada.
+  const primeiraRodada = useRef(true)
+  useEffect(() => {
+    if (primeiraRodada.current) {
+      primeiraRodada.current = false
+      return
+    }
+    if (!escolhida) return
+    const t = window.setTimeout(async () => {
+      const notas = notasDaRodada()
+      const res = await salvarNotasAction(dia, escolhida, notas, undefined, { rascunho: true })
+      if (res.ok) lembrarNotas(escolhida, notas)
+    }, 900)
+    return () => window.clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rodada])
+
+  // O botão principal da missão é o único botão: é ele que fecha a rodada.
+  useEffect(() => {
+    antesDeAvancarRef.current = async () => {
+      const faltaCampo = passo.campos.some(
+        (c) => c.obrigatorio !== false && visivel(c, rodada) && vazio(rodada[c.chave])
+      )
+
+      // Rodada aberta: grava e diz se ainda falta empresa neste passo.
+      if (escolhida) {
+        if (faltaCampo) return { ok: false, erro: "Faltou responder alguma coisa aqui em cima." }
+        if (passo.proximaAcao && proxima.trim() === "") {
+          return {
+            ok: false,
+            erro: "Escreva o próximo passo dessa conversa — é ele que não deixa ela esfriar.",
+          }
+        }
+        const notas = notasDaRodada()
+        const res = await salvarNotasAction(dia, escolhida, notas, {
+          proxima: passo.proximaAcao ? proxima : undefined,
+          proximaEm: passo.proximaAcao && proximaEm ? proximaEm : undefined,
+        })
+        if (!res.ok) return { ok: false, erro: res.error ?? "Não consegui salvar agora." }
+        lembrarNotas(escolhida, notas)
+        const novas = feitas.includes(escolhida) ? feitas : [...feitas, escolhida]
+        setEscolhida(null)
+        setRodada({})
+        setProxima("")
+        setProximaEm("")
+        return { ok: true, respostas: { [chaveFeitas]: novas }, ficar: !livre && novas.length < meta }
+      }
+
+      // Cadastro (Dia 1): cria a empresa e grava as respostas de uma vez só.
+      if (passo.cadastro && !completo) {
+        if (nome.trim() === "") return { ok: false, erro: "Escreva o nome da empresa." }
+        if (faltaCampo) return { ok: false, erro: "Faltou responder alguma coisa aqui em cima." }
+        const criada = await addEmpresaAction({
+          dia,
+          nome,
+          segmento,
+          contato: canal ?? undefined,
+          origem: passo.cadastro.origem,
+        })
+        if (!criada.ok) return { ok: false, erro: criada.error }
+        setRadar((r) => [...r, criada.empresa])
+        const notas = notasDaRodada()
+        const res = await salvarNotasAction(dia, criada.empresa.id, notas)
+        if (!res.ok) return { ok: false, erro: res.error ?? "Não consegui salvar agora." }
+        lembrarNotas(criada.empresa.id, notas)
+        const novas = [...feitas, criada.empresa.id]
+        setRodada({})
+        return { ok: true, respostas: { [chaveFeitas]: novas }, ficar: novas.length < meta }
+      }
+
+      // Nada aberto: quem decide se pode seguir é a regra do passo.
+      return { ok: true, ficar: false }
+    }
+    return () => {
+      antesDeAvancarRef.current = null
+    }
+  })
+
+  // No meio das rodadas, o botão diz que vem outra empresa — e não que o dia acabou.
+  const maisUma = !livre && meta > 1 && escolhida !== null && feitas.length + 1 < meta
+  useEffect(() => {
+    setRotulo(maisUma ? "Próxima empresa" : null)
+    return () => setRotulo(null)
+  }, [maisUma, setRotulo])
 
   const contador = livre ? (
     <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -1306,31 +1464,40 @@ function EmpresaDoPasso({
     </p>
   ) : null
 
+  const listaDasFeitas = (
+    <ul className="flex flex-col gap-1.5">
+      {feitas.map((id) => {
+        const e = radar.find((x) => x.id === id)
+        return (
+          <li key={id}>
+            {/* Clicar reabre a empresa com o que ela respondeu, para editar. */}
+            <button
+              type="button"
+              onClick={() => escolher(id)}
+              className="flex w-full items-center gap-3 rounded-xl border border-primary/30 bg-primary-subtle px-4 py-3 text-left"
+            >
+              <Check className="h-3.5 w-3.5 flex-none text-primary" strokeWidth={3} />
+              <b className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
+                {e?.nome ?? "Empresa"}
+              </b>
+              <span className="flex-none text-[11px] font-semibold text-primary">editar</span>
+            </button>
+          </li>
+        )
+      })}
+    </ul>
+  )
+
   // Terminou o que o passo pedia.
   if (completo && !escolhida) {
     return (
       <div className="flex flex-col gap-3">
         {contador}
-        <ul className="flex flex-col gap-1.5">
-          {feitas.map((id) => {
-            const e = radar.find((x) => x.id === id)
-            return (
-              <li
-                key={id}
-                className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary-subtle px-4 py-3"
-              >
-                <Check className="h-3.5 w-3.5 flex-none text-primary" strokeWidth={3} />
-                <b className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
-                  {e?.nome ?? "Empresa"}
-                </b>
-              </li>
-            )
-          })}
-        </ul>
+        {listaDasFeitas}
         {disponiveis.length > 0 && (
           <button
             type="button"
-            onClick={() => setEscolhida(disponiveis[0].id)}
+            onClick={() => escolher(disponiveis[0].id)}
             className="w-fit text-xs font-semibold text-primary underline underline-offset-2"
           >
             {livre ? "Trabalhar mais uma conversa" : "Quero adicionar uma empresa a mais"}
@@ -1339,6 +1506,50 @@ function EmpresaDoPasso({
       </div>
     )
   }
+
+  const perguntas = (
+    <div className="flex flex-col gap-5">
+      {passo.campos.filter((c) => visivel(c, rodada)).map((campo) => (
+        <CampoUnico
+          key={campo.chave}
+          campo={campo}
+          valor={rodada[campo.chave]}
+          set={setRodadaCampo}
+        />
+      ))}
+
+      {/* O próximo passo é o que impede a conversa de esfriar. Fica junto
+          da empresa no Radar, não no dia: ela vai consultar isso amanhã. */}
+      {passo.proximaAcao && escolhida && (
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="proxima-acao"
+            className="text-[13px] font-semibold leading-snug text-foreground"
+          >
+            {passo.proximaAcao.rotulo}
+          </label>
+          <input
+            id="proxima-acao"
+            type="text"
+            value={proxima}
+            onChange={(e) => setProxima(e.target.value)}
+            placeholder={passo.proximaAcao.placeholder}
+            className="w-full rounded-xl border border-input bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
+          />
+          <label htmlFor="proxima-em" className="text-xs text-muted-foreground">
+            Quando? (opcional)
+          </label>
+          <input
+            id="proxima-em"
+            type="date"
+            value={proximaEm}
+            onChange={(e) => setProximaEm(e.target.value)}
+            className="w-fit rounded-xl border border-input bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
+          />
+        </div>
+      )}
+    </div>
+  )
 
   // Rodada em andamento: as perguntas sobre a empresa escolhida.
   if (empresa) {
@@ -1359,7 +1570,7 @@ function EmpresaDoPasso({
               </small>
             )}
           </span>
-          {!passo.cadastro && disponiveis.length > 1 && (
+          {!passo.cadastro && (disponiveis.length > 1 || feitas.includes(empresa.id)) && (
             <button
               type="button"
               onClick={() => {
@@ -1373,70 +1584,13 @@ function EmpresaDoPasso({
           )}
         </div>
 
-        <div className="flex flex-col gap-5">
-          {passo.campos.filter((c) => visivel(c, rodada)).map((campo) => (
-            <CampoUnico
-              key={campo.chave}
-              campo={campo}
-              valor={rodada[campo.chave]}
-              set={setRodadaCampo}
-            />
-          ))}
-
-          {/* O próximo passo é o que impede a conversa de esfriar. Fica junto
-              da empresa no Radar, não no dia: ela vai consultar isso amanhã. */}
-          {passo.proximaAcao && (
-            <div className="flex flex-col gap-2">
-              <label
-                htmlFor="proxima-acao"
-                className="text-[13px] font-semibold leading-snug text-foreground"
-              >
-                {passo.proximaAcao.rotulo}
-              </label>
-              <input
-                id="proxima-acao"
-                type="text"
-                value={proxima}
-                onChange={(e) => setProxima(e.target.value)}
-                placeholder={passo.proximaAcao.placeholder}
-                className="w-full rounded-xl border border-input bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
-              />
-              <label htmlFor="proxima-em" className="text-xs text-muted-foreground">
-                Quando? (opcional)
-              </label>
-              <input
-                id="proxima-em"
-                type="date"
-                value={proximaEm}
-                onChange={(e) => setProximaEm(e.target.value)}
-                className="w-fit rounded-xl border border-input bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
-              />
-            </div>
-          )}
-        </div>
-
-        <button
-          type="button"
-          onClick={guardarRodada}
-          disabled={salvando}
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-secondary px-5 py-3 text-xs font-semibold text-secondary-foreground transition-all duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 sm:w-fit sm:py-2.5"
-        >
-          {salvando
-            ? "Salvando…"
-            : meta > 1 && feitas.length + 1 < meta
-              ? "Salvar e ir para a próxima"
-              : "Salvar"}
-        </button>
-        {aviso && (
-          <small role="status" className="text-xs font-semibold text-secondary">
-            {aviso}
-          </small>
-        )}
+        {perguntas}
       </div>
     )
   }
 
-  // Cadastro: o Dia 1, em que o Radar ainda está vazio.
+  // Cadastro: o Dia 1, em que o Radar ainda está vazio. A empresa e as
+  // perguntas sobre ela numa tela só — o botão da missão grava tudo junto.
   if (passo.cadastro) {
     const cad = passo.cadastro
     return (
@@ -1488,37 +1642,7 @@ function EmpresaDoPasso({
           </div>
         )}
 
-        <button
-          type="button"
-          disabled={salvando || nome.trim() === ""}
-          onClick={() =>
-            startSalvar(async () => {
-              const res = await addEmpresaAction({
-                dia,
-                nome,
-                segmento,
-                contato: canal ?? undefined,
-                origem: cad.origem,
-              })
-              if (!res.ok) {
-                setAviso(res.error)
-                return
-              }
-              setRadar((r) => [...r, res.empresa])
-              setEscolhida(res.empresa.id)
-              setAviso(null)
-            })
-          }
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-secondary px-5 py-3 text-xs font-semibold text-secondary-foreground transition-all duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 sm:w-fit sm:py-2.5"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Guardar essa empresa
-        </button>
-        {aviso && (
-          <small role="status" className="text-xs font-semibold text-secondary">
-            {aviso}
-          </small>
-        )}
+        {perguntas}
       </div>
     )
   }
@@ -1537,24 +1661,7 @@ function EmpresaDoPasso({
     <div className="flex flex-col gap-3">
       {contador}
 
-      {feitas.length > 0 && (
-        <ul className="flex flex-col gap-1.5">
-          {feitas.map((id) => {
-            const e = radar.find((x) => x.id === id)
-            return (
-              <li
-                key={id}
-                className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary-subtle px-4 py-2.5"
-              >
-                <Check className="h-3.5 w-3.5 flex-none text-primary" strokeWidth={3} />
-                <b className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
-                  {e?.nome ?? "Empresa"}
-                </b>
-              </li>
-            )
-          })}
-        </ul>
-      )}
+      {feitas.length > 0 && listaDasFeitas}
 
       <div className="flex flex-col gap-2">
         {disponiveis.map((e) => (
@@ -1562,7 +1669,7 @@ function EmpresaDoPasso({
             key={e.id}
             rotulo={e.segmento ? `${e.nome} — ${e.segmento}` : e.nome}
             marcado={false}
-            onClick={() => setEscolhida(e.id)}
+            onClick={() => escolher(e.id)}
           />
         ))}
       </div>

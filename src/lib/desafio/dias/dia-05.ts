@@ -55,7 +55,7 @@ export const dia05: Dia = {
       chave: "whatsapp",
       ask: "Deixe seu WhatsApp profissional.",
       support:
-        "É por ali que as conversas vão acontecer. Não precisa de foto de estúdio — precisa de uma foto em que dê para te ver, do seu nome do jeito que te identifica, e de uma linha dizendo o que você faz.",
+        "A proposta é deixar o WhatsApp com uma apresentação mais profissional, pensando na imagem que queremos transmitir nos contatos comerciais.\n\n• **Foto de perfil:** escolher uma foto nítida, com boa iluminação e aparência profissional. Não precisa ser uma foto de estúdio, mas deve ser bem apresentada e transmitir credibilidade.\n• **Nome do perfil:** utilizar o nome pelo qual você deseja ser reconhecida profissionalmente.\n• **Descrição:** se possível, incluir a profissão ou área de atuação, como SDR e Closer Comercial, para que as pessoas identifiquem rapidamente com o que você trabalha.\n\nA ideia é fazer pequenos ajustes que transmitam mais profissionalismo e confiança, sem perder a naturalidade.",
       itens: [
         "Minha foto está adequada.",
         "Meu nome está identificável.",
@@ -69,7 +69,7 @@ export const dia05: Dia = {
       chave: "minha-apresentacao-base",
       ask: "Escolha uma base para a sua apresentação.",
       support:
-        "Duas versões da mesma coisa. Copie a que soar mais com você — no próximo passo você ajusta no seu jeito.",
+        "Aqui temos duas versões para a mesma mensagem. Veja com qual você se identifica mais para ajustar do seu jeito no próximo passo!",
       mensagens: [
         {
           titulo: "Opção A — estou começando",
@@ -90,7 +90,7 @@ export const dia05: Dia = {
       chave: "minha-apresentacao",
       ask: "Agora escreva a sua.",
       support:
-        "Do seu jeito, com as suas palavras. Essa é a frase que você vai falar quando alguém perguntar o que você faz.",
+        "Agora, ajuste do seu jeito: essa será a frase que você vai falar quando alguém perguntar o que você faz.",
       campos: [
         {
           tipo: "area",

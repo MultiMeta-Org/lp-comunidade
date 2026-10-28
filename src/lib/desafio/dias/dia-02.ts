@@ -76,6 +76,21 @@ export const dia02: Dia = {
       cta: "Entendi",
     },
 
+    // Prepara a missão logo abaixo, que pergunta como os clientes PARECEM
+    // chegar até a empresa: é aqui que ela aprende a ler isso.
+    {
+      tipo: "leitura",
+      chave: "resumo-prospeccao",
+      ask: "Um resumo sobre prospecção",
+      corpo: [
+        "**Inbound (atração):** o potencial cliente chega até a empresa por meio de conteúdos, anúncios, indicações, pesquisas na internet ou outros canais. Ele demonstra interesse e inicia o contato ou deixa sinais de que deseja conhecer melhor a solução.",
+        "**Outbound (prospecção ativa):** a empresa toma a iniciativa de entrar em contato com potenciais clientes. Isso pode acontecer por mensagens, e-mails, ligações ou outras abordagens, mesmo quando a pessoa ainda não demonstrou interesse diretamente.",
+        "**Por que isso importa para a Empreendedora Anônima?**\nEntender como os potenciais clientes chegam até a empresa ajuda você a direcionar melhor o seu trabalho. Afinal, conversar com alguém que já demonstrou interesse é diferente de abordar uma pessoa que ainda não conhece a solução.\n\nEssa informação ajuda você a adaptar sua abordagem, entender o contexto de cada contato e conduzir as conversas de forma mais estratégica.",
+      ],
+      nota: "Lembre-se: quanto melhor você entender de onde vem o potencial cliente e em que momento ele está, mais preparada estará para dar o próximo passo na conversa comercial.",
+      cta: "Entendi",
+    },
+
     {
       tipo: "empresa",
       chave: "missao-dia-2",
@@ -126,7 +141,6 @@ export const dia02: Dia = {
             "Não tente adivinhar. Pense nas informações que ainda faltam para você compreender a operação.",
         },
       ],
-      cta: "Salvar missão de hoje",
     },
   ],
 
