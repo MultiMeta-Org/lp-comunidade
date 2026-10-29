@@ -1,10 +1,16 @@
 import { Fragment } from "react"
+import Link from "next/link"
+import { ArrowRight, FileText } from "lucide-react"
 
 /**
  * O Markdown que a B.IA escreve, e só ele: parágrafos, listas com "-" ou
  * "1.", **negrito**, _itálico_, links soltos e [texto](link) — este só para
  * caminhos do portal ("/desafio/caderno?pagina=12") ou https. O prompt dela
  * proíbe títulos e tabelas, então um parser completo seria peso sem uso.
+ *
+ * Link para o próprio portal vira botão que navega na mesma aba, com a B.IA
+ * aberta por cima; link de fora abre em outra aba. O Caderno é a exceção
+ * interna: a rota redireciona para um PDF, que sairia do portal.
  *
  * Monta elementos React — nunca `innerHTML`. O texto vem de um LLM que leu
  * material e a pergunta da aluna; nada dele pode virar HTML executável.
@@ -54,6 +60,8 @@ function inline(texto: string): React.ReactNode[] {
   return texto.split(TOKEN).map((parte, i) => {
     const link = parte.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/)
     if (link) {
+      const interno = caminhoDoPortal(link[2])
+      if (interno) return <BotaoDoPortal key={i} href={interno} texto={link[1]} />
       return (
         <a
           key={i}
@@ -77,6 +85,15 @@ function inline(texto: string): React.ReactNode[] {
     if (/^https?:\/\//.test(parte)) {
       // Pontuação final da frase não faz parte do link.
       const [, url, resto] = parte.match(/^(.*?)([.,;:!?]*)$/)!
+      const interno = caminhoDoPortal(url)
+      if (interno) {
+        return (
+          <Fragment key={i}>
+            <BotaoDoPortal href={interno} texto={rotulo(interno)} />
+            {resto}
+          </Fragment>
+        )
+      }
       return (
         <Fragment key={i}>
           <a
@@ -93,4 +110,49 @@ function inline(texto: string): React.ReactNode[] {
     }
     return <Fragment key={i}>{parte}</Fragment>
   })
+}
+
+/** Os domínios em que o portal responde; respostas antigas da B.IA têm a URL inteira. */
+const ORIGENS_DO_PORTAL = /^https:\/\/(?:portal|portalevp)\.conexaomultimeta\.com\.br(?=\/|$)/
+
+/** O caminho dentro do portal ("/desafio/dia/5"), ou null se o link é de fora. */
+function caminhoDoPortal(href: string): string | null {
+  if (/^\/(?!\/)/.test(href)) return href
+  if (ORIGENS_DO_PORTAL.test(href)) return href.replace(ORIGENS_DO_PORTAL, "") || "/"
+  return null
+}
+
+const ehCaderno = (href: string) => href.startsWith("/desafio/caderno")
+
+/** Para link solto, sem texto escolhido pela B.IA. */
+function rotulo(href: string): string {
+  const [caminho] = href.split(/[?#]/)
+  const dia = caminho.match(/^\/desafio\/dia\/(\d+)/)
+  if (dia) return Number(dia[1]) === 0 ? "Abrir o Dia Zero" : `Abrir o Dia ${dia[1]}`
+  if (caminho.startsWith("/desafio/radar")) return "Abrir o Radar"
+  if (caminho.startsWith("/desafio/biblioteca")) return "Abrir a Biblioteca"
+  if (ehCaderno(caminho)) return "Abrir o Caderno de Campo"
+  if (caminho.startsWith("/desafio")) return "Abrir a jornada do Desafio"
+  if (caminho.startsWith("/aulas")) return "Abrir as aulas"
+  return "Abrir no portal"
+}
+
+const BOTAO =
+  "mx-0.5 inline-flex max-w-full items-center gap-1.5 rounded-full border border-primary/25 bg-primary-subtle px-3 py-1 align-middle text-[13px] font-semibold leading-5 text-primary no-underline transition-colors hover:border-primary/50 hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+
+function BotaoDoPortal({ href, texto }: { href: string; texto: string }) {
+  if (ehCaderno(href)) {
+    return (
+      <a href={href} target="_blank" rel="noopener" className={BOTAO}>
+        <FileText className="h-3.5 w-3.5 flex-none" />
+        <span className="truncate">{texto}</span>
+      </a>
+    )
+  }
+  return (
+    <Link href={href} className={BOTAO}>
+      <span className="truncate">{texto}</span>
+      <ArrowRight className="h-3.5 w-3.5 flex-none" />
+    </Link>
+  )
 }

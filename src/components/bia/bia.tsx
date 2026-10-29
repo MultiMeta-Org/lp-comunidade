@@ -73,7 +73,10 @@ export function BiaProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const rotaPermitida = ROTAS_COM_BIA.some((r) => pathname.startsWith(r))
-  const disponivel = Boolean(BIA_URL) && temSessao && rotaPermitida
+  // Aberta, ela acompanha a aluna: um botão da conversa pode levar para fora
+  // do Desafio (as aulas do Método) e a conversa não some no meio. Fechou
+  // fora do Desafio, o botão flutuante não volta.
+  const disponivel = Boolean(BIA_URL) && temSessao && (rotaPermitida || aberto)
 
   const fechar = useCallback(() => setAberto(false), [])
 
@@ -246,7 +249,7 @@ function Drawer({ aberto, onFechar }: { aberto: boolean; onFechar: () => void })
           {mensagens.length === 0 && !enviando ? (
             <BoasVindas onEscolher={perguntar} />
           ) : (
-            <ol className="flex flex-col gap-3">
+            <ol className="flex flex-col gap-4">
               {mensagens.map((m) => (
                 <Bolha key={m.id} mensagem={m} />
               ))}
@@ -301,7 +304,7 @@ function Drawer({ aberto, onFechar }: { aberto: boolean; onFechar: () => void })
 function BoasVindas({ onEscolher }: { onEscolher: (pergunta: string) => void }) {
   return (
     <div className="flex flex-col gap-4 pt-2">
-      <div className="rounded-2xl rounded-tl-md bg-muted/70 px-4 py-3 text-sm leading-relaxed text-foreground">
+      <div className="text-sm leading-relaxed text-foreground">
         Oi! Eu sou a <b>B.IA</b>. Posso te ajudar com a missão do dia, os scripts, o Radar e as aulas do Método. O que
         você quer destravar hoje?
       </div>
@@ -329,11 +332,13 @@ function Bolha({ mensagem }: { mensagem: Mensagem }) {
       </li>
     )
   }
+  // A B.IA escreve solta, sem balão: só a aluna tem balão, e a conversa se lê
+  // como texto corrido. O erro se distingue pela cor, não por uma caixa.
   return (
     <li
       className={cn(
-        "max-w-[92%] self-start break-words rounded-2xl rounded-tl-md px-3.5 py-2.5 text-sm leading-relaxed",
-        mensagem.erro ? "border border-destructive/30 bg-destructive/5 text-foreground" : "bg-muted/70 text-foreground"
+        "self-stretch break-words text-sm leading-relaxed",
+        mensagem.erro ? "text-destructive" : "text-foreground"
       )}
     >
       <Markdown texto={mensagem.texto} />
@@ -343,7 +348,7 @@ function Bolha({ mensagem }: { mensagem: Mensagem }) {
 
 function Digitando() {
   return (
-    <li aria-label="A B.IA está escrevendo" className="flex gap-1 self-start rounded-2xl rounded-tl-md bg-muted/70 px-4 py-3.5">
+    <li aria-label="A B.IA está escrevendo" className="flex gap-1 self-start py-2">
       {[0, 150, 300].map((d) => (
         <span
           key={d}
