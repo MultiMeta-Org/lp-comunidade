@@ -366,7 +366,12 @@ function oQueFalta(
           ? "Guarde a empresa para a gente seguir."
           : "Escolha uma empresa e responda sobre ela."
       }
-      return `Faltam ${falta} ${falta === 1 ? "empresa" : "empresas"} para fechar.`
+      // As empresas daqui são escolhidas na lista do Radar, não cadastradas.
+      // "Faltam 5 empresas" sozinho mandava a aluna cadastrar mais no Radar —
+      // e o número não mexia, porque o que conta é tocar numa e responder.
+      return `Toque em uma das empresas da lista e responda sobre ela. ${
+        falta === 1 ? "Falta só uma" : `Faltam ${falta}`
+      } para fechar.`
     }
   }
 }
@@ -1445,10 +1450,14 @@ function EmpresaDoPasso({
 
   // No meio das rodadas, o botão diz que vem outra empresa — e não que o dia acabou.
   const maisUma = !livre && meta > 1 && escolhida !== null && feitas.length + 1 < meta
+  // Antes de abrir uma empresa, "Concluir" mentia: ainda não há o que concluir,
+  // e quem apertava ia cadastrar mais empresas no Radar achando que era isso.
+  const semEscolha = !livre && !passo.cadastro && !completo && escolhida === null
+  const rotulo = maisUma ? "Próxima empresa" : semEscolha ? "Escolha uma empresa acima" : null
   useEffect(() => {
-    setRotulo(maisUma ? "Próxima empresa" : null)
+    setRotulo(rotulo)
     return () => setRotulo(null)
-  }, [maisUma, setRotulo])
+  }, [rotulo, setRotulo])
 
   const contador = livre ? (
     <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
