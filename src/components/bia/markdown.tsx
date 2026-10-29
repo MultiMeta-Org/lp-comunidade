@@ -1,11 +1,12 @@
-import { Fragment } from "react"
+import { createContext, Fragment, useContext, useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, FileText } from "lucide-react"
+import { ArrowRight, Check, Copy, FileText } from "lucide-react"
 
 /**
  * O Markdown que a B.IA escreve, e só ele: parágrafos, listas com "-" ou
- * "1.", **negrito**, _itálico_, links soltos e [texto](link) — este só para
- * caminhos do portal ("/desafio/caderno?pagina=12") ou https. O prompt dela
+ * "1.", citação com "> " (a mensagem pronta para copiar), **negrito**,
+ * _itálico_, links soltos e [texto](link) — este só para caminhos do portal
+ * ("/desafio/caderno?pagina=12") ou https. O prompt dela
  * proíbe títulos e tabelas, então um parser completo seria peso sem uso.
  *
  * Link para o próprio portal vira botão que navega na mesma aba, com a B.IA
@@ -15,12 +16,41 @@ import { ArrowRight, FileText } from "lucide-react"
  * Monta elementos React — nunca `innerHTML`. O texto vem de um LLM que leu
  * material e a pergunta da aluna; nada dele pode virar HTML executável.
  */
+/** Quem usa o Markdown fica sabendo quando a aluna toca num botão do portal. */
+export const AoNavegarNoPortal = createContext<(() => void) | null>(null)
+
+const CITACAO = /^\s*>\s?/
+
+/**
+ * Blocos separados por linha em branco e, dentro de um bloco, a citação
+ * separada do texto em volta: o modelo costuma colar "Manda assim:" na linha
+ * de cima do "> ".
+ */
+function blocosDe(texto: string): string[][] {
+  const blocos: string[][] = []
+  for (const bloco of texto.trim().split(/\n{2,}/)) {
+    let atual: string[] = []
+    for (const linha of bloco.split("\n")) {
+      if (atual.length > 0 && CITACAO.test(linha) !== CITACAO.test(atual[0])) {
+        blocos.push(atual)
+        atual = []
+      }
+      atual.push(linha)
+    }
+    if (atual.length > 0) blocos.push(atual)
+  }
+  // Parágrafos dentro da mesma mensagem vêm com ">" vazio entre eles; duas
+  // citações separadas por linha em branco são duas mensagens.
+  return blocos
+}
+
 export function Markdown({ texto }: { texto: string }) {
-  const blocos = texto.trim().split(/\n{2,}/)
   return (
     <>
-      {blocos.map((bloco, i) => {
-        const linhas = bloco.split("\n")
+      {blocosDe(texto).map((linhas, i) => {
+        if (CITACAO.test(linhas[0])) {
+          return <MensagemPronta key={i} texto={linhas.map((l) => l.replace(CITACAO, "")).join("\n").trim()} />
+        }
         if (linhas.every((l) => /^\s*[-*•]\s+/.test(l))) {
           return (
             <ul key={i} className="my-1.5 list-disc space-y-1 pl-5 marker:text-primary">
@@ -141,6 +171,7 @@ const BOTAO =
   "mx-0.5 inline-flex max-w-full items-center gap-1.5 rounded-full border border-primary/25 bg-primary-subtle px-3 py-1 align-middle text-[13px] font-semibold leading-5 text-primary no-underline transition-colors hover:border-primary/50 hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 function BotaoDoPortal({ href, texto }: { href: string; texto: string }) {
+  const aoNavegar = useContext(AoNavegarNoPortal)
   if (ehCaderno(href)) {
     return (
       <a href={href} target="_blank" rel="noopener" className={BOTAO}>
@@ -150,9 +181,55 @@ function BotaoDoPortal({ href, texto }: { href: string; texto: string }) {
     )
   }
   return (
-    <Link href={href} className={BOTAO}>
+    <Link href={href} onClick={() => aoNavegar?.()} className={BOTAO}>
       <span className="truncate">{texto}</span>
       <ArrowRight className="h-3.5 w-3.5 flex-none" />
     </Link>
+  )
+}
+
+/**
+ * A mensagem que ela vai mandar para a empresa, com botão de copiar: no
+ * celular, selecionar um parágrafo exato dentro do chat é o que mais irrita.
+ */
+function MensagemPronta({ texto }: { texto: string }) {
+  const [copiou, setCopiou] = useState(false)
+
+  useEffect(() => {
+    if (!copiou) return
+    const t = setTimeout(() => setCopiou(false), 2000)
+    return () => clearTimeout(t)
+  }, [copiou])
+
+  // Na tela, com negrito; no que ela copia, sem os asteriscos — é o texto
+  // que vai para o WhatsApp.
+  const limpo = texto.replace(/\*\*([^*]+)\*\*|__([^_]+)__/g, "$1$2")
+
+  return (
+    <figure className="my-2.5 overflow-hidden rounded-xl border border-border bg-muted/40">
+      <blockquote className="px-3.5 pb-2 pt-3 text-[13.5px] leading-relaxed text-foreground">
+        {texto.split("\n").map((l, j) => (
+          <Fragment key={j}>
+            {j > 0 && <br />}
+            {inline(l)}
+          </Fragment>
+        ))}
+      </blockquote>
+      <figcaption className="flex justify-end border-t border-border/70 px-2 py-1">
+        <button
+          type="button"
+          onClick={() => {
+            navigator.clipboard
+              ?.writeText(limpo)
+              .then(() => setCopiou(true))
+              .catch(() => {})
+          }}
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold text-muted-foreground transition-colors hover:bg-background hover:text-primary"
+        >
+          {copiou ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+          <span aria-live="polite">{copiou ? "Copiado" : "Copiar mensagem"}</span>
+        </button>
+      </figcaption>
+    </figure>
   )
 }
