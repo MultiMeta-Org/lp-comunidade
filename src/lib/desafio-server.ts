@@ -100,7 +100,8 @@ export async function getJornada(email: string): Promise<Jornada> {
 const VIDEO_TTL = 60 * 60 * 12
 
 /**
- * Troca o `storage://bucket/caminho` dos vídeos do dia por uma signed URL.
+ * Troca o `storage://bucket/caminho` dos vídeos (e áudios) do dia por uma
+ * signed URL.
  *
  * O conteúdo do dia é estático (vive no código), mas o arquivo mora num
  * bucket privado: a URL que chega ao navegador é gerada aqui, por quem já
@@ -112,14 +113,18 @@ export async function assinarVideosDoDia(dia: Dia): Promise<Dia> {
   const db = createComunidadeServiceClient()
   const passos = await Promise.all(
     dia.passos.map(async (passo) => {
-      if (passo.tipo !== "video" || !passo.videoUrl?.startsWith("storage://")) return passo
-      const caminho = passo.videoUrl.slice("storage://".length)
+      const ref =
+        passo.tipo === "video" ? passo.videoUrl : passo.tipo === "audio" ? passo.audioUrl : undefined
+      if (!ref?.startsWith("storage://")) return passo
+      const caminho = ref.slice("storage://".length)
       const barra = caminho.indexOf("/")
       const { data, error } = await db.storage
         .from(caminho.slice(0, barra))
         .createSignedUrl(caminho.slice(barra + 1), VIDEO_TTL)
-      if (error) console.error("[desafio] assinar vídeo:", error.message)
-      return { ...passo, videoUrl: data?.signedUrl }
+      if (error) console.error(`[desafio] assinar ${passo.tipo}:`, error.message)
+      return passo.tipo === "video"
+        ? { ...passo, videoUrl: data?.signedUrl }
+        : { ...passo, audioUrl: data?.signedUrl }
     })
   )
   return { ...dia, passos }

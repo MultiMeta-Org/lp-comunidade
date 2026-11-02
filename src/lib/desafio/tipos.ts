@@ -89,6 +89,9 @@ export type Passo =
       videoUrl?: string
       formato?: "horizontal" | "vertical"
     })
+  /** Ouvir. Do Dia 8 ao 11 a Nati gravou áudio em vez de vídeo. `audioUrl`
+   *  ausente mostra a mesma cartela do vídeo não gravado. */
+  | (Base & { tipo: "audio"; label: string; audioUrl?: string })
   /** Uma ou mais perguntas numa tela. */
   | (Base & { tipo: "formulario"; campos: readonly Campo[] })
   /** Só ler: resumo do dia, princípio, "guarde isso". Nada a responder. */

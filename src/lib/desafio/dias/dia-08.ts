@@ -57,6 +57,15 @@ export const dia08: Dia = {
     },
 
     {
+      tipo: "audio",
+      chave: "audio-dia-8",
+      label: "Dia 8 — As respostas que chegaram",
+      audioUrl: "storage://audios/desafio/dia-08.mp3",
+      ask: "Agora, ouça o áudio de hoje.",
+      cta: "Já ouvi",
+    },
+
+    {
       tipo: "leitura",
       chave: "tres-coisas",
       ask: "São três coisas que você quer entender. Só três.",

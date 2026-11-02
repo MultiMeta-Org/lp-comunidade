@@ -48,13 +48,14 @@ export const dia09: Dia = {
 
   passos: [
     {
-      tipo: "video",
-      chave: "video-dia-9",
+      tipo: "audio",
+      chave: "audio-dia-9",
       label: "Dia 9 — O dinheiro também está no follow-up",
-      ask: "Assista ao vídeo de hoje.",
+      audioUrl: "storage://audios/desafio/dia-09.mp3",
+      ask: "Ouça o áudio de hoje.",
       support:
         "Ele mostra quando retomar, como retomar sem parecer que você está cobrando, e quando parar.",
-      cta: "Já assisti",
+      cta: "Já ouvi",
     },
 
     {

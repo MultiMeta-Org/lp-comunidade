@@ -43,13 +43,14 @@ export const dia10: Dia = {
 
   passos: [
     {
-      tipo: "video",
-      chave: "video-dia-10",
+      tipo: "audio",
+      chave: "audio-dia-10",
       label: "Dia 10 — Da conversa para a reunião",
-      ask: "Assista ao vídeo de hoje.",
+      audioUrl: "storage://audios/desafio/dia-10.mp3",
+      ask: "Ouça o áudio de hoje.",
       support:
         "Ele mostra quando convidar, como marcar, como confirmar — e o que fazer quando a pessoa não aparece.",
-      cta: "Já assisti",
+      cta: "Já ouvi",
     },
 
     {

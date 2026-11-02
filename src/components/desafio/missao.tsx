@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useRef, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Check, Copy, Play, Plus, Trash2, X } from "lucide-react"
+import { ArrowLeft, Check, Copy, Headphones, Play, Plus, Trash2, X } from "lucide-react"
 import type { Campo, Dia, Passo, ProximoDia, Respostas, StatusRadar } from "@/lib/desafio"
 import { STATUS_RADAR, rotuloDoBotao } from "@/lib/desafio"
 import {
@@ -317,6 +317,7 @@ function oQueFalta(
 ): string | null {
   switch (passo.tipo) {
     case "video":
+    case "audio":
     case "leitura":
     case "interesse":
     case "funil":
@@ -411,6 +412,9 @@ function CorpoDoPasso(props: CorpoProps) {
       return (
         <Video label={passo.label} src={passo.videoUrl} formato={passo.formato} />
       )
+
+    case "audio":
+      return <Audio label={passo.label} src={passo.audioUrl} />
 
     case "leitura":
       return <Leitura corpo={passo.corpo} destaque={passo.destaque} />
@@ -622,6 +626,34 @@ function Video({
         allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
         allowFullScreen
       />
+    </div>
+  )
+}
+
+/**
+ * O áudio do dia. Player nativo, e não o AudioPlayer das aulas: no celular ele
+ * já traz arrastar, velocidade e o controle na tela bloqueada, que é como ela
+ * vai ouvir. Sem `src`, a mesma cartela do vídeo não gravado.
+ */
+function Audio({ label, src }: { label: string; src?: string }) {
+  return (
+    <div className="flex flex-col gap-3 rounded-[18px] border border-border bg-muted/60 px-4 py-4 sm:px-5 sm:py-5">
+      <span className="flex items-center gap-3.5 sm:gap-4">
+        <span className="grid h-11 w-11 flex-none place-items-center rounded-full bg-card text-muted-foreground">
+          <Headphones className="h-5 w-5" />
+        </span>
+        <span className="min-w-0">
+          <b className="block text-sm font-semibold text-foreground">{label}</b>
+          {!src && (
+            <small className="block text-xs text-muted-foreground">
+              O áudio está sendo preparado. Pode seguir — eu te explico tudo por escrito.
+            </small>
+          )}
+        </span>
+      </span>
+      {src && (
+        <audio controls preload="metadata" src={src} className="w-full" aria-label={label} />
+      )}
     </div>
   )
 }
