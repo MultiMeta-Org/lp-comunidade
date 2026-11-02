@@ -1,7 +1,7 @@
 import type { FeatureUnlock } from "@/lib/access"
 import type { Lesson } from "@/lib/lessons"
 import type { Banner } from "@/lib/banners-server"
-import { buildHighlights, buildProducts } from "@/lib/home"
+import { FERRAMENTAS_SLUGS, buildHighlights, buildProducts } from "@/lib/home"
 import { Atmosphere } from "@/components/atmosphere"
 import { NewsCarousel } from "@/components/home/news-carousel"
 import { ProductShelf } from "@/components/home/product-shelf"
@@ -44,8 +44,9 @@ function unlockDateLabel(iso: string | null): string | null {
 }
 
 /**
- * Home do portal: novidades no topo, os produtos da aluna em uma fileira, os
- * que ela ainda vai conhecer em outra, e os links de sempre no pé.
+ * Home do portal: novidades no topo, os produtos da aluna em uma fileira, as
+ * ferramentas (Marketplace, MultiQuiz, CRM) em outra, o que ela ainda vai
+ * conhecer na seguinte, e os links de sempre no pé.
  * Puramente apresentacional — a page faz o guard e busca os dados.
  */
 export function HomeBoard({
@@ -88,8 +89,10 @@ export function HomeBoard({
       : `Libera em ${unlock.daysRemaining} dias${unlockDate ? ` · ${unlockDate}` : ""}`
 
   const products = buildProducts({ hasLab, hasDesafio, hasMetodo, hasMapa, temPlantao })
-  const owned = products.filter((p) => p.state === "owned")
-  const soon = products.filter((p) => p.state !== "owned")
+  const ferramentas = products.filter((p) => FERRAMENTAS_SLUGS.includes(p.slug))
+  const resto = products.filter((p) => !FERRAMENTAS_SLUGS.includes(p.slug))
+  const owned = resto.filter((p) => p.state === "owned")
+  const soon = resto.filter((p) => p.state !== "owned")
 
   return (
     <>
@@ -130,6 +133,21 @@ export function HomeBoard({
           <div className="animate-rise mt-4" style={{ "--d": "90ms" } as React.CSSProperties}>
             <ProductShelf products={owned} />
           </div>
+
+          {/* ── Ferramentas ── */}
+          {ferramentas.length > 0 && (
+            <>
+              <SectionLabel className="mt-12" delay={110}>
+                Ferramentas
+              </SectionLabel>
+              <div
+                className="animate-rise mt-4"
+                style={{ "--d": "120ms" } as React.CSSProperties}
+              >
+                <ProductShelf products={ferramentas} />
+              </div>
+            </>
+          )}
 
           {/* ── O que ela ainda vai conhecer ── */}
           {soon.length > 0 && (

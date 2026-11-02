@@ -72,6 +72,13 @@ export const DESAFIO_SLUG = "desafio-21-dias"
 export const MAPA_SLUG = "mapa-direcao-profissional"
 
 /**
+ * As capas que vão para a seção "Ferramentas" da home, e não para "Meus
+ * produtos" ou "Para conhecer". Ficam lá travadas ou não: a aluna sem o
+ * Método vê o cadeado no mesmo lugar onde vai usá-las depois de comprar.
+ */
+export const FERRAMENTAS_SLUGS: readonly string[] = ["marketplace", "multiquiz", "crm"]
+
+/**
  * O que vem com o Método — e o convite de cada um para quem entrou só pelo
  * Mapa. Marketplace e CRM não se compram à parte: a aluna do Método ganha os
  * dois na hora. Por isso as capas deles levam para a compra do Método, que é
