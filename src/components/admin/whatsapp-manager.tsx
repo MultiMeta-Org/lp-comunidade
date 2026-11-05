@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { QRCodeSVG } from "qrcode.react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   bloquearContato,
   pedirDesconexao,
@@ -16,6 +16,7 @@ import {
 export type EstadoWhatsapp = {
   status: "desconectado" | "conectando" | "pareando" | "conectado"
   numero: string | null
+  /** O conteúdo do QR code enquanto pareia (a coluna é anterior ao QR). */
   codigo_pareamento: string | null
   erro: string | null
   pedido: "parear" | "desconectar" | null
@@ -35,7 +36,7 @@ export type ContatoRow = {
 
 const STATUS_CONEXAO: Record<EstadoWhatsapp["status"], { label: string; className: string }> = {
   conectado: { label: "Conectado", className: "bg-primary-subtle text-primary" },
-  pareando: { label: "Aguardando o código", className: "bg-warning-subtle text-warning-foreground" },
+  pareando: { label: "Aguardando a leitura do QR", className: "bg-warning-subtle text-warning-foreground" },
   conectando: { label: "Conectando…", className: "bg-warning-subtle text-warning-foreground" },
   desconectado: { label: "Desconectado", className: "bg-destructive-subtle text-destructive" },
 }
@@ -55,12 +56,12 @@ function formatarTelefone(t: string | null): string {
 
 /**
  * O chip da BIA. Enquanto há um pedido em andamento (conectando, pareando),
- * a página se relê a cada 3 s: o processo no VPS escreve o código de
- * pareamento e o status em bia.whatsapp_estado, e só a releitura os traz.
+ * a página se relê a cada 3 s: o processo no VPS escreve o QR code (que o
+ * WhatsApp renova a cada ~20 s) e o status em bia.whatsapp_estado, e só a
+ * releitura os traz.
  */
 export function WhatsappConexao({ estado }: { estado: EstadoWhatsapp | null }) {
   const router = useRouter()
-  const [telefone, setTelefone] = useState("")
   const [error, setError] = useState("")
   const [pending, startTransition] = useTransition()
 
@@ -124,41 +125,26 @@ export function WhatsappConexao({ estado }: { estado: EstadoWhatsapp | null }) {
       </div>
 
       {status === "pareando" && estado.codigo_pareamento && (
-        <div className="space-y-2 rounded-lg border border-warning/40 bg-warning-subtle p-4">
-          <div className="font-display text-3xl font-bold tracking-[0.2em] text-foreground">
-            {estado.codigo_pareamento}
+        <div className="flex flex-wrap items-center gap-5 rounded-lg border border-warning/40 bg-warning-subtle p-4">
+          {/* Fundo branco fixo: leitor de QR não lê o código invertido do tema escuro. */}
+          <div className="rounded-lg bg-white p-3">
+            <QRCodeSVG value={estado.codigo_pareamento} size={224} marginSize={0} />
           </div>
-          <p className="text-xs leading-relaxed text-warning-foreground">
-            No celular do chip: WhatsApp → Configurações → Aparelhos conectados → Conectar
-            um aparelho → <strong>Conectar com número de telefone</strong>, e digite o
-            código. Ele vale por poucos minutos; se expirar, peça outro.
+          <p className="max-w-sm text-xs leading-relaxed text-warning-foreground">
+            No celular do chip: WhatsApp → Configurações → <strong>Aparelhos conectados</strong>{" "}
+            → Conectar um aparelho, e aponte a câmera para o QR. Ele se renova sozinho a cada
+            poucos segundos; depois de 5 minutos sem leitura, gere outro.
           </p>
         </div>
       )}
 
-      {status !== "conectado" && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            run(() => pedirPareamento(telefone))
-          }}
-          className="flex flex-wrap items-end gap-3"
-        >
-          <div className="grid min-w-[220px] flex-1 gap-1.5">
-            <Label htmlFor="wa-numero">Número do chip (com DDI e DDD)</Label>
-            <Input
-              id="wa-numero"
-              inputMode="tel"
-              placeholder="5511987654321"
-              value={telefone}
-              onChange={(e) => setTelefone(e.target.value)}
-              required
-            />
-          </div>
-          <Button type="submit" disabled={pending || aguardando}>
-            {aguardando ? "Aguardando…" : "Gerar código de pareamento"}
-          </Button>
-        </form>
+      {status !== "conectado" && !aguardando && (
+        <Button onClick={() => run(pedirPareamento)} disabled={pending}>
+          Gerar QR code
+        </Button>
+      )}
+      {aguardando && !(status === "pareando" && estado.codigo_pareamento) && (
+        <p className="text-xs text-muted-foreground">Gerando o QR code…</p>
       )}
 
       {(error || estado.erro) && <p className="text-xs text-destructive">{error || estado.erro}</p>}

@@ -10,18 +10,15 @@ export type ActionResult = { ok: boolean; error?: string }
 /**
  * O admin não fala com o WhatsApp direto: escreve um PEDIDO em
  * bia.whatsapp_estado, e o processo da BIA no VPS o executa em poucos
- * segundos e escreve de volta o status (e o código de pareamento).
+ * segundos e escreve de volta o status (e o QR code do pareamento).
  */
-async function pedir(
-  pedido: "parear" | "desconectar",
-  telefone: string | null
-): Promise<ActionResult> {
+async function pedir(pedido: "parear" | "desconectar"): Promise<ActionResult> {
   const admin = await requireAdmin()
   const { error } = await createBiaServiceClient()
     .from("whatsapp_estado")
     .update({
       pedido,
-      pedido_telefone: telefone,
+      pedido_telefone: null,
       pedido_por: admin,
       pedido_em: new Date().toISOString(),
       erro: null,
@@ -32,16 +29,12 @@ async function pedir(
   return { ok: true }
 }
 
-export async function pedirPareamento(telefone: string): Promise<ActionResult> {
-  const digitos = telefone.replace(/\D/g, "")
-  if (digitos.length < 12) {
-    return { ok: false, error: "Use DDI + DDD + número, ex.: 5511987654321." }
-  }
-  return pedir("parear", digitos)
+export async function pedirPareamento(): Promise<ActionResult> {
+  return pedir("parear")
 }
 
 export async function pedirDesconexao(): Promise<ActionResult> {
-  return pedir("desconectar", null)
+  return pedir("desconectar")
 }
 
 /**
