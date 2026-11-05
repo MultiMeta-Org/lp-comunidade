@@ -43,13 +43,14 @@ export const dia18: Dia = {
 
   passos: [
     {
-      tipo: "video",
+      tipo: "audio",
       chave: "video-dia-18",
       label: "Dia 18 — 100 empresas no radar",
-      ask: "Assista ao vídeo de hoje.",
+      audioUrl: "storage://audios/desafio/dia-18.mp3",
+      ask: "Ouça o áudio de hoje.",
       support:
         "Ele fecha a construção da sua carteira e mostra como ela se mantém viva daqui para frente.",
-      cta: "Já assisti",
+      cta: "Já ouvi",
     },
 
     {

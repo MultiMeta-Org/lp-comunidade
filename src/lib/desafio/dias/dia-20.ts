@@ -40,13 +40,13 @@ export const dia20: Dia = {
 
   passos: [
     {
-      tipo: "video",
+      tipo: "audio",
       chave: "video-dia-20",
       label: "Dia 20 — Essa habilidade pode te levar muito mais longe",
-      ask: "Assista ao vídeo de hoje.",
+      ask: "Ouça o áudio de hoje.",
       support:
         "Ele mostra os caminhos reais de crescimento de quem trabalha com comercial — e quanto essa habilidade vale além do primeiro contrato.",
-      cta: "Já assisti",
+      cta: "Já ouvi",
     },
 
     {

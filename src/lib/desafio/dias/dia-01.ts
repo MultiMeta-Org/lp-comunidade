@@ -9,7 +9,7 @@ import type { Dia } from "../tipos"
  *
  * A missão não aborda ninguém. Ela escolhe uma empresa que já conhece e olha
  * para ela com olhos de profissional — é o Dia 1 inteiro em uma frase. Dessas
- * seis perguntas, só três viram cadastro no Radar (nome, o que vende, canal);
+ * perguntas, só três viram cadastro no Radar (nome, o que vende, canal);
  * as outras são respostas da aula, e o documento é explícito em não despejar
  * tudo no Radar, que é ferramenta operacional.
  *
@@ -137,14 +137,11 @@ export const dia01: Dia = {
             "Ainda não consigo identificar",
           ],
         },
-        {
-          tipo: "texto",
-          chave: "chamou_atencao",
-          rotulo: "O que mais chamou sua atenção nessa carreira até agora?",
-          obrigatorio: false,
-        },
       ],
-      cta: "Salvar minha primeira empresa",
+      // "Salvar minha primeira empresa" parecia um segundo botão de salvar, e
+      // quem testou achou que precisava salvar em outro lugar antes. O botão
+      // já grava a empresa: ele só precisa dizer para onde leva.
+      cta: "Seguir para o próximo passo",
     },
 
     // ── Interesse (não trava o dia) ──

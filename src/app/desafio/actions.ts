@@ -13,6 +13,7 @@ import {
 import {
   addEmpresa,
   arquivarEmpresa,
+  atualizarEmpresa,
   concluirDia,
   getJornada,
   getRadar,
@@ -141,6 +142,34 @@ export async function addEmpresaAction(entrada: {
     primeiroContatoEm: entrada.primeiroContatoEm,
     origem: entrada.origem,
     diaOrigem: typeof entrada.dia === "number" ? entrada.dia : null,
+  })
+  if (res.ok) refresh()
+  return res
+}
+
+/** Corrige os dados de uma empresa do Radar, em qualquer dia — o Radar é vivo. */
+export async function editarEmpresaAction(
+  id: string,
+  entrada: {
+    nome: string
+    segmento?: string
+    contato?: string
+    telefone?: string
+    primeiroContatoEm?: string
+  }
+): Promise<EmpresaResult> {
+  const { email } = await requireDesafio()
+
+  const telefone = entrada.telefone?.trim() ?? ""
+  const erroTelefone = problemaNoTelefone(telefone)
+  if (erroTelefone) return { ok: false, error: erroTelefone }
+
+  const res = await atualizarEmpresa(email, id, {
+    nome: entrada.nome,
+    segmento: entrada.segmento,
+    contato: entrada.contato,
+    telefone: telefone ? formatarTelefone(telefone) : null,
+    primeiroContatoEm: entrada.primeiroContatoEm,
   })
   if (res.ok) refresh()
   return res

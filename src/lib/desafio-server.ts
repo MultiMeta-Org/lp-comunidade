@@ -114,7 +114,13 @@ export async function assinarVideosDoDia(dia: Dia): Promise<Dia> {
   const passos = await Promise.all(
     dia.passos.map(async (passo) => {
       const ref =
-        passo.tipo === "video" ? passo.videoUrl : passo.tipo === "audio" ? passo.audioUrl : undefined
+        passo.tipo === "video"
+          ? passo.videoUrl
+          : passo.tipo === "audio"
+            ? passo.audioUrl
+            : passo.tipo === "radar"
+              ? passo.audioAbaixoDaMeta
+              : undefined
       if (!ref?.startsWith("storage://")) return passo
       const caminho = ref.slice("storage://".length)
       const barra = caminho.indexOf("/")
@@ -124,7 +130,9 @@ export async function assinarVideosDoDia(dia: Dia): Promise<Dia> {
       if (error) console.error(`[desafio] assinar ${passo.tipo}:`, error.message)
       return passo.tipo === "video"
         ? { ...passo, videoUrl: data?.signedUrl }
-        : { ...passo, audioUrl: data?.signedUrl }
+        : passo.tipo === "audio"
+          ? { ...passo, audioUrl: data?.signedUrl }
+          : { ...passo, audioAbaixoDaMeta: data?.signedUrl }
     })
   )
   return { ...dia, passos }
@@ -393,6 +401,56 @@ export async function addEmpresa(
       return { ok: false, duplicada: true, error: "Essa empresa já está no seu Radar." }
     }
     console.error("[desafio] addEmpresa:", error.message)
+    return { ok: false, error: "Não consegui salvar agora. Tenta de novo?" }
+  }
+
+  return { ok: true, empresa: paraEmpresa(data) }
+}
+
+/**
+ * Corrige os dados de uma empresa do Radar: nome, o que faz, contato,
+ * telefone e o primeiro contato. Estágio e notas não passam por aqui — eles
+ * andam com as missões.
+ *
+ * Mesmas regras do cadastro (nome obrigatório, data que não é futura, nome
+ * repetido vira aviso), e o e-mail no WHERE junto do id.
+ */
+export async function atualizarEmpresa(
+  email: string,
+  id: string,
+  empresa: Omit<AddEmpresa, "origem" | "diaOrigem">
+): Promise<RadarResult> {
+  const nome = empresa.nome.trim()
+  if (!nome) return { ok: false, error: "Escreva o nome da empresa." }
+
+  const db = createComunidadeServiceClient()
+  const { data, error } = await db
+    .from("desafio_radar")
+    .update({
+      nome,
+      segmento: empresa.segmento?.trim() || null,
+      contato: empresa.contato?.trim() || null,
+      telefone: empresa.telefone?.trim().slice(0, 40) || null,
+      primeiro_contato_em:
+        empresa.primeiroContatoEm &&
+        /^\d{4}-\d{2}-\d{2}$/.test(empresa.primeiroContatoEm) &&
+        empresa.primeiroContatoEm <= hojeEmSaoPaulo()
+          ? empresa.primeiroContatoEm
+          : null,
+    })
+    .eq("email", norm(email))
+    .eq("id", id)
+    .is("arquivada_em", null)
+    .select(
+      "id, nome, segmento, contato, telefone, primeiro_contato_em, origem, dia_origem, status, proxima_acao, proxima_acao_em, notas"
+    )
+    .single()
+
+  if (error) {
+    if (error.code === "23505") {
+      return { ok: false, duplicada: true, error: "Já existe outra empresa com esse nome no seu Radar." }
+    }
+    console.error("[desafio] atualizarEmpresa:", error.message)
     return { ok: false, error: "Não consegui salvar agora. Tenta de novo?" }
   }
 

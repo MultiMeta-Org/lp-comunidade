@@ -111,7 +111,7 @@ export const dia03: Dia = {
       chave: "tres-indicacoes",
       ask: "Peça indicação para três pessoas.",
       support:
-        "Você não está pedindo para alguém encontrar uma empresa “que precisa de vendas”. Você só quer ampliar seu Radar. Copie uma das mensagens abaixo e mande no WhatsApp.",
+        "Você não está pedindo para alguém encontrar uma empresa “que precisa de vendas”. Você só quer ampliar seu Radar. Copie uma das mensagens abaixo e mande no WhatsApp ou no Direct do Instagram — por onde você conversa com essa pessoa.",
       mensagens: [
         {
           titulo: "Para alguém mais próximo",
@@ -127,7 +127,7 @@ export const dia03: Dia = {
       // O documento é explícito em NÃO perguntar para quem ela enviou, o
       // telefone, a relação, quando enviou nem o que responderam. Queremos
       // execução, não burocracia.
-      confirmacao: "Mandei para três pessoas.",
+      confirmacao: "Mandei para três pessoas (WhatsApp ou Instagram).",
       nota: "Você pode adaptar a mensagem para o seu jeito. O importante é manter o objetivo: pedir nomes, não pedir que a pessoa diagnostique uma necessidade comercial. E se a indicação chegar amanhã ou nos próximos dias, sem problema — é só adicionar a empresa no Radar com origem “Indicação”. Seu Radar fica disponível durante toda a jornada.",
       cta: "Concluir minha missão de hoje",
     },

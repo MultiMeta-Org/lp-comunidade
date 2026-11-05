@@ -89,7 +89,7 @@ export type Passo =
       videoUrl?: string
       formato?: "horizontal" | "vertical"
     })
-  /** Ouvir. Do Dia 8 ao 11 a Nati gravou áudio em vez de vídeo. `audioUrl`
+  /** Ouvir. Do Dia 8 em diante o conteúdo do dia é áudio, não vídeo. `audioUrl`
    *  ausente mostra a mesma cartela do vídeo não gravado. */
   | (Base & { tipo: "audio"; label: string; audioUrl?: string })
   /** Uma ou mais perguntas numa tela. */
@@ -105,8 +105,21 @@ export type Passo =
       /** A confirmação de envio. É o que ela controla. */
       confirmacao: string
     })
-  /** O Radar. `meta` é quantas empresas o dia pede no total (não a mais). */
-  | (Base & { tipo: "radar"; meta: number; origemSugerida?: OrigemRadar })
+  /**
+   * O Radar. `meta` é quantas empresas o dia pede no total (não a mais).
+   *
+   * A meta não trava o dia: quem não chegou nela pode seguir, mas antes ouve
+   * (ou lê) o recado da Nati de que venda é volume. Achar empresa depende
+   * dela, sim — mas travar o dia inteiro por três empresas que faltam fazia a
+   * aluna parar de vez em vez de seguir e completar depois pelo Radar.
+   * `audioAbaixoDaMeta` é esse recado gravado; ausente, fica só o texto.
+   */
+  | (Base & {
+      tipo: "radar"
+      meta: number
+      origemSugerida?: OrigemRadar
+      audioAbaixoDaMeta?: string
+    })
   /**
    * Uma empresa do Radar e perguntas sobre ela. As respostas vão para
    * `desafio_radar.notas`, e NÃO para as colunas do Radar: "acho que essa

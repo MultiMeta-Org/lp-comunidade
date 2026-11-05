@@ -46,13 +46,13 @@ export const dia19: Dia = {
 
   passos: [
     {
-      tipo: "video",
+      tipo: "audio",
       chave: "video-dia-19",
       label: "Dia 19 — Saber se apresentar como profissional",
-      ask: "Assista ao vídeo de hoje.",
+      ask: "Ouça o áudio de hoje.",
       support:
         "Ele mostra como você se apresenta para o mercado sem precisar de audiência, seguidores nem feed bonito.",
-      cta: "Já assisti",
+      cta: "Já ouvi",
     },
 
     {

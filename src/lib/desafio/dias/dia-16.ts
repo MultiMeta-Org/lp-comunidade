@@ -41,13 +41,14 @@ export const dia16: Dia = {
 
   passos: [
     {
-      tipo: "video",
+      tipo: "audio",
       chave: "video-dia-16",
       label: "Dia 16 — Não perca oportunidades por falta de organização",
-      ask: "Assista ao vídeo de hoje.",
+      audioUrl: "storage://audios/desafio/dia-16.mp3",
+      ask: "Ouça o áudio de hoje.",
       support:
         "Ele mostra como revisar a sua carteira inteira e sair sabendo exatamente quem precisa de você hoje.",
-      cta: "Já assisti",
+      cta: "Já ouvi",
     },
 
     {
