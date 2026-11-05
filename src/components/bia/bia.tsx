@@ -9,7 +9,8 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import { usePathname } from "next/navigation"
-import { ArrowUp, MessageCircle, Sparkles, X } from "lucide-react"
+import Image from "next/image"
+import { ArrowUp, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { AoNavegarNoPortal, Markdown } from "./markdown"
 
@@ -135,21 +136,102 @@ export function BiaProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-function BotaoFlutuante({ onClick, voltar }: { onClick: () => void; voltar: boolean }) {
+/** O rosto da B.IA: avatar em PNG sem fundo, sobre o verde-claro do portal. */
+function Avatar({ tamanho, className }: { tamanho: number; className?: string }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={voltar ? "Voltar à conversa com a B.IA" : "Conversar com a B.IA"}
-      className="group fixed bottom-5 right-5 z-40 flex h-14 items-center gap-2 rounded-full bg-primary pl-4 pr-5 text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:bottom-6 sm:right-6"
-    >
-      {voltar ? (
-        <MessageCircle className="h-5 w-5" />
-      ) : (
-        <Sparkles className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12" />
+    <span
+      className={cn(
+        "relative block flex-none overflow-hidden rounded-full bg-primary-subtle",
+        className
       )}
-      <span className="font-display text-sm font-bold tracking-tight">{voltar ? "Voltar à conversa" : "B.IA"}</span>
-    </button>
+      style={{ width: tamanho, height: tamanho }}
+    >
+      <Image
+        src="/bia/avatar.webp"
+        alt=""
+        width={tamanho}
+        height={tamanho}
+        className="absolute inset-x-0 bottom-0 h-full w-full object-cover object-bottom"
+      />
+    </span>
+  )
+}
+
+/** A aluna fechou o balão: some até ela fechar a aba. Sem storage, volta — tudo bem. */
+const BALAO_FECHADO = "bia:balao-fechado"
+
+function lerBalaoFechado(): boolean {
+  try {
+    return sessionStorage.getItem(BALAO_FECHADO) === "1"
+  } catch {
+    return false
+  }
+}
+
+/**
+ * O botão flutuante: o rosto da B.IA e um balão se apresentando.
+ *
+ * Era uma pílula "✦ B.IA", e quem testou não sabia o que era — "B.IA" sozinho
+ * não diz que ali tem alguém para tirar dúvida. O balão diz. Ele pode ser
+ * fechado (no celular ele cobre um pedaço da página); o rosto fica.
+ */
+function BotaoFlutuante({ onClick, voltar }: { onClick: () => void; voltar: boolean }) {
+  const [balaoFechado, setBalaoFechado] = useState(lerBalaoFechado)
+  const mostraBalao = voltar || !balaoFechado
+
+  return (
+    <div className="fixed bottom-5 right-5 z-40 flex items-end gap-2.5 sm:bottom-6 sm:right-6">
+      {mostraBalao && (
+        <div className="relative mb-2 animate-rise">
+          <button
+            type="button"
+            onClick={onClick}
+            className="block max-w-[210px] rounded-2xl rounded-br-md border border-border bg-card px-4 py-2.5 pr-7 text-left shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/45 hover:shadow-xl sm:max-w-[240px]"
+          >
+            {voltar ? (
+              <b className="block text-[13px] font-semibold text-foreground">Voltar à conversa</b>
+            ) : (
+              <>
+                <b className="block text-[13px] font-semibold leading-snug text-foreground">
+                  Oi! Eu sou a B.IA 👋
+                </b>
+                <span className="block text-[12.5px] leading-snug text-muted-foreground">
+                  Posso tirar suas dúvidas?
+                </span>
+              </>
+            )}
+          </button>
+          {!voltar && (
+            <button
+              type="button"
+              onClick={() => {
+                setBalaoFechado(true)
+                try {
+                  sessionStorage.setItem(BALAO_FECHADO, "1")
+                } catch {
+                  // Sem storage o balão só volta na próxima página. Não vale travar.
+                }
+              }}
+              aria-label="Esconder o recado da B.IA"
+              className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={voltar ? "Voltar à conversa com a B.IA" : "Conversar com a B.IA"}
+        className="group relative flex-none rounded-full shadow-lg shadow-primary/25 ring-[3px] ring-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30 focus-visible:outline-none focus-visible:ring-ring"
+      >
+        <Avatar tamanho={60} />
+        {/* O pontinho verde de "online": diz que tem alguém ali para responder. */}
+        <span className="absolute bottom-0.5 right-0.5 h-3.5 w-3.5 rounded-full border-2 border-card bg-emerald-500" />
+      </button>
+    </div>
   )
 }
 
@@ -364,9 +446,7 @@ function Drawer({
         )}
       >
         <header className="flex flex-none items-center gap-3 border-b border-border px-4 py-3">
-          <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-primary-subtle text-primary">
-            <Sparkles className="h-4.5 w-4.5" />
-          </span>
+          <Avatar tamanho={36} />
           <span className="min-w-0 flex-1">
             <b className="block font-display text-sm font-bold tracking-tight text-foreground">B.IA</b>
             <small className="block text-[11.5px] text-muted-foreground">
