@@ -3,7 +3,20 @@
 import { Fragment, useEffect, useRef, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Check, Copy, Headphones, Pencil, Play, Plus, Trash2, X } from "lucide-react"
+import {
+  ArrowLeft,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Headphones,
+  Pencil,
+  Play,
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from "lucide-react"
 import type { Campo, Dia, Passo, ProximoDia, Respostas, StatusRadar } from "@/lib/desafio"
 import { STATUS_RADAR, rotuloDoBotao } from "@/lib/desafio"
 import {
@@ -1197,6 +1210,25 @@ export function RadarEditor({
   // é só fazer a lista?".
   const pedeData = dia === null || dia >= 7
 
+  // Busca e páginas: o Radar chega a 100 empresas (e passa), e uma lista
+  // corrida dessas empurrava o "Adicionar empresa" para o fim de uma rolagem
+  // enorme. A conta fica no cliente — o Radar inteiro já está aqui (teto de
+  // MAX_EMPRESAS_NO_RADAR), e filtrar no servidor só traria espera.
+  const [busca, setBusca] = useState("")
+  const [pagina, setPagina] = useState(0)
+  const termo = semAcento(busca.trim())
+  const filtradas = termo ? radar.filter((e) => textoDeBusca(e).includes(termo)) : radar
+  const totalPaginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA))
+  // Apagar a última empresa de uma página não pode deixar a tela vazia.
+  const atual = Math.min(pagina, totalPaginas - 1)
+  const visiveis = filtradas.slice(atual * POR_PAGINA, (atual + 1) * POR_PAGINA)
+  const comBusca = radar.length > POR_PAGINA
+
+  function mudarPagina(n: number) {
+    setPagina(n)
+    setEditando(null)
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3 rounded-[18px] bg-muted px-4 py-4 sm:px-5">
@@ -1227,9 +1259,46 @@ export function RadarEditor({
         )}
       </div>
 
-      {radar.length > 0 && (
+      {comBusca && (
+        <label className="flex items-center gap-2.5 rounded-xl border border-input bg-card px-4 py-2.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/25">
+          <Search className="h-4 w-4 flex-none text-muted-foreground" />
+          <input
+            type="search"
+            value={busca}
+            onChange={(e) => {
+              setBusca(e.target.value)
+              setPagina(0)
+            }}
+            placeholder="Buscar empresa, contato ou estágio"
+            aria-label="Buscar no Radar"
+            className="min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none"
+          />
+          {busca && (
+            <button
+              type="button"
+              onClick={() => {
+                setBusca("")
+                setPagina(0)
+              }}
+              aria-label="Limpar busca"
+              className="flex-none p-0.5 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </label>
+      )}
+
+      {termo && filtradas.length === 0 && (
+        <p className="rounded-[14px] border border-dashed border-border bg-card px-4 py-4 text-sm text-muted-foreground">
+          Nenhuma empresa do seu Radar bate com “{busca.trim()}”. Se ela ainda não está
+          aqui, cadastre logo abaixo.
+        </p>
+      )}
+
+      {visiveis.length > 0 && (
         <ul className="flex flex-col gap-1.5">
-          {radar.map((empresa) =>
+          {visiveis.map((empresa) =>
             editando === empresa.id ? (
               <li key={empresa.id}>
                 <FormularioDaEmpresa
@@ -1292,6 +1361,36 @@ export function RadarEditor({
         </ul>
       )}
 
+      {totalPaginas > 1 && (
+        <nav
+          aria-label="Páginas do Radar"
+          className="flex items-center justify-between gap-3 text-xs text-muted-foreground"
+        >
+          <button
+            type="button"
+            onClick={() => mudarPagina(atual - 1)}
+            disabled={atual === 0}
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 font-semibold transition-colors hover:border-primary/45 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            Anteriores
+          </button>
+          <span aria-live="polite" className="text-center tabular-nums">
+            {atual * POR_PAGINA + 1}–{atual * POR_PAGINA + visiveis.length} de {filtradas.length}
+            {termo ? " encontradas" : ""}
+          </span>
+          <button
+            type="button"
+            onClick={() => mudarPagina(atual + 1)}
+            disabled={atual >= totalPaginas - 1}
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 font-semibold transition-colors hover:border-primary/45 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+          >
+            Próximas
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        </nav>
+      )}
+
       <FormularioDaEmpresa
         key={novos}
         pedeData={pedeData}
@@ -1302,6 +1401,10 @@ export function RadarEditor({
           setRadar((r) => [...r, res.empresa])
           setNovos((n) => n + 1)
           setErro(null)
+          // A nova entra no fim da lista: mostra a página dela, sem filtro, para
+          // ela ver que guardou.
+          setBusca("")
+          setPagina(Math.floor(radar.length / POR_PAGINA))
           return null
         }}
       />
@@ -1311,6 +1414,31 @@ export function RadarEditor({
         jornada, volte aqui e adicione — ele fica no topo de todas as páginas do Desafio.
       </p>
     </div>
+  )
+}
+
+/** Quantas empresas por página no Radar. */
+const POR_PAGINA = 10
+
+/** Minúsculas e sem acento: "clínica" acha "Clinica" e vice-versa. */
+function semAcento(texto: string): string {
+  return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+}
+
+/** Tudo de uma empresa que a busca enxerga, inclusive o estágio ("abordagem"). */
+function textoDeBusca(e: Empresa): string {
+  return semAcento(
+    [
+      e.nome,
+      e.segmento,
+      e.contato,
+      e.telefone,
+      e.telefone?.replace(/\D/g, ""),
+      e.proximaAcao,
+      STATUS_RADAR[e.status as StatusRadar] ?? e.status,
+    ]
+      .filter(Boolean)
+      .join(" ")
   )
 }
 
