@@ -67,6 +67,16 @@ export const dia15: Dia = {
       cta: "Já assisti",
     },
 
+    // Como no Dia 8: o vídeo abre a semana, o áudio é o conteúdo do dia.
+    {
+      tipo: "audio",
+      chave: "audio-dia-15",
+      label: "Dia 15 — Agora isso precisa caber na sua vida",
+      audioUrl: "storage://audios/desafio/dia-15.mp3",
+      ask: "Agora, ouça o áudio de hoje.",
+      cta: "Já ouvi",
+    },
+
     {
       tipo: "formulario",
       chave: "minha-rotina",

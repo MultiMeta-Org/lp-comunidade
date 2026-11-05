@@ -48,6 +48,7 @@ export const dia14: Dia = {
       tipo: "audio",
       chave: "video-dia-14",
       label: "Dia 14 — Seus números mostram o próximo passo",
+      audioUrl: "storage://audios/desafio/dia-14.mp3",
       ask: "Ouça o áudio de hoje.",
       support:
         "Hoje eu não quero te dar mais conteúdo. Quero te ensinar a olhar para o que você já construiu.",

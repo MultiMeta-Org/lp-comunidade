@@ -61,6 +61,7 @@ export const dia12: Dia = {
       tipo: "audio",
       chave: "video-dia-12",
       label: "Dia 12 — Monte sua primeira oferta",
+      audioUrl: "storage://audios/desafio/dia-12.mp3",
       ask: "Ouça o áudio de hoje.",
       support:
         "Ele mostra como sair da necessidade que você descobriu na reunião para um escopo claro — e só então falar de valor.",

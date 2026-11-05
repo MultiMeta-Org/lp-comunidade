@@ -53,6 +53,7 @@ export const dia17: Dia = {
       tipo: "audio",
       chave: "video-dia-17",
       label: "Dia 17 — O mercado está te dando respostas",
+      audioUrl: "storage://audios/desafio/dia-17.mp3",
       ask: "Ouça o áudio de hoje.",
       support:
         "Ele mostra como transformar o que já aconteceu com você em decisão sobre o que fazer a seguir.",

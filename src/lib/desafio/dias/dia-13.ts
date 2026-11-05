@@ -69,6 +69,7 @@ export const dia13: Dia = {
       tipo: "audio",
       chave: "video-dia-13",
       label: "Dia 13 — “Preciso pensar”: objeções e negociação",
+      audioUrl: "storage://audios/desafio/dia-13.mp3",
       ask: "Ouça o áudio de hoje.",
       support:
         "Ele mostra o que está por trás de cada objeção e como perguntar antes de responder.",
