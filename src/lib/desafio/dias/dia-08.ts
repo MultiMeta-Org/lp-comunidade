@@ -53,6 +53,9 @@ export const dia08: Dia = {
       ask: "Assista ao vídeo da Fase 2.",
       support:
         "Ele abre a sua segunda semana: o que você vai aprender e fazer do Dia 8 ao Dia 14. Se precisar, volte nele nos próximos dias.",
+      // A Nati fala de "um material para imprimir" e da Biblioteca sem dizer
+      // onde estão; quem testou ficou procurando.
+      nota: "O material para imprimir que eu comento no vídeo é o Caderno de Campo. Ele fica na Biblioteca, no topo de todas as páginas do Desafio.",
       cta: "Já assisti",
     },
 

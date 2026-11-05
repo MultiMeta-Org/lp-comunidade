@@ -49,6 +49,9 @@ export const dia06: Dia = {
       ask: "Assista ao vídeo de hoje.",
       support:
         "Ele mostra onde procurar empresas e por que uma profissional comercial não pode depender de uma só.",
+      // No vídeo a Nati fala dos scripts de abordagem, mas eles só abrem no
+      // Dia 7 — sem este aviso a aluna procurava os scripts aqui.
+      nota: "Os scripts de abordagem que eu comento no vídeo chegam amanhã, no Dia 7, prontos para copiar e adaptar. Hoje o trabalho é montar a lista.",
       cta: "Já assisti",
     },
 

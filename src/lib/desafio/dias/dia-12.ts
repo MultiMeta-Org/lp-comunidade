@@ -58,13 +58,13 @@ export const dia12: Dia = {
 
   passos: [
     {
-      tipo: "video",
+      tipo: "audio",
       chave: "video-dia-12",
       label: "Dia 12 — Monte sua primeira oferta",
-      ask: "Assista ao vídeo de hoje.",
+      ask: "Ouça o áudio de hoje.",
       support:
         "Ele mostra como sair da necessidade que você descobriu na reunião para um escopo claro — e só então falar de valor.",
-      cta: "Já assisti",
+      cta: "Já ouvi",
     },
 
     {
@@ -169,7 +169,6 @@ export const dia12: Dia = {
           obrigatorio: false,
         },
       ],
-      nota: "Se o modelo for só variável, volte na pergunta do “só comissão” lá em cima antes de enviar. Não é proibido — é para ser entendido.",
     },
 
     {

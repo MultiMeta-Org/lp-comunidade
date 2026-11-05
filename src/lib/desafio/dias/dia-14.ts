@@ -45,13 +45,13 @@ export const dia14: Dia = {
 
   passos: [
     {
-      tipo: "video",
+      tipo: "audio",
       chave: "video-dia-14",
       label: "Dia 14 — Seus números mostram o próximo passo",
-      ask: "Assista ao vídeo de hoje.",
+      ask: "Ouça o áudio de hoje.",
       support:
         "Hoje eu não quero te dar mais conteúdo. Quero te ensinar a olhar para o que você já construiu.",
-      cta: "Já assisti",
+      cta: "Já ouvi",
     },
 
     {

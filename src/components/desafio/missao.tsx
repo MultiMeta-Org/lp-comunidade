@@ -3,13 +3,14 @@
 import { Fragment, useEffect, useRef, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Check, Copy, Headphones, Play, Plus, Trash2, X } from "lucide-react"
+import { ArrowLeft, Check, Copy, Headphones, Pencil, Play, Plus, Trash2, X } from "lucide-react"
 import type { Campo, Dia, Passo, ProximoDia, Respostas, StatusRadar } from "@/lib/desafio"
 import { STATUS_RADAR, rotuloDoBotao } from "@/lib/desafio"
 import {
   addEmpresaAction,
   arquivarEmpresaAction,
   concluirDiaAction,
+  editarEmpresaAction,
   registrarInteresseAction,
   salvarNotasAction,
   salvarPassoAction,
@@ -80,9 +81,21 @@ export function Missao({
   const antesDeAvancarRef = useRef<AntesDeAvancar | null>(null)
   /** O passo `empresa` troca o texto do botão no meio das rodadas. */
   const [rotuloDoPasso, setRotuloDoPasso] = useState<string | null>(null)
+  /** Ela apertou para seguir com o Radar abaixo da meta e já viu o recado. */
+  const [seguirAbaixo, setSeguirAbaixo] = useState(false)
 
   const passo = dia.passos[i]
   const ultimo = i === dia.passos.length - 1
+  const abaixoDaMeta = passo.tipo === "radar" && radar.length < passo.meta
+
+  // Passo novo começa do topo: o botão de seguir fica lá embaixo, e quem
+  // avançava continuava na altura dele, sem ver a pergunta do passo seguinte.
+  const passoAnterior = useRef(i)
+  useEffect(() => {
+    if (passoAnterior.current === i) return
+    passoAnterior.current = i
+    paraOTopo()
+  }, [i])
 
   // Salvamento automático: um instante depois que ela para de mexer, o que
   // respondeu vai para o banco no passo em que ela está. O RPC mescla as
@@ -127,12 +140,20 @@ export function Missao({
         // Ainda faltam empresas neste passo: a próxima rodada abre aqui mesmo.
         if (rodada.ficar) {
           setErro(null)
+          paraOTopo()
           await salvarPassoAction(dia.dia, i, atuais)
           return
         }
       }
 
-      const pendencia = oQueFalta(passo, atuais, radar)
+      // Abaixo da meta do Radar: o primeiro toque mostra o recado da Nati, o
+      // segundo segue. Não trava — mas também não deixa passar sem ouvir.
+      if (abaixoDaMeta && !seguirAbaixo) {
+        setSeguirAbaixo(true)
+        return
+      }
+
+      const pendencia = oQueFalta(passo, atuais)
       if (pendencia) {
         setErro(pendencia)
         return
@@ -155,6 +176,7 @@ export function Missao({
       }
       setErro(null)
       setAutosalvo(false)
+      setSeguirAbaixo(false)
       setI(i + 1)
     })
   }
@@ -223,6 +245,14 @@ export function Missao({
             {passo.nota}
           </p>
         )}
+
+        {passo.tipo === "radar" && abaixoDaMeta && seguirAbaixo && (
+          <RecadoDoVolume
+            tem={radar.length}
+            meta={passo.meta}
+            audio={passo.audioAbaixoDaMeta}
+          />
+        )}
       </div>
 
       {/* O rodapé: para trás à esquerda, para a frente à direita — a direção
@@ -244,6 +274,7 @@ export function Missao({
               onClick={() => {
                 setI(i - 1)
                 setErro(null)
+                setSeguirAbaixo(false)
               }}
               className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-primary sm:px-0 sm:py-0"
             >
@@ -268,7 +299,11 @@ export function Missao({
             disabled={salvando}
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md disabled:pointer-events-none disabled:opacity-60 sm:ml-auto sm:w-auto sm:min-w-[180px] sm:py-3"
           >
-            {salvando ? "Salvando…" : (rotuloDoPasso ?? rotuloDoBotao(passo, ultimo))}
+            {salvando
+              ? "Salvando…"
+              : abaixoDaMeta && seguirAbaixo
+                ? "Seguir mesmo assim"
+                : (rotuloDoPasso ?? rotuloDoBotao(passo, ultimo))}
           </button>
         </div>
         {autosalvo && !erro && (
@@ -310,11 +345,7 @@ function vazio(valor: Respostas[string] | undefined): boolean {
  * O texto é escrito para a aluna, não para o programador: "Responde essa
  * última para eu poder guardar" em vez de "campo obrigatório".
  */
-function oQueFalta(
-  passo: Passo,
-  respostas: Respostas,
-  radar: Empresa[]
-): string | null {
+function oQueFalta(passo: Passo, respostas: Respostas): string | null {
   switch (passo.tipo) {
     case "video":
     case "audio":
@@ -347,11 +378,10 @@ function oQueFalta(
         ? null
         : "Marque quando tiver enviado — é isso que está na sua mão."
 
-    case "radar": {
-      if (radar.length >= passo.meta) return null
-      const falta = passo.meta - radar.length
-      return `Faltam ${falta} ${falta === 1 ? "empresa" : "empresas"} para fechar a meta de hoje.`
-    }
+    // A meta do Radar não trava: abaixo dela, o `avancar` mostra o recado do
+    // volume antes de seguir (ver `RecadoDoVolume`).
+    case "radar":
+      return null
 
     case "empresa": {
       // `livre` nunca trava: quantas respostas chegaram não está sob o
@@ -375,6 +405,44 @@ function oQueFalta(
       } para fechar.`
     }
   }
+}
+
+/** Volta a página para o começo do passo, sem animação no celular lento. */
+function paraOTopo() {
+  window.scrollTo({ top: 0, behavior: "instant" })
+}
+
+/**
+ * O recado de quando ela segue com o Radar abaixo da meta do dia.
+ *
+ * Pode seguir — mas ouvindo que venda é volume e que completar é com ela. É
+ * autorresponsabilidade, não bronca: o Radar continua aberto no topo de toda
+ * página do Desafio para ela completar quando lembrar de uma empresa.
+ */
+function RecadoDoVolume({ tem, meta, audio }: { tem: number; meta: number; audio?: string }) {
+  const falta = meta - tem
+  return (
+    <div
+      role="status"
+      className="flex flex-col gap-3 rounded-[18px] border border-secondary/40 bg-secondary-subtle/40 px-4 py-4 sm:px-5"
+    >
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-secondary">
+        {falta === 1 ? "Falta 1 empresa" : `Faltam ${falta} empresas`} para a meta de hoje
+      </p>
+      {audio && (
+        <audio controls preload="metadata" src={audio} className="w-full" aria-label="Recado da Nati" />
+      )}
+      <p className="text-sm leading-relaxed text-foreground">
+        Você pode seguir, tudo bem. Mas guarde isso: <b>venda é volume</b>. Cada empresa a
+        mais no seu Radar é uma conversa a mais que você pode abrir — e é das conversas
+        que sai o seu primeiro sim. Ninguém vai completar essa lista por você.
+      </p>
+      <p className="text-[13px] leading-relaxed text-muted-foreground">
+        Seu Radar fica no topo de todas as páginas do Desafio. Lembrou de uma empresa no
+        meio de outra missão? Abra e adicione na hora.
+      </p>
+    </div>
+  )
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -585,7 +653,8 @@ function Video({
         <span className="min-w-0">
           <b className="block text-sm font-semibold text-foreground">{label}</b>
           <small className="block text-xs text-muted-foreground">
-            A gravação está sendo preparada. Pode seguir — eu te explico tudo por escrito.
+            A gravação está sendo preparada. Pode seguir: os próximos passos trazem o
+            essencial por escrito.
           </small>
         </span>
       </div>
@@ -646,7 +715,8 @@ function Audio({ label, src }: { label: string; src?: string }) {
           <b className="block text-sm font-semibold text-foreground">{label}</b>
           {!src && (
             <small className="block text-xs text-muted-foreground">
-              O áudio está sendo preparado. Pode seguir — eu te explico tudo por escrito.
+              O áudio está sendo preparado. Pode seguir: os próximos passos trazem o
+              essencial por escrito.
             </small>
           )}
         </span>
@@ -793,11 +863,14 @@ function Opcao({
   rotulo,
   marcado,
   inline,
+  etiqueta,
   onClick,
 }: {
   rotulo: string
   marcado: boolean
   inline?: boolean
+  /** Selo à direita — o estágio da empresa do Radar, quando a opção é uma. */
+  etiqueta?: string
   onClick: () => void
 }) {
   return (
@@ -823,9 +896,20 @@ function Opcao({
       {/* `min-w-0` + quebra no meio da palavra: o rótulo pode ser o nome de uma
           empresa que a aluna digitou, e um nome comprido sem espaço esticaria o
           botão para fora da tela no celular. */}
-      <span className="min-w-0 break-words">{rotulo}</span>
+      <span className="min-w-0 flex-1 break-words">{rotulo}</span>
+      {etiqueta && (
+        <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
+          {etiqueta}
+        </span>
+      )}
     </button>
   )
+}
+
+/** O estágio da empresa como selo — só depois que ela saiu de "no radar". */
+function etiquetaDoStatus(empresa: Empresa): string | undefined {
+  if (empresa.status === "no-radar") return undefined
+  return STATUS_RADAR[empresa.status as StatusRadar] ?? empresa.status
 }
 
 /**
@@ -1080,6 +1164,11 @@ function RadarDoPasso({
  * O contador mostra a meta do dia e a do Desafio inteiro ao lado, porque são
  * duas coisas diferentes: hoje são 10, no Desafio são 100. Sem a segunda, a
  * aluna acha que terminou; sem a primeira, ela acha que está longe.
+ *
+ * Toda empresa da lista pode ser corrigida no lápis: o Instagram que ela
+ * achou depois, o telefone que chegou pela indicação. Antes só dava para
+ * apagar e cadastrar de novo — e apagar levava junto o que as missões
+ * anotaram sobre ela.
  */
 export function RadarEditor({
   dia,
@@ -1099,52 +1188,14 @@ export function RadarEditor({
   meta?: number
   metaTotal?: number
 }) {
-  const [nome, setNome] = useState("")
-  const [segmento, setSegmento] = useState("")
-  const [contato, setContato] = useState("")
-  const [telefone, setTelefone] = useState("")
-  const [primeiroContato, setPrimeiroContato] = useState("")
-  const [aviso, setAviso] = useState<string | null>(null)
-  const [salvando, startSalvar] = useTransition()
-  // O aviso do telefone só aparece depois que ela sai do campo (ou tenta
-  // salvar): acusar "faltam números" no meio da digitação é bronca antes da hora.
-  const [telefoneTocado, setTelefoneTocado] = useState(false)
-  const erroTelefone = problemaNoTelefone(telefone)
-  const erroData = problemaNaData(primeiroContato)
-
-  function adicionar() {
-    const limpo = nome.trim()
-    if (!limpo) return
-    if (erroTelefone || erroData) {
-      setTelefoneTocado(true)
-      return
-    }
-
-    startSalvar(async () => {
-      const res = await addEmpresaAction({
-        dia: dia ?? undefined,
-        nome: limpo,
-        segmento,
-        contato,
-        telefone,
-        primeiroContatoEm: primeiroContato || undefined,
-        origem,
-      })
-      if (!res.ok) {
-        setAviso(res.error)
-        return
-      }
-      setRadar((r) => [...r, res.empresa])
-      setNome("")
-      setSegmento("")
-      setContato("")
-      setTelefone("")
-      setTelefoneTocado(false)
-      setPrimeiroContato("")
-      setAviso(null)
-      setErro(null)
-    })
-  }
+  const [editando, setEditando] = useState<string | null>(null)
+  // Cada cadastro feito remonta o formulário limpo.
+  const [novos, setNovos] = useState(0)
+  const [, startSalvar] = useTransition()
+  // A data do 1º contato só faz sentido depois que ela começa a abordar (Dia
+  // 7). Nos dias de montar a lista o campo confundia: "contato de quê, se hoje
+  // é só fazer a lista?".
+  const pedeData = dia === null || dia >= 7
 
   return (
     <div className="flex flex-col gap-4">
@@ -1178,93 +1229,210 @@ export function RadarEditor({
 
       {radar.length > 0 && (
         <ul className="flex flex-col gap-1.5">
-          {radar.map((empresa) => (
-            <li
-              key={empresa.id}
-              className="group flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3"
-            >
-              <div className="flex items-center gap-2">
-                <b className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
-                  {empresa.nome}
-                </b>
-                {empresa.status !== "no-radar" && (
-                  <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
-                    {STATUS_RADAR[empresa.status as StatusRadar] ?? empresa.status}
-                  </span>
-                )}
-                <button
-                  type="button"
-                  aria-label={`Tirar ${empresa.nome} do Radar`}
-                  onClick={() =>
-                    startSalvar(async () => {
-                      const res = await arquivarEmpresaAction(empresa.id)
-                      if (res.ok) setRadar((r) => r.filter((e) => e.id !== empresa.id))
-                    })
-                  }
-                  // Visível no celular: sem hover, um botão que só aparece ao
-                  // passar o mouse simplesmente não existe para quem toca.
-                  className="flex-none p-1 text-muted-foreground transition-opacity hover:text-destructive lg:opacity-0 lg:group-hover:opacity-100"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-              <DadosDaEmpresa empresa={empresa} />
-            </li>
-          ))}
+          {radar.map((empresa) =>
+            editando === empresa.id ? (
+              <li key={empresa.id}>
+                <FormularioDaEmpresa
+                  inicial={empresa}
+                  pedeData
+                  rotulo="Salvar alterações"
+                  onCancelar={() => setEditando(null)}
+                  onSalvar={async (dados) => {
+                    const res = await editarEmpresaAction(empresa.id, dados)
+                    if (!res.ok) return res.error
+                    setRadar((r) => r.map((e) => (e.id === empresa.id ? res.empresa : e)))
+                    setEditando(null)
+                    setErro(null)
+                    return null
+                  }}
+                />
+              </li>
+            ) : (
+              <li
+                key={empresa.id}
+                className="group flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3"
+              >
+                <div className="flex items-center gap-2">
+                  <b className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
+                    {empresa.nome}
+                  </b>
+                  {empresa.status !== "no-radar" && (
+                    <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
+                      {STATUS_RADAR[empresa.status as StatusRadar] ?? empresa.status}
+                    </span>
+                  )}
+                  {/* Visíveis no celular: sem hover, um botão que só aparece
+                      ao passar o mouse simplesmente não existe para quem toca. */}
+                  <button
+                    type="button"
+                    aria-label={`Editar ${empresa.nome}`}
+                    onClick={() => setEditando(empresa.id)}
+                    className="flex-none p-1 text-muted-foreground transition-opacity hover:text-primary lg:opacity-0 lg:group-hover:opacity-100"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Tirar ${empresa.nome} do Radar`}
+                    onClick={() =>
+                      startSalvar(async () => {
+                        const res = await arquivarEmpresaAction(empresa.id)
+                        if (res.ok) setRadar((r) => r.filter((e) => e.id !== empresa.id))
+                      })
+                    }
+                    className="flex-none p-1 text-muted-foreground transition-opacity hover:text-destructive lg:opacity-0 lg:group-hover:opacity-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <DadosDaEmpresa empresa={empresa} />
+              </li>
+            )
+          )}
         </ul>
       )}
 
-      <div className="flex flex-col gap-2 rounded-[18px] border border-dashed border-border bg-card px-4 py-4">
+      <FormularioDaEmpresa
+        key={novos}
+        pedeData={pedeData}
+        rotulo="Adicionar empresa"
+        onSalvar={async (dados) => {
+          const res = await addEmpresaAction({ ...dados, dia: dia ?? undefined, origem })
+          if (!res.ok) return res.error
+          setRadar((r) => [...r, res.empresa])
+          setNovos((n) => n + 1)
+          setErro(null)
+          return null
+        }}
+      />
+
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        Seu Radar não acaba hoje. Sempre que encontrar uma empresa nova durante a
+        jornada, volte aqui e adicione — ele fica no topo de todas as páginas do Desafio.
+      </p>
+    </div>
+  )
+}
+
+type DadosDoFormulario = {
+  nome: string
+  segmento: string
+  contato: string
+  telefone: string
+  primeiroContatoEm?: string
+}
+
+/**
+ * Os campos de uma empresa do Radar — para cadastrar uma nova ou corrigir uma
+ * que já está lá. `onSalvar` devolve a mensagem de erro, ou null se gravou.
+ */
+function FormularioDaEmpresa({
+  inicial,
+  pedeData,
+  rotulo,
+  onSalvar,
+  onCancelar,
+}: {
+  inicial?: Empresa
+  pedeData: boolean
+  rotulo: string
+  onSalvar: (dados: DadosDoFormulario) => Promise<string | null>
+  onCancelar?: () => void
+}) {
+  const [nome, setNome] = useState(inicial?.nome ?? "")
+  const [segmento, setSegmento] = useState(inicial?.segmento ?? "")
+  const [contato, setContato] = useState(inicial?.contato ?? "")
+  const [telefone, setTelefone] = useState(inicial?.telefone ?? "")
+  const [primeiroContato, setPrimeiroContato] = useState(inicial?.primeiroContatoEm ?? "")
+  const [aviso, setAviso] = useState<string | null>(null)
+  const [salvando, startSalvar] = useTransition()
+  // O aviso do telefone só aparece depois que ela sai do campo (ou tenta
+  // salvar): acusar "faltam números" no meio da digitação é bronca antes da hora.
+  const [telefoneTocado, setTelefoneTocado] = useState(false)
+  const erroTelefone = problemaNoTelefone(telefone)
+  const erroData = problemaNaData(primeiroContato)
+
+  function salvar() {
+    const limpo = nome.trim()
+    if (!limpo) return
+    if (erroTelefone || erroData) {
+      setTelefoneTocado(true)
+      return
+    }
+    startSalvar(async () => {
+      const erro = await onSalvar({
+        nome: limpo,
+        segmento,
+        contato,
+        telefone,
+        // Sem o campo na tela, a data que já existia é mantida.
+        primeiroContatoEm: (pedeData ? primeiroContato : inicial?.primeiroContatoEm) || undefined,
+      })
+      setAviso(erro)
+    })
+  }
+
+  const campo =
+    "w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
+  const idErroTelefone = `telefone-erro-${inicial?.id ?? "novo"}`
+
+  return (
+    <div
+      className={`flex flex-col gap-2 rounded-[18px] border bg-card px-4 py-4 ${
+        inicial ? "border-primary/45" : "border-dashed border-border"
+      }`}
+    >
+      <input
+        type="text"
+        value={nome}
+        onChange={(e) => setNome(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault()
+            salvar()
+          }
+        }}
+        placeholder="Nome da empresa"
+        aria-label="Nome da empresa"
+        className={campo}
+      />
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input
           type="text"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault()
-              adicionar()
-            }
-          }}
-          placeholder="Nome da empresa"
-          aria-label="Nome da empresa"
-          className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
+          value={segmento}
+          onChange={(e) => setSegmento(e.target.value)}
+          placeholder="O que ela faz"
+          aria-label="O que ela faz"
+          className={campo}
         />
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <input
-            type="text"
-            value={segmento}
-            onChange={(e) => setSegmento(e.target.value)}
-            placeholder="O que ela faz"
-            aria-label="O que ela faz"
-            className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
-          />
-          <input
-            type="text"
-            value={contato}
-            onChange={(e) => setContato(e.target.value)}
-            placeholder="Instagram ou site"
-            aria-label="Instagram ou site"
-            className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
-          />
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <input
-            type="tel"
-            inputMode="tel"
-            autoComplete="off"
-            value={telefone}
-            onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
-            onBlur={() => setTelefoneTocado(true)}
-            placeholder="(11) 98765-4321"
-            aria-label="Telefone ou WhatsApp"
-            aria-invalid={telefoneTocado && erroTelefone !== null}
-            aria-describedby={telefoneTocado && erroTelefone ? "radar-telefone-erro" : undefined}
-            className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25 aria-[invalid=true]:border-destructive"
-          />
-          {/* Opcional: se ela já falou com a empresa antes de cadastrar. Senão,
-              a data entra sozinha quando ela registra a abordagem. */}
+        <input
+          type="text"
+          value={contato}
+          onChange={(e) => setContato(e.target.value)}
+          placeholder="Instagram ou site"
+          aria-label="Instagram ou site"
+          className={campo}
+        />
+      </div>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          type="tel"
+          inputMode="tel"
+          autoComplete="off"
+          value={telefone}
+          onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
+          onBlur={() => setTelefoneTocado(true)}
+          placeholder="(11) 98765-4321"
+          aria-label="Telefone ou WhatsApp"
+          aria-invalid={telefoneTocado && erroTelefone !== null}
+          aria-describedby={telefoneTocado && erroTelefone ? idErroTelefone : undefined}
+          className={`${campo} aria-[invalid=true]:border-destructive`}
+        />
+        {/* Opcional: se ela já falou com a empresa antes de cadastrar. Senão,
+            a data entra sozinha quando ela registra a abordagem. */}
+        {pedeData && (
           <label className="flex w-full items-center gap-2 rounded-xl border border-input bg-background px-4 py-1.5 text-sm text-muted-foreground focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/25">
-            <span className="flex-none text-xs">1º contato em</span>
+            <span className="flex-none text-xs">Já falei com ela em</span>
             <input
               type="date"
               max={hojeLocal()}
@@ -1273,37 +1441,49 @@ export function RadarEditor({
               className="min-w-0 flex-1 bg-transparent py-1 text-sm text-foreground focus:outline-none"
             />
           </label>
-        </div>
-        {telefoneTocado && erroTelefone && (
-          <small id="radar-telefone-erro" role="alert" className="text-xs font-semibold text-destructive">
-            {erroTelefone}
-          </small>
         )}
-        {erroData && (
-          <small role="alert" className="text-xs font-semibold text-destructive">
-            {erroData}
-          </small>
-        )}
+      </div>
+      {pedeData && (
+        <small className="text-[11px] leading-relaxed text-muted-foreground">
+          A data é opcional: preencha só se você já conversou com essa empresa. Se ainda
+          não, ela entra sozinha quando você registrar a abordagem.
+        </small>
+      )}
+      {telefoneTocado && erroTelefone && (
+        <small id={idErroTelefone} role="alert" className="text-xs font-semibold text-destructive">
+          {erroTelefone}
+        </small>
+      )}
+      {erroData && (
+        <small role="alert" className="text-xs font-semibold text-destructive">
+          {erroData}
+        </small>
+      )}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <button
           type="button"
-          onClick={adicionar}
+          onClick={salvar}
           disabled={salvando || nome.trim() === ""}
           className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-secondary px-5 py-3 text-xs font-semibold text-secondary-foreground transition-all duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 sm:w-fit sm:py-2.5"
         >
-          <Plus className="h-3.5 w-3.5" />
-          Adicionar empresa
+          {inicial ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+          {salvando ? "Salvando…" : rotulo}
         </button>
-        {aviso && (
-          <small role="status" className="text-xs font-semibold text-secondary">
-            {aviso}
-          </small>
+        {onCancelar && (
+          <button
+            type="button"
+            onClick={onCancelar}
+            className="inline-flex items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Cancelar
+          </button>
         )}
       </div>
-
-      <p className="text-xs leading-relaxed text-muted-foreground">
-        Seu Radar não acaba hoje. Sempre que encontrar uma empresa nova durante a
-        jornada, volte aqui e adicione.
-      </p>
+      {aviso && (
+        <small role="status" className="text-xs font-semibold text-secondary">
+          {aviso}
+        </small>
+      )}
     </div>
   )
 }
@@ -1355,7 +1535,17 @@ function EmpresaDoPasso({
   const [canal, setCanal] = useState<string | null>(null)
 
   const empresa = radar.find((e) => e.id === escolhida)
-  const disponiveis = radar.filter((e) => !feitas.includes(e.id))
+  const naoFeitas = radar.filter((e) => !feitas.includes(e.id))
+  // No dia de abordar, as que ainda não receberam mensagem vêm primeiro — as
+  // já abordadas continuam na lista (ela pode voltar a falar com uma), mas
+  // embaixo e com o selo, para não abordar de novo sem perceber.
+  const disponiveis =
+    passo.defineStatus === "abordagem-enviada"
+      ? [
+          ...naoFeitas.filter((e) => e.status === "no-radar"),
+          ...naoFeitas.filter((e) => e.status !== "no-radar"),
+        ]
+      : naoFeitas
   const completo = feitas.length >= meta
 
   function setRodadaCampo(chave: string, valor: Respostas[string]) {
@@ -1597,32 +1787,37 @@ function EmpresaDoPasso({
     return (
       <div className="flex flex-col gap-5">
         {contador}
-        <div className="flex items-center gap-3 rounded-[18px] border border-primary/35 bg-primary-subtle px-4 py-4 sm:px-5">
-          <span className="min-w-0 flex-1">
-            <small className="block text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
-              Sua empresa
-            </small>
-            <b className="block truncate font-display text-lg font-bold text-foreground">
-              {empresa.nome}
-            </b>
-            {empresa.segmento && (
-              <small className="block truncate text-xs text-muted-foreground">
-                {empresa.segmento}
+        {/* Os dados dela vêm junto, com o Instagram/site e o WhatsApp como
+            link: é daqui que ela abre a conversa para mandar a mensagem. */}
+        <div className="flex flex-col gap-2 rounded-[18px] border border-primary/35 bg-primary-subtle px-4 py-4 sm:px-5">
+          <div className="flex items-center gap-3">
+            <span className="min-w-0 flex-1">
+              <small className="block text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
+                Sua empresa
               </small>
+              <b className="block truncate font-display text-lg font-bold text-foreground">
+                {empresa.nome}
+              </b>
+            </span>
+            {etiquetaDoStatus(empresa) && (
+              <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
+                {etiquetaDoStatus(empresa)}
+              </span>
             )}
-          </span>
-          {!passo.cadastro && (disponiveis.length > 1 || feitas.includes(empresa.id)) && (
-            <button
-              type="button"
-              onClick={() => {
-                setEscolhida(null)
-                setRodada({})
-              }}
-              className="flex-none text-[11px] font-semibold text-primary underline underline-offset-2"
-            >
-              trocar
-            </button>
-          )}
+            {!passo.cadastro && (disponiveis.length > 1 || feitas.includes(empresa.id)) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEscolhida(null)
+                  setRodada({})
+                }}
+                className="flex-none text-[11px] font-semibold text-primary underline underline-offset-2"
+              >
+                trocar
+              </button>
+            )}
+          </div>
+          <DadosDaEmpresa empresa={empresa} />
         </div>
 
         {perguntas}
@@ -1710,6 +1905,7 @@ function EmpresaDoPasso({
             key={e.id}
             rotulo={e.segmento ? `${e.nome} — ${e.segmento}` : e.nome}
             marcado={false}
+            etiqueta={etiquetaDoStatus(e)}
             onClick={() => escolher(e.id)}
           />
         ))}

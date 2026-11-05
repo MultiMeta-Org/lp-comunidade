@@ -1,4 +1,5 @@
-import { ListOrdered } from "lucide-react"
+import Link from "next/link"
+import { BookOpen, ListOrdered, Target } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { requireDesafio } from "@/lib/guard"
 import { getJornada } from "@/lib/desafio-server"
@@ -17,6 +18,9 @@ import { JornadaMenu } from "@/components/desafio/jornada-menu"
  * em App Router (uma navegação de cliente pode renderizar a página sem
  * reexecutar o layout), então cada página revalida por conta.
  */
+const ATALHO =
+  "inline-flex flex-none items-center gap-1.5 rounded-full border border-border bg-background/60 px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/45 hover:text-primary"
+
 export default async function DesafioLayout({
   children,
 }: {
@@ -34,25 +38,38 @@ export default async function DesafioLayout({
       <SiteHeader
         wide
         acoes={
+          // Radar e Biblioteca à mão em toda página do Desafio: ela lembra de
+          // uma empresa no meio da missão de outro dia, ou a Nati cita o
+          // Caderno no áudio — e o caminho não pode ser "volte para a jornada".
           // O contador É o gatilho da lista completa: o número de dias é a
           // jornada, e tocar nele para ver a jornada inteira dispensa um
           // segundo botão.
-          <JornadaMenu
-            concluidos={concluidos}
-            atual={diaAtual(concluidos)}
-            empresasNoRadar={empresasNoRadar}
-            liberacao={liberacao}
-            className="inline-flex flex-none items-center gap-1.5 rounded-full border border-border bg-background/60 px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/45 hover:text-primary"
-          >
-            <ListOrdered className="h-3.5 w-3.5" />
-            <span className="sm:hidden">
-              {feitos}/{TOTAL_DIAS}
-            </span>
-            <span className="hidden sm:inline">
-              {feitos} de {TOTAL_DIAS} dias
-            </span>
-            <span className="sr-only">— ver os 21 dias</span>
-          </JornadaMenu>
+          <span className="flex flex-none items-center gap-1.5">
+            <Link href="/desafio/radar" aria-label="Meu Radar" className={ATALHO}>
+              <Target className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Radar</span>
+            </Link>
+            <Link href="/desafio/biblioteca" aria-label="Biblioteca" className={ATALHO}>
+              <BookOpen className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Biblioteca</span>
+            </Link>
+            <JornadaMenu
+              concluidos={concluidos}
+              atual={diaAtual(concluidos)}
+              empresasNoRadar={empresasNoRadar}
+              liberacao={liberacao}
+              className={ATALHO}
+            >
+              <ListOrdered className="h-3.5 w-3.5" />
+              <span className="sm:hidden">
+                {feitos}/{TOTAL_DIAS}
+              </span>
+              <span className="hidden sm:inline">
+                {feitos} de {TOTAL_DIAS} dias
+              </span>
+              <span className="sr-only">— ver os 21 dias</span>
+            </JornadaMenu>
+          </span>
         }
         faixa={
           // Progresso: fina, sem número, sempre à vista.

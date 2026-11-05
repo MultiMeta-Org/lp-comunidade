@@ -67,13 +67,13 @@ export const dia21: Dia = {
 
   passos: [
     {
-      tipo: "video",
+      tipo: "audio",
       chave: "video-dia-21",
       label: "Dia 21 — Agora você sabe o que fazer",
-      ask: "Assista ao último vídeo.",
+      ask: "Ouça o último áudio.",
       support:
         "Antes de falar do que vem depois, eu quero que você volte mentalmente para o Dia 1 — e veja de onde você saiu.",
-      cta: "Já assisti",
+      cta: "Já ouvi",
     },
 
     {

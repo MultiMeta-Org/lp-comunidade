@@ -28,6 +28,26 @@ export const dia00: Dia = {
     "Acolher, explicar a jornada dos 21 dias e a Missão Primeiro Sim, apresentar o portal e colher a matrícula — inclusive o ponto de partida (baseline) que vai ser comparado no Dia 21.",
 
   passos: [
+    // ── Boas-vindas ──
+    // Primeiro, e não depois do formulário: no vídeo a Nati mostra como o
+    // portal funciona e por que a matrícula precisa estar completa. Já esteve
+    // depois ("quem clica em matrícula espera a matrícula"), mas assim a aluna
+    // preenchia sem saber para que servia.
+    {
+      tipo: "video",
+      chave: "video-boas-vindas",
+      label: "Bem-vinda ao Desafio Empreendedora Anônima",
+      // H.264 720p no bucket privado (o original do iPhone é HEVC e só tocava
+      // pelo player do Drive, com tarja preta e sem duração). Original no Drive:
+      // https://drive.google.com/file/d/1FC8J9iPn1YD-909M40BF6I3-T9q5aL-T/view
+      videoUrl: "storage://videos/desafio/dia-00-boas-vindas.mp4",
+      formato: "vertical",
+      ask: "Seja bem-vinda!",
+      support: "Gravei alguns recadinhos importantes para você:",
+      nota: "Não precisa anotar nada agora. Logo depois do vídeo vem a sua matrícula.",
+      cta: "Já assisti, quero fazer minha matrícula",
+    },
+
     // ── 1. Sobre você ──
     {
       tipo: "formulario",
@@ -45,7 +65,13 @@ export const dia00: Dia = {
         },
         { tipo: "numero", chave: "idade", rotulo: "Idade" },
         { tipo: "texto", chave: "cidade", rotulo: "Cidade" },
-        { tipo: "texto", chave: "uf", rotulo: "Estado (UF)", placeholder: "SP" },
+        {
+          tipo: "texto",
+          chave: "uf",
+          rotulo: "Estado (UF)",
+          placeholder: "SP",
+          ajuda: "Mora fora do Brasil? Escreva o país.",
+        },
         {
           tipo: "radio",
           chave: "estado_civil",
@@ -98,7 +124,7 @@ export const dia00: Dia = {
         {
           tipo: "radio",
           chave: "momento_profissional",
-          rotulo: "Qual descreve melhor seu momento profissional hoje?",
+          rotulo: "Qual descreve MELHOR seu momento profissional hoje? Escolha a principal.",
           opcoes: [
             "Trabalho presencialmente",
             "Trabalho de casa ou remotamente",
@@ -108,6 +134,24 @@ export const dia00: Dia = {
             "Cuido integralmente da casa e dos filhos",
             "Outro",
             "Prefiro não informar",
+          ],
+        },
+        // Quem trabalha presencial e ainda faz freela não cabia numa opção só.
+        // A principal continua de escolha única — é ela que o painel conta
+        // (desafio_distribuicao lê `momento_profissional` como texto) — e as
+        // demais entram aqui, à parte.
+        {
+          tipo: "checks",
+          chave: "momento_profissional_tambem",
+          rotulo: "Além disso, você também faz alguma dessas coisas?",
+          ajuda: "Opcional. Pode marcar mais de uma.",
+          obrigatorio: false,
+          opcoes: [
+            "Trabalho presencialmente",
+            "Trabalho de casa ou remotamente",
+            "Tenho meu próprio negócio",
+            "Faço trabalhos informais ou freelas",
+            "Cuido integralmente da casa e dos filhos",
           ],
         },
         {
@@ -304,24 +348,7 @@ export const dia00: Dia = {
       ],
     },
 
-    // ── Os vídeos ──
-    // Vêm DEPOIS do formulário, e não antes: quem clica em "Fazer minha
-    // matrícula" espera cair na matrícula. Abrir num vídeo gerava a dúvida
-    // "cadê o formulário?" logo no primeiro clique.
-    {
-      tipo: "video",
-      chave: "video-boas-vindas",
-      label: "Bem-vinda ao Desafio Empreendedora Anônima",
-      // H.264 720p no bucket privado (o original do iPhone é HEVC e só tocava
-      // pelo player do Drive, com tarja preta e sem duração). Original no Drive:
-      // https://drive.google.com/file/d/1FC8J9iPn1YD-909M40BF6I3-T9q5aL-T/view
-      videoUrl: "storage://videos/desafio/dia-00-boas-vindas.mp4",
-      formato: "vertical",
-      ask: "Seja bem-vinda!",
-      support: "Gravei alguns recadinhos importantes para você:",
-      nota: "Não precisa anotar nada agora. Depois do vídeo eu te digo exatamente o que fazer.",
-      cta: "Já assisti",
-    },
+    // ── O vídeo da carreira ──
     // O tour do portal saiu: o vídeo de boas-vindas já mostra o portal, e um
     // terceiro vídeo seguido pesava sem acrescentar.
     // Fase 0: a carreira, antes do Dia 1 — para ela entender o caminho que

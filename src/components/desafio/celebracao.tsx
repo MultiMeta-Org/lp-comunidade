@@ -63,7 +63,12 @@ export function Celebracao({
       )}
 
       {fim.feito.length > 0 && (
-        <ul className="mt-2 flex w-full flex-col gap-1.5 text-left">
+        <p className="mt-3 w-full text-left text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
+          Hoje você:
+        </p>
+      )}
+      {fim.feito.length > 0 && (
+        <ul className="flex w-full flex-col gap-1.5 text-left">
           {fim.feito.map((item) => (
             <li
               key={item}

@@ -50,6 +50,26 @@ export const dia05: Dia = {
       cta: "Já assisti",
     },
 
+    // O vídeo fala de comissão sem fazer a conta, e a aluna sai comparando
+    // percentuais. A conta escrita aqui ensina a olhar o ganho do mês inteiro.
+    // Exemplos ilustrativos — a nota diz isso, como no objetivo de renda do Dia 0.
+    {
+      tipo: "leitura",
+      chave: "ganho-total",
+      ask: "Antes da comissão, olhe o ganho total.",
+      support:
+        "Quando falarem de remuneração, não julgue pelo percentual sozinho. A mesma comissão pode ser pouco ou muito, dependendo do valor do produto.",
+      corpo: [
+        "**3% de um produto de R$ 297** = R$ 8,91 por venda.\n**3% de um produto de R$ 50.000** = R$ 1.500 por venda.",
+        "**Cenário 1:** fixo de R$ 500 + 3% de um produto de R$ 50.000. Com duas vendas no mês: R$ 500 + R$ 3.000 = **R$ 3.500**.",
+        "**Cenário 2:** fixo de R$ 2.000 + 3% de um produto de R$ 297. Com trinta vendas no mês: R$ 2.000 + R$ 267,30 = **R$ 2.267,30**.",
+        "O fixo menor pagou mais. A conta que importa é sempre a do mês inteiro: **fixo + (comissão × valor do produto × quantas vendas)**.",
+      ],
+      destaque: "Pense no ganho total do mês, não no percentual.",
+      nota: "São exemplos para você aprender a fazer a conta, não promessa de ganho.",
+      cta: "Entendi",
+    },
+
     {
       tipo: "confirma",
       chave: "whatsapp",
