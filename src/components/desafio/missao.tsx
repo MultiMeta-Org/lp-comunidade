@@ -1259,6 +1259,26 @@ export function RadarEditor({
         )}
       </div>
 
+      {/* O cadastro vem antes da lista: é o que ela mais faz aqui, e com 30,
+          50 empresas ele ficava no fim de uma rolagem longa. */}
+      <FormularioDaEmpresa
+        key={novos}
+        pedeData={pedeData}
+        rotulo="Adicionar empresa"
+        onSalvar={async (dados) => {
+          const res = await addEmpresaAction({ ...dados, dia: dia ?? undefined, origem })
+          if (!res.ok) return res.error
+          setRadar((r) => [...r, res.empresa])
+          setNovos((n) => n + 1)
+          setErro(null)
+          // A nova entra no fim da lista: mostra a página dela, sem filtro, para
+          // ela ver que guardou.
+          setBusca("")
+          setPagina(Math.floor(radar.length / POR_PAGINA))
+          return null
+        }}
+      />
+
       {comBusca && (
         <label className="flex items-center gap-2.5 rounded-xl border border-input bg-card px-4 py-2.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/25">
           <Search className="h-4 w-4 flex-none text-muted-foreground" />
@@ -1292,7 +1312,7 @@ export function RadarEditor({
       {termo && filtradas.length === 0 && (
         <p className="rounded-[14px] border border-dashed border-border bg-card px-4 py-4 text-sm text-muted-foreground">
           Nenhuma empresa do seu Radar bate com “{busca.trim()}”. Se ela ainda não está
-          aqui, cadastre logo abaixo.
+          aqui, cadastre logo acima.
         </p>
       )}
 
@@ -1391,23 +1411,6 @@ export function RadarEditor({
         </nav>
       )}
 
-      <FormularioDaEmpresa
-        key={novos}
-        pedeData={pedeData}
-        rotulo="Adicionar empresa"
-        onSalvar={async (dados) => {
-          const res = await addEmpresaAction({ ...dados, dia: dia ?? undefined, origem })
-          if (!res.ok) return res.error
-          setRadar((r) => [...r, res.empresa])
-          setNovos((n) => n + 1)
-          setErro(null)
-          // A nova entra no fim da lista: mostra a página dela, sem filtro, para
-          // ela ver que guardou.
-          setBusca("")
-          setPagina(Math.floor(radar.length / POR_PAGINA))
-          return null
-        }}
-      />
 
       <p className="text-xs leading-relaxed text-muted-foreground">
         Seu Radar não acaba hoje. Sempre que encontrar uma empresa nova durante a
