@@ -6,6 +6,7 @@ import {
   GalleryHorizontalEnd,
   Gauge,
   GraduationCap,
+  MessageCircle,
   Target,
   Users,
 } from "lucide-react"
@@ -22,12 +23,13 @@ const ITEMS: Item[] = [
   { href: "/admin/aulas", label: "Aulas", icon: GraduationCap },
   { href: "/admin/desafio", label: "Desafio", icon: Target },
   { href: "/admin/banners", label: "Banners", icon: GalleryHorizontalEnd },
+  { href: "/admin/whatsapp", label: "WhatsApp", icon: MessageCircle },
 ]
 
 /**
  * Navegação do /admin.
  *
- * O painel virou cinco rotas em vez de uma página rolante: cada lista pagina
+ * O painel virou rotas separadas em vez de uma página rolante: cada lista pagina
  * e filtra pela URL, então um link reaberto cai exatamente onde a Nati estava.
  * "Visão geral" é só o item exato — as outras acendem no prefixo, para a página
  * de progresso de uma aula manter "Aulas" aceso.
