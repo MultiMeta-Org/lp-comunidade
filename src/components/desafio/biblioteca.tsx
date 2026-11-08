@@ -122,7 +122,7 @@ export function LinhaDoMaterial({ m, dia }: { m: MaterialAssinado; dia: number }
           {m.duracao && (
             <>
               <span aria-hidden>·</span>
-              <Clock className="h-3 w-3" />
+              {m.tipo === "video" && <Clock className="h-3 w-3" />}
               {m.duracao}
             </>
           )}

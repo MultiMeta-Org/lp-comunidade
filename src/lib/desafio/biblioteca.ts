@@ -14,9 +14,10 @@
  *                   aprofundar". A BIA não usa esse campo.
  *
  * Sem `arquivo` = o material ainda não chegou: a Biblioteca mostra "em breve"
- * e o dia não mostra nada. Os dos dias 10, 13, 15 e 16 estão no Drive da Nati
- * restritos a quem tem acesso; o modelo de apresentação do Dia 14 ela ainda vai
- * achar.
+ * e o dia não mostra nada. Falta o modelo de apresentação do Dia 14, que a
+ * Nati ainda vai achar, e o vídeo do Dia 13 (fechamento high ticket), que é a
+ * gravação de uma reunião de venda real com clientes identificáveis — está
+ * baixado, mas só entra com o ok da Nati sobre o consentimento delas.
  *
  * A BIA conhece as aulas pelas transcrições em
  * multimeta-bia/conteudo/desafio/biblioteca-<chave>.md, que apontam para
@@ -52,14 +53,6 @@ const pasta = (nome: string) => `storage://videos/desafio/biblioteca/${nome}`
 export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
   // ── SDR ──
   {
-    chave: "sdr",
-    titulo: "Vídeo SDR",
-    resumo: "A aula de SDR que acompanha o Dia 10.",
-    trilha: "sdr",
-    tipo: "video",
-    dia: 10,
-  },
-  {
     chave: "sdr-2",
     titulo: "O papel do SDR",
     resumo: "De onde vêm os leads (inbound e outbound) e como qualificar com perguntas que geram conexão.",
@@ -68,6 +61,9 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     arquivo: pasta("sdr-2.mp4"),
     capa: pasta("sdr-2.jpg"),
     duracao: "5 min",
+    // O "vídeo SDR" que a Nati pôs no Dia 10 é esta mesma gravação, com seis
+    // segundos a mais; o "SDR 2.0" é a edição. Um card só, em vez de dois iguais.
+    dia: 10,
     aprofunda: [9],
   },
   {
@@ -127,9 +123,12 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
   {
     chave: "objecoes-e-follow-up",
     titulo: "Objeções e follow-up",
-    resumo: "A aula de objeções que acompanha o Dia 15.",
+    resumo: "“Sem dinheiro”, “vou falar com meu marido”: por que é prioridade, não falta, e por que retomar depois de 24 horas.",
     trilha: "closer",
     tipo: "video",
+    arquivo: pasta("objecoes-e-follow-up.mp4"),
+    capa: pasta("objecoes-e-follow-up.jpg"),
+    duracao: "5 min",
     dia: 15,
   },
   {
@@ -165,9 +164,14 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
   {
     chave: "contrato-closer",
     titulo: "Modelo de contrato de closer",
-    resumo: "O contrato para formalizar o trabalho com a empresa, do Dia 16.",
+    resumo: "Objeto, comissão, sigilo, exclusividade, prazo e LGPD: o contrato de prestação de serviços para preencher com a empresa.",
     trilha: "closer",
     tipo: "modelo",
+    // Modelo com "xxx" no lugar dos dados. O título nos metadados do PDF
+    // original trazia o nome de quem assinou; o publicado tem título neutro.
+    arquivo: "storage://pdfs/desafio/contrato-closer.pdf",
+    capa: "storage://pdfs/desafio/contrato-closer.jpg",
+    duracao: "5 páginas",
     dia: 16,
   },
 
