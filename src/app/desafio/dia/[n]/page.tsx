@@ -8,7 +8,10 @@ import {
   getRadar,
 } from "@/lib/desafio-server"
 import { diaAtual, diaDisponivel, getDia, podeAbrir, semanaAberta, type ProximoDia } from "@/lib/desafio"
+import { materiaisDoDia } from "@/lib/desafio/biblioteca"
+import { assinarMateriais } from "@/lib/desafio/biblioteca-server"
 import { Atmosphere } from "@/components/atmosphere"
+import { MaterialDoDia } from "@/components/desafio/biblioteca"
 import { Missao } from "@/components/desafio/missao"
 import { DiasVizinhos } from "@/components/desafio/vizinhos"
 
@@ -36,12 +39,13 @@ export default async function DiaPage({
   const dia = getDia(numero)
   if (!dia || dia.passos.length === 0) notFound()
 
-  const [jornada, radar, interesses, operacao, diaComVideos] = await Promise.all([
+  const [jornada, radar, interesses, operacao, diaComVideos, extras] = await Promise.all([
     getJornada(email),
     getRadar(email),
     getInteresses(email),
     getOperacao(email),
     assinarVideosDoDia(dia),
+    assinarMateriais(materiaisDoDia(numero)),
   ])
 
   // Correr na frente não dá: o Desafio é um dia por vez. Volta para a jornada,
@@ -76,6 +80,10 @@ export default async function DiaPage({
             você guardar aqui substitui o de antes.
           </p>
         )}
+
+        {/* As aulas extras e modelos deste dia, antes da missão: quem não
+            lembra que a Biblioteca existe encontra aqui. */}
+        <MaterialDoDia dia={numero} materiais={extras} />
 
         <Missao
           dia={diaComVideos}
