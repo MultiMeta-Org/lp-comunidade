@@ -105,9 +105,13 @@ function ProductCard({
   const locked = product.state !== "owned"
   const clicavel = Boolean(product.href) || product.chooser
 
+  // `w-full` explícito, e não o stretch do flex: a capa com arte não tem
+  // conteúdo em fluxo (a imagem é absoluta), e dentro do <button> do seletor
+  // (Laboratório, Mapa) houve navegador que não esticou o filho — a capa
+  // encolhia até o padding e virava um selo de 2 cm.
   const poster = (
     <span
-      className={`relative isolate grid aspect-[3/4] grid-rows-[1fr_auto] overflow-hidden rounded-2xl border border-border p-4 shadow-sm transition-all duration-300 ${
+      className={`relative isolate grid aspect-[3/4] w-full grid-rows-[1fr_auto] overflow-hidden rounded-2xl border border-border p-4 shadow-sm transition-all duration-300 ${
         locked ? "saturate-[0.7]" : ""
       } ${clicavel ? "group-hover:-translate-y-1 group-hover:shadow-md" : ""}`}
       style={{ background: product.art }}
