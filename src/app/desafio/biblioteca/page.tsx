@@ -1,12 +1,14 @@
-import { ArrowUpRight, BookOpen } from "lucide-react"
+import { ArrowUpRight, BookOpen, FileText, PlayCircle } from "lucide-react"
 import { requireDesafio } from "@/lib/guard"
 import { getJornada } from "@/lib/desafio-server"
 import { diaAtual } from "@/lib/desafio"
 import { APOIO_DO_CADERNO, INDICE_DO_CADERNO, linkDoCaderno } from "@/lib/desafio/caderno"
+import { MATERIAIS_DA_BIBLIOTECA } from "@/lib/desafio/biblioteca"
 import { Atmosphere } from "@/components/atmosphere"
 
 /**
- * A Biblioteca do Desafio. Por enquanto, um livro só: o Caderno de Campo.
+ * A Biblioteca do Desafio: o Caderno de Campo e, abaixo dele, os vídeos e
+ * modelos de apoio (src/lib/desafio/biblioteca.ts).
  *
  * O índice leva direto à página de cada dia, e o dia em que ela está vem
  * marcado — é o que ela mais vai abrir. O Caderno inteiro fica liberado, como
@@ -32,7 +34,7 @@ export default async function BibliotecaPage() {
           </h1>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
             O Caderno de Campo acompanha os vídeos: o estudo completo de cada dia, esquemas para
-            consultar rápido e espaço para suas anotações.
+            consultar rápido e espaço para suas anotações. Mais abaixo, aulas extras e modelos.
           </p>
         </header>
 
@@ -115,6 +117,71 @@ export default async function BibliotecaPage() {
                 </a>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="mt-10" aria-labelledby="videos-e-modelos">
+          <h2
+            id="videos-e-modelos"
+            className="mb-1 font-display text-xl font-bold tracking-tight text-foreground"
+          >
+            Vídeos e modelos
+          </h2>
+          <p className="mb-5 text-sm text-muted-foreground">
+            Abrem no Google Drive, em outra aba.
+          </p>
+
+          <div className="space-y-5">
+            {MATERIAIS_DA_BIBLIOTECA.map((grupo) => (
+              <div
+                key={grupo.titulo}
+                className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+              >
+                <div className="border-b border-border px-5 py-4 sm:px-6">
+                  <b className="block font-display text-base font-bold tracking-tight text-foreground">
+                    {grupo.titulo}
+                  </b>
+                  <small className="block text-[13px] text-muted-foreground">{grupo.descricao}</small>
+                </div>
+                <ul className="divide-y divide-border/70">
+                  {grupo.materiais.map(({ titulo, tipo, url, dia }) => {
+                    const hoje = dia !== undefined && dia === atual
+                    const Icone = tipo === "modelo" ? FileText : PlayCircle
+                    return (
+                      <li key={url}>
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`group flex items-center gap-3 px-5 py-3 transition-colors hover:bg-accent/60 sm:px-6 ${
+                            hoje ? "bg-primary-subtle/50" : ""
+                          }`}
+                        >
+                          <Icone
+                            className={`h-4 w-4 flex-none ${
+                              hoje ? "text-primary" : "text-muted-foreground group-hover:text-primary"
+                            }`}
+                          />
+                          <span className="min-w-0 flex-1 truncate text-sm text-foreground">{titulo}</span>
+                          {hoje ? (
+                            <span className="flex-none rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-primary-foreground">
+                              hoje
+                            </span>
+                          ) : (
+                            dia !== undefined && (
+                              <span className="flex-none font-display text-xs tabular-nums text-muted-foreground">
+                                Dia {String(dia).padStart(2, "0")}
+                              </span>
+                            )
+                          )}
+                          <ArrowUpRight className="h-4 w-4 flex-none text-muted-foreground group-hover:text-primary" />
+                        </a>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            ))}
           </div>
         </section>
       </div>
