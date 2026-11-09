@@ -6,8 +6,9 @@ import type { Dia } from "../tipos"
  * O marco do Desafio: hoje ela deixa de ser uma mulher estudando para
  * trabalhar com comercial e passa a ter dez conversas iniciadas no mercado.
  *
- * TODOS OS SCRIPTS FALADOS NO VÍDEO ESTÃO AQUI PARA COPIAR, inclusive os de
- * resposta — e isso não é conveniência, é o que faz o dia ser concluído. Ela
+ * Dia sem vídeo nem áudio: o conteúdo é só o texto dos passos. TODOS OS
+ * SCRIPTS ESTÃO AQUI PARA COPIAR, inclusive os de resposta — e isso não é
+ * conveniência, é o que faz o dia ser concluído. Ela
  * pode receber resposta cinco minutos depois de enviar, e "ainda não cheguei
  * nessa aula" não é algo que ela possa responder a um empresário. Por isso as
  * respostas rápidas vêm ANTES das dez abordagens, não depois.
@@ -53,16 +54,6 @@ export const dia07: Dia = {
   ],
 
   passos: [
-    {
-      tipo: "video",
-      chave: "video-dia-7",
-      label: "Dia 7 — Sua primeira abordagem profissional",
-      ask: "Assista ao vídeo de hoje.",
-      support:
-        "Ele mostra as três portas de entrada, a mensagem de cada uma e o que fazer com cada tipo de resposta.",
-      cta: "Já assisti",
-    },
-
     {
       tipo: "leitura",
       chave: "as-tres-portas",
