@@ -99,6 +99,16 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     duracao: "5 min",
     aprofunda: [18],
   },
+  {
+    chave: "qualificando-sdr",
+    titulo: "Qualificando como SDR",
+    resumo: "Do direct para o WhatsApp, a escada de produtos e o formulário que diz se o lead está pronto para a reunião.",
+    trilha: "sdr",
+    tipo: "video",
+    arquivo: pasta("qualificando-sdr.mp4"),
+    capa: pasta("qualificando-sdr.jpg"),
+    duracao: "15 min",
+  },
 
   // ── Closer ──
   {
