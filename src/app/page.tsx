@@ -1,4 +1,5 @@
-import { requireReleasedAccess } from "@/lib/guard"
+import { isAdmin, requireReleasedAccess } from "@/lib/guard"
+import { desafioEncerrado } from "@/lib/desafio-server"
 import {
   getFeatureUnlock,
   getMemberFirstName,
@@ -33,6 +34,10 @@ export default async function HomePage() {
   // A novidade da aula sai do que ESTA aluna pode abrir: o acervo inteiro para
   // quem assina o Laboratório, só o Plantão Tira Dúvidas para as do Método, e
   // nada para quem entrou só pelo Mapa.
+  // Prazo só conta para quem tem o Desafio e não é admin — e só aí custa a
+  // consulta do início.
+  const encerrado = desafio && !(await isAdmin(email)) && (await desafioEncerrado(email))
+
   const lessons = lab ? await getLessons("lab") : metodo ? await getLessons("aberto") : []
 
   return (
@@ -46,6 +51,7 @@ export default async function HomePage() {
         unlock={unlock}
         hasLab={lab}
         hasDesafio={desafio}
+        desafioEncerrado={encerrado}
         hasMetodo={metodo}
         hasMapa={mapa}
         temPlantao={lessons.length > 0}

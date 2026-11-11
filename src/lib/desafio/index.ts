@@ -200,6 +200,20 @@ export function calcularLiberacao(inicio: Date | null, agora: Date = new Date())
   return { semanasAbertas, proximaSemanaEm }
 }
 
+/**
+ * Quantos dias o Desafio fica aberto, contando do mesmo início da liberação
+ * por semana (a compra válida mais recente, ou a cortesia). São os 21 dias com
+ * folga para quem atrasou alguns; depois disso o ambiente fecha para a aluna.
+ * Admin não tem prazo.
+ */
+export const PRAZO_DO_DESAFIO_DIAS = 30
+
+/** Passou do prazo. Sem data de início, não fecha: errar para o lado de quem pagou. */
+export function prazoEncerrado(inicio: Date | null, agora: Date = new Date()): boolean {
+  if (!inicio) return false
+  return agora.getTime() - inicio.getTime() >= PRAZO_DO_DESAFIO_DIAS * DIA_MS
+}
+
 export function semanaAberta(n: number, liberacao: Liberacao): boolean {
   return semanaDoDia(n) <= liberacao.semanasAbertas
 }

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
 import { getAccessState, hasDesafio, hasLab, hasMetodo } from "@/lib/access"
+import { desafioEncerrado } from "@/lib/desafio-server"
 
 /**
  * E-mail do usuário logado (ou null).
@@ -113,10 +114,16 @@ export type DesafioViewer = {
  * Admin entra sem ter comprado, para conferir o conteúdo do jeito que a aluna
  * vê. Como no acervo, isso não é posse do produto: a estante dela segue sem a
  * capa como "comprada".
+ *
+ * O Desafio fecha PRAZO_DO_DESAFIO_DIAS depois do início (a compra). Quem
+ * passou volta para a home, onde a capa aparece travada como "Acesso
+ * encerrado". Admin não tem prazo. Server actions e rotas também passam por
+ * aqui, então fechar a página fecha a escrita junto.
  */
 export async function requireDesafio(): Promise<DesafioViewer> {
   const email = await requireReleasedAccess()
   const [desafio, admin] = await Promise.all([hasDesafio(email), isAdmin(email)])
-  if (!desafio && !admin) redirect("/?produto=desafio-21-dias")
+  if (admin) return { email, admin }
+  if (!desafio || (await desafioEncerrado(email))) redirect("/?produto=desafio-21-dias")
   return { email, admin }
 }

@@ -177,7 +177,7 @@ function ProductCard({
         </span>
       ) : locked ? (
         <span className="inline-flex w-fit items-center rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-          {product.state === "soon" ? "Em breve" : "Não incluído"}
+          {product.selo ?? (product.state === "soon" ? "Em breve" : "Não incluído")}
         </span>
       ) : (
         <span className="text-xs text-muted-foreground">{product.meta}</span>

@@ -56,6 +56,7 @@ export function HomeBoard({
   unlock,
   hasLab,
   hasDesafio = false,
+  desafioEncerrado = false,
   hasMetodo = true,
   hasMapa = false,
   temPlantao = false,
@@ -68,6 +69,8 @@ export function HomeBoard({
   hasLab: boolean
   /** Aluna tem o Desafio Empreendedora Anônima. */
   hasDesafio?: boolean
+  /** O prazo do Desafio dela acabou (ver PRAZO_DO_DESAFIO_DIAS). */
+  desafioEncerrado?: boolean
   /** Aluna tem o Método EVP. False só para quem entrou pelo Mapa. */
   hasMetodo?: boolean
   /** Aluna tem o Mapa de Transição para o Digital. */
@@ -88,7 +91,7 @@ export function HomeBoard({
       ? "Libera amanhã"
       : `Libera em ${unlock.daysRemaining} dias${unlockDate ? ` · ${unlockDate}` : ""}`
 
-  const products = buildProducts({ hasLab, hasDesafio, hasMetodo, hasMapa, temPlantao })
+  const products = buildProducts({ hasLab, hasDesafio, desafioEncerrado, hasMetodo, hasMapa, temPlantao })
   const ferramentas = products.filter((p) => FERRAMENTAS_SLUGS.includes(p.slug))
   const resto = products.filter((p) => !FERRAMENTAS_SLUGS.includes(p.slug))
   const owned = resto.filter((p) => p.state === "owned")

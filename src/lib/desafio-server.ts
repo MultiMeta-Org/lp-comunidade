@@ -1,9 +1,11 @@
 import "server-only"
+import { cache } from "react"
 import { createClient } from "@supabase/supabase-js"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
 import {
   ORDEM_STATUS_RADAR,
   calcularLiberacao,
+  prazoEncerrado,
   ehStatusRadar,
   type Dia,
   type Liberacao,
@@ -171,7 +173,7 @@ const semCuringas = (s: string) => s.replace(/[\\%_]/g, (c) => `\\${c}`)
  * conferindo, ou dado faltando), null — e aí nada trava por semana: errar
  * para o lado de não bloquear uma aluna que pagou.
  */
-async function getInicioDoDesafio(e: string): Promise<Date | null> {
+const getInicioDoDesafio = cache(async (e: string): Promise<Date | null> => {
   const db = createComunidadeServiceClient()
   // public.hotmart_transactions é do CRM e não está nos tipos do portal.
   const publico = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
@@ -215,6 +217,15 @@ async function getInicioDoDesafio(e: string): Promise<Date | null> {
 
   const data = inicio ?? cortesia.data?.created_at ?? null
   return data ? new Date(data) : null
+})
+
+/**
+ * O prazo do Desafio desta aluna acabou. Sai do mesmo início da liberação por
+ * semana — memoizado por request, então o guard e a jornada leem uma vez só.
+ * Quem decide se admin escapa é o chamador.
+ */
+export async function desafioEncerrado(email: string): Promise<boolean> {
+  return prazoEncerrado(await getInicioDoDesafio(norm(email)))
 }
 
 /**

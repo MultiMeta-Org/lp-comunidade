@@ -59,6 +59,8 @@ export type Product = {
    * Profissões em PDF.
    */
   chooser?: boolean
+  /** Travado sem convite: o texto do selo no lugar de "Não incluído". */
+  selo?: string
   state: ProductState
 }
 
@@ -113,6 +115,7 @@ const DO_METODO: Record<string, { href: string; cta: string }> = {
 export function buildProducts({
   hasLab,
   hasDesafio = false,
+  desafioEncerrado = false,
   hasMetodo = true,
   hasMapa = false,
   temPlantao = false,
@@ -120,6 +123,8 @@ export function buildProducts({
   hasLab: boolean
   /** Aluna tem o Desafio Empreendedora Anônima (coluna derivada has_desafio). */
   hasDesafio?: boolean
+  /** Ela tem o Desafio, mas o prazo acabou: capa travada, sem convite de compra. */
+  desafioEncerrado?: boolean
   /** Aluna tem o Método EVP. False só para quem entrou pelo Mapa. */
   hasMetodo?: boolean
   /** Aluna tem o Mapa de Transição para o Digital. */
@@ -152,6 +157,10 @@ export function buildProducts({
     // capa travada com o convite. Saiu de "soon", que era o estado de um
     // produto sem lugar para ir.
     if (product.slug === DESAFIO_SLUG) {
+      // Ela comprou: vender de novo para quem já fez seria o convite errado.
+      if (hasDesafio && desafioEncerrado) {
+        return [{ ...product, state: "locked", href: undefined, selo: "Acesso encerrado" }]
+      }
       if (hasDesafio) {
         return [{ ...product, state: "owned", href: "/desafio" }]
       }
