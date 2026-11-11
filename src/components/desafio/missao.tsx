@@ -1451,6 +1451,8 @@ type DadosDoFormulario = {
   contato: string
   telefone: string
   primeiroContatoEm?: string
+  /** Só quando ela mudou o estágio — salvar o nome não mexe no funil. */
+  status?: StatusRadar
 }
 
 /**
@@ -1475,6 +1477,7 @@ function FormularioDaEmpresa({
   const [contato, setContato] = useState(inicial?.contato ?? "")
   const [telefone, setTelefone] = useState(inicial?.telefone ?? "")
   const [primeiroContato, setPrimeiroContato] = useState(inicial?.primeiroContatoEm ?? "")
+  const [status, setStatus] = useState(inicial?.status ?? "no-radar")
   const [aviso, setAviso] = useState<string | null>(null)
   const [salvando, startSalvar] = useTransition()
   // O aviso do telefone só aparece depois que ela sai do campo (ou tenta
@@ -1498,6 +1501,7 @@ function FormularioDaEmpresa({
         telefone,
         // Sem o campo na tela, a data que já existia é mantida.
         primeiroContatoEm: (pedeData ? primeiroContato : inicial?.primeiroContatoEm) || undefined,
+        status: inicial && status !== inicial.status ? (status as StatusRadar) : undefined,
       })
       setAviso(erro)
     })
@@ -1574,6 +1578,24 @@ function FormularioDaEmpresa({
           </label>
         )}
       </div>
+      {/* Só na edição: a negociação não espera o calendário do Desafio. Quem
+          já mandou proposta no Dia 7 marca aqui e vê no placar. */}
+      {inicial && (
+        <label className="flex w-full items-center gap-2 rounded-xl border border-input bg-background px-4 py-1.5 text-sm text-muted-foreground focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/25">
+          <span className="flex-none text-xs">Estágio</span>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="min-w-0 flex-1 bg-transparent py-1 text-sm text-foreground focus:outline-none"
+          >
+            {(Object.keys(STATUS_RADAR) as StatusRadar[]).map((s) => (
+              <option key={s} value={s}>
+                {STATUS_RADAR[s]}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {pedeData && (
         <small className="text-[11px] leading-relaxed text-muted-foreground">
           A data é opcional: preencha só se você já conversou com essa empresa. Se ainda

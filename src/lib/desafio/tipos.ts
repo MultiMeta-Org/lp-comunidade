@@ -239,6 +239,28 @@ export const STATUS_RADAR: Record<StatusRadar, string> = {
   "sem-interesse": "Sem interesse",
 }
 
+/**
+ * Até onde a empresa chegou no funil. Serve para uma missão nunca puxar o
+ * estágio para trás: a aluna pode ter marcado "Proposta" à mão no Dia 7, e
+ * escolher essa empresa na rodada de abordagens não pode devolvê-la para
+ * "Abordagem enviada". "Sem interesse" fica no zero: retomar o contato é andar.
+ */
+export const ORDEM_STATUS_RADAR: Record<StatusRadar, number> = {
+  "no-radar": 0,
+  "sem-interesse": 0,
+  "abordagem-enviada": 1,
+  respondeu: 2,
+  conversando: 3,
+  reuniao: 4,
+  "reuniao-realizada": 5,
+  proposta: 6,
+  fechado: 7,
+}
+
+export function ehStatusRadar(s: unknown): s is StatusRadar {
+  return typeof s === "string" && Object.hasOwn(STATUS_RADAR, s)
+}
+
 /** De onde a empresa veio. As quatro primeiras são as "4 fontes" do Dia 3. */
 export type OrigemRadar =
   | "formacao"

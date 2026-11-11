@@ -1,7 +1,15 @@
 import "server-only"
 import { createClient } from "@supabase/supabase-js"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
-import { calcularLiberacao, type Dia, type Liberacao, type Respostas } from "@/lib/desafio"
+import {
+  ORDEM_STATUS_RADAR,
+  calcularLiberacao,
+  ehStatusRadar,
+  type Dia,
+  type Liberacao,
+  type Respostas,
+  type StatusRadar,
+} from "@/lib/desafio"
 
 /**
  * A jornada da aluna no Desafio Empreendedora Anônima (comunidade.desafio_*).
@@ -409,8 +417,13 @@ export async function addEmpresa(
 
 /**
  * Corrige os dados de uma empresa do Radar: nome, o que faz, contato,
- * telefone e o primeiro contato. Estágio e notas não passam por aqui — eles
- * andam com as missões.
+ * telefone, o primeiro contato e o estágio. Notas não passam por aqui — elas
+ * são das missões.
+ *
+ * O estágio entra porque a negociação não espera o calendário do Desafio: a
+ * aluna no Dia 7 que já mandou proposta para uma empresa quer vê-la como
+ * "Proposta" no placar, não esperar o Dia 12. É o Radar DELA — o que ela marca
+ * é o que ela sabe da conversa. Só aceita estágio que existe.
  *
  * Mesmas regras do cadastro (nome obrigatório, data que não é futura, nome
  * repetido vira aviso), e o e-mail no WHERE junto do id.
@@ -418,10 +431,20 @@ export async function addEmpresa(
 export async function atualizarEmpresa(
   email: string,
   id: string,
-  empresa: Omit<AddEmpresa, "origem" | "diaOrigem">
+  empresa: Omit<AddEmpresa, "origem" | "diaOrigem"> & { status?: string }
 ): Promise<RadarResult> {
   const nome = empresa.nome.trim()
   if (!nome) return { ok: false, error: "Escreva o nome da empresa." }
+  if (empresa.status !== undefined && !ehStatusRadar(empresa.status)) {
+    return { ok: false, error: "Esse estágio não existe." }
+  }
+
+  const primeiroContato =
+    empresa.primeiroContatoEm &&
+    /^\d{4}-\d{2}-\d{2}$/.test(empresa.primeiroContatoEm) &&
+    empresa.primeiroContatoEm <= hojeEmSaoPaulo()
+      ? empresa.primeiroContatoEm
+      : null
 
   const db = createComunidadeServiceClient()
   const { data, error } = await db
@@ -431,12 +454,14 @@ export async function atualizarEmpresa(
       segmento: empresa.segmento?.trim() || null,
       contato: empresa.contato?.trim() || null,
       telefone: empresa.telefone?.trim().slice(0, 40) || null,
+      // Saiu de "no-radar" sem data = ela já falou com a empresa, e o primeiro
+      // contato é hoje — a mesma regra de quando a missão move o estágio.
       primeiro_contato_em:
-        empresa.primeiroContatoEm &&
-        /^\d{4}-\d{2}-\d{2}$/.test(empresa.primeiroContatoEm) &&
-        empresa.primeiroContatoEm <= hojeEmSaoPaulo()
-          ? empresa.primeiroContatoEm
-          : null,
+        primeiroContato ??
+        (empresa.status && empresa.status !== "no-radar" ? hojeEmSaoPaulo() : null),
+      ...(empresa.status
+        ? { status: empresa.status, ultima_acao: "Atualizou no Radar", ultima_acao_em: new Date().toISOString() }
+        : {}),
     })
     .eq("email", norm(email))
     .eq("id", id)
@@ -464,16 +489,37 @@ export async function atualizarEmpresa(
  * com o sócio". Fica em texto livre de propósito — o que ela combinou não cabe
  * numa lista de opções.
  *
+ * O estágio só anda para frente: se ela já marcou essa empresa como
+ * "Proposta" no Radar, a rodada de abordagens de um dia seguinte registra a
+ * ação mas não a devolve para "Abordagem enviada".
+ *
  * O e-mail entra no WHERE junto do id, como em toda escrita no Radar.
  */
 export async function moverStatus(
   email: string,
   id: string,
   /** Ausente = só registra a ação, sem mexer no estágio. */
-  status: string | undefined,
+  status: StatusRadar | undefined,
   acao?: { ultima?: string; proxima?: string | null; proximaEm?: string | null }
 ): Promise<string | null> {
   const db = createComunidadeServiceClient()
+
+  if (status) {
+    const { data: atual } = await db
+      .from("desafio_radar")
+      .select("status")
+      .eq("email", norm(email))
+      .eq("id", id)
+      .maybeSingle()
+    if (
+      atual &&
+      ehStatusRadar(atual.status) &&
+      ORDEM_STATUS_RADAR[atual.status] > ORDEM_STATUS_RADAR[status]
+    ) {
+      status = undefined
+    }
+  }
+
   const { error } = await db
     .from("desafio_radar")
     .update({

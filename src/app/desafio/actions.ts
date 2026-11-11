@@ -156,6 +156,8 @@ export async function editarEmpresaAction(
     contato?: string
     telefone?: string
     primeiroContatoEm?: string
+    /** Só vem quando ela mudou o estágio no lápis. */
+    status?: string
   }
 ): Promise<EmpresaResult> {
   const { email } = await requireDesafio()
@@ -170,6 +172,7 @@ export async function editarEmpresaAction(
     contato: entrada.contato,
     telefone: telefone ? formatarTelefone(telefone) : null,
     primeiroContatoEm: entrada.primeiroContatoEm,
+    status: entrada.status,
   })
   if (res.ok) refresh()
   return res
@@ -229,8 +232,9 @@ export async function salvarNotasAction(
 
   /**
    * O estágio sai do CONTEÚDO do dia, nunca do cliente: terminar a rodada do
-   * Dia 7 É ter mandado a abordagem. Se o cliente escolhesse o status, um POST
-   * marcaria qualquer empresa como "fechado" e contaminaria o placar.
+   * Dia 7 É ter mandado a abordagem. O estágio que ela escolhe à mão vai pelo
+   * lápis do Radar (editarEmpresaAction); aqui ele é consequência da missão, e
+   * `moverStatus` não deixa a missão puxar para trás o que ela já marcou.
    */
   const comStatus = ctx.dia.passos.find(
     (p) => p.tipo === "empresa" && p.defineStatus !== undefined
