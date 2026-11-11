@@ -190,7 +190,9 @@ export async function POST(req: NextRequest) {
           revoked_at: null,
           // Compra de um produto extra liga a coluna dele; qualquer outra é o
           // Método. Quem já tem o grupo não o perde comprando mais.
-          ...(extra ? ligaExtra(extra, true) : { has_metodo: true }),
+          // Extra só chega aqui em linha nova (quem já existe sai pelo ramo
+          // de baixo), então ela não tem o Método: o default da coluna é true.
+          ...(extra ? { ...ligaExtra(extra, true), has_metodo: false } : { has_metodo: true }),
         }
 
         // Aluna que já tinha o Método e agora comprou o extra: só liga a
