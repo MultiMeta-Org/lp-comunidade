@@ -101,6 +101,12 @@ export type Passo =
       destaque?: string
       /** Botões para fora do portal (abrem em outra aba). */
       links?: readonly { rotulo: string; href: string }[]
+      /**
+       * Uma ilustração no lugar das caixas de texto (em `public/`). O `corpo`
+       * continua obrigatório: vira o texto alternativo — quem usa leitor de
+       * tela ouve o mesmo conteúdo que a imagem mostra.
+       */
+      imagem?: { src: string; largura: number; altura: number }
     })
   /** Ela declara o que fez. Avança quando tudo está marcado. */
   | (Base & { tipo: "confirma"; itens: readonly string[] })

@@ -1,13 +1,22 @@
 import Link from "next/link"
-import { ArrowRight, BookOpen, Check, PartyPopper, Target } from "lucide-react"
+import {
+  ArrowRight,
+  BookOpen,
+  CalendarCheck,
+  Check,
+  ClipboardList,
+  ListOrdered,
+  PartyPopper,
+  Target,
+} from "lucide-react"
 import { requireDesafio } from "@/lib/guard"
 import { getJornada, getOperacao } from "@/lib/desafio-server"
 import { TOTAL_DIAS, dataCurta, diaAtual, diasFeitos, getDia, podeAbrir, semanaDoDia } from "@/lib/desafio"
 import { getMemberFirstName } from "@/lib/access"
-import { SUPPORT_URL } from "@/lib/links"
 import { Atmosphere } from "@/components/atmosphere"
 import { Jornada } from "@/components/desafio/jornada"
 import { OperacaoDeHoje } from "@/components/desafio/operacao"
+import { JornadaMenu } from "@/components/desafio/jornada-menu"
 
 /**
  * A casa do Desafio: a jornada à esquerda, o dia de hoje à direita.
@@ -113,11 +122,37 @@ export default async function DesafioPage() {
             </>
           )}
 
-          {feitos > 0 && (
-            <p className="text-center text-xs text-muted-foreground">
-              Você já concluiu {feitos} de {TOTAL_DIAS} dias. Pode rever qualquer um
-              deles pela lista dos 21 dias — e editar o que escreveu.
-            </p>
+          {/* Voltar a um dia (a matrícula, sobretudo) era achar o "1/21" do
+              cabeçalho — quem não sabia que ele abre a lista ficava procurando.
+              Aqui o caminho é dito com todas as letras. */}
+          {!emMatricula && (
+            <div className="flex flex-col items-center gap-2 text-center">
+              {feitos > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Você já concluiu {feitos} de {TOTAL_DIAS} dias. Pode rever qualquer um
+                  deles — e editar o que escreveu.
+                </p>
+              )}
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <JornadaMenu
+                  concluidos={jornada.concluidos}
+                  atual={atual}
+                  empresasNoRadar={jornada.empresasNoRadar}
+                  liberacao={jornada.liberacao}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:border-primary/45 hover:text-primary"
+                >
+                  <ListOrdered className="h-3.5 w-3.5" />
+                  Ver todos os dias
+                </JornadaMenu>
+                <Link
+                  href="/desafio/dia/0"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:border-primary/45 hover:text-primary"
+                >
+                  <ClipboardList className="h-3.5 w-3.5" />
+                  Rever minha matrícula
+                </Link>
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -278,30 +313,48 @@ function SemConteudo() {
 /**
  * Os acessos que acompanham a aluna por toda a formação.
  *
- * "Fechei meu primeiro contrato" tem mais destaque que os outros, como o
- * documento pede, e hoje leva ao suporte — que é, de fato, quem conduz a
- * Central Primeiro Contrato.
+ * "Vou fazer uma reunião" e "Fechei meu primeiro contrato" têm mais destaque
+ * que os outros, como o documento pede. Cada um leva a uma página com o que
+ * ela precisa naquele momento (/desafio/reuniao e /desafio/fechei).
  */
 function AcessosPermanentes({ empresas }: { empresas: number }) {
   return (
     <section aria-label="Seus acessos" className="flex flex-col gap-2.5">
-      <a
-        href={SUPPORT_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group relative flex items-center gap-3.5 overflow-hidden rounded-2xl border border-primary/45 bg-primary-subtle px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:px-5"
-      >
-        <PartyPopper className="h-5 w-5 flex-none text-primary" />
-        <span className="min-w-0 flex-1">
-          <b className="block text-sm font-bold text-foreground">
-            Fechei meu primeiro contrato
-          </b>
-          <small className="block text-xs text-muted-foreground">
-            Fechou? Não importa em que dia você está. Clique aqui.
-          </small>
-        </span>
-        <ArrowRight className="h-4 w-4 flex-none text-primary transition-transform group-hover:translate-x-0.5" />
-      </a>
+      {/* Dois momentos, dois botões (pedido da Nati): primeiro ela se reúne
+          para se apresentar; só depois de fechar vem o "o que fazer agora". */}
+      <div className="grid gap-2.5 sm:grid-cols-2">
+        <Link
+          href="/desafio/reuniao"
+          className="group relative flex items-center gap-3.5 overflow-hidden rounded-2xl border border-primary/45 bg-card px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:px-5"
+        >
+          <CalendarCheck className="h-5 w-5 flex-none text-primary" />
+          <span className="min-w-0 flex-1">
+            <b className="block text-sm font-bold text-foreground">
+              Vou fazer uma reunião
+            </b>
+            <small className="block text-xs text-muted-foreground">
+              Marcou com um empresário? Prepare-se aqui.
+            </small>
+          </span>
+          <ArrowRight className="h-4 w-4 flex-none text-primary transition-transform group-hover:translate-x-0.5" />
+        </Link>
+
+        <Link
+          href="/desafio/fechei"
+          className="group relative flex items-center gap-3.5 overflow-hidden rounded-2xl border border-primary/45 bg-primary-subtle px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:px-5"
+        >
+          <PartyPopper className="h-5 w-5 flex-none text-primary" />
+          <span className="min-w-0 flex-1">
+            <b className="block text-sm font-bold text-foreground">
+              Fechei meu primeiro contrato
+            </b>
+            <small className="block text-xs text-muted-foreground">
+              Fechou? Não importa em que dia você está. Clique aqui.
+            </small>
+          </span>
+          <ArrowRight className="h-4 w-4 flex-none text-primary transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      </div>
 
       <div className="grid gap-2.5 sm:grid-cols-2">
         <Link

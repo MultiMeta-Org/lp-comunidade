@@ -292,3 +292,20 @@ export async function registrarInteresseAction(
   if (error) return { ok: false, error: "Não consegui registrar agora. Tenta de novo?" }
   return { ok: true }
 }
+
+/**
+ * O WhatsApp de quem entrou numa lista de interessadas (sócias, imersão
+ * presencial…). Fica nas respostas da matrícula, junto do nome e da cidade:
+ * é onde o painel do admin já lê quem a aluna é. A gravação mescla as chaves
+ * e nunca recua o passo, então serve em qualquer dia do Desafio.
+ */
+export async function salvarWhatsappAction(telefone: string): Promise<ActionResult> {
+  const { email } = await requireDesafio()
+  const limpo = telefone.trim()
+  const erro = problemaNoTelefone(limpo)
+  if (erro || !limpo) return { ok: false, error: erro ?? "Escreva o seu WhatsApp com DDD." }
+
+  const error = await salvarPasso(email, 0, 0, { whatsapp: formatarTelefone(limpo) })
+  if (error) return { ok: false, error: "Não consegui salvar agora. Tenta de novo?" }
+  return { ok: true }
+}

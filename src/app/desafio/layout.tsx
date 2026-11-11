@@ -61,8 +61,9 @@ export default async function DesafioLayout({
               className={ATALHO}
             >
               <ListOrdered className="h-3.5 w-3.5" />
+              {/* "1/21" sozinho não dizia que abre a lista dos dias. */}
               <span className="sm:hidden">
-                {feitos}/{TOTAL_DIAS}
+                Dias {feitos}/{TOTAL_DIAS}
               </span>
               <span className="hidden sm:inline">
                 {feitos} de {TOTAL_DIAS} dias

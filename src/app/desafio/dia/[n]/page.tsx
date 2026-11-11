@@ -100,6 +100,7 @@ export default async function DiaPage({
           radarInicial={radar}
           jaConcluido={concluido}
           interesses={Object.fromEntries(interesses)}
+          whatsapp={(jornada.dias.get(0)?.respostas.whatsapp as string | undefined) ?? null}
           operacao={operacao}
           proximo={proximo}
           // A navegação entre os dias desce montada do servidor: a Missao só

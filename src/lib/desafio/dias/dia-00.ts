@@ -366,6 +366,41 @@ export const dia00: Dia = {
       cta: "Já assisti",
     },
 
+    // ── As duas listas que a Nati oferece no vídeo da carreira ──
+    // Mesmos slugs do Dia 1 (closer-presencial) e do Dia 21
+    // (socias-de-projeto): uma lista só por assunto, não importa o dia em que
+    // ela levantou a mão. Opcionais — o compromisso não espera por elas.
+    {
+      tipo: "interesse",
+      chave: "socias-de-projeto-matricula",
+      interesse: "socias-de-projeto",
+      opcional: true,
+      ask: "Quer ser sócia e parceira da MultiMeta?",
+      support:
+        "Como eu te contei no vídeo, abrimos vagas para alunas formadas, que terminam o Desafio, construírem operações junto com a MultiMeta. Entre na lista de espera e você fica sabendo primeiro quando as vagas abrirem.",
+      pergunta: "Em que momento você está?",
+      opcoes: [
+        "Quero muito, me avisa assim que abrir",
+        "Tenho interesse, mas primeiro quero terminar o Desafio",
+        "Quero entender melhor antes",
+      ],
+      nota: "Entrar na lista não é compromisso nenhum. Quando as vagas abrirem, a equipe entra em contato pelo WhatsApp que você deixar aqui.",
+      cta: "Seguir para o próximo passo",
+    },
+    {
+      tipo: "interesse",
+      chave: "closer-presencial-matricula",
+      interesse: "closer-presencial",
+      opcional: true,
+      ask: "Imersão presencial: vender em eventos",
+      support:
+        "Duas vezes por ano eu faço uma imersão presencial em Brasília para ensinar a vender em eventos presenciais, onde um evento pode render de 8 a 15 mil reais. Entre na lista de interessadas e você recebe as datas da próxima edição.",
+      pergunta: "Você teria disponibilidade para viajar para Brasília?",
+      opcoes: ["Sim", "Talvez, dependendo da data", "Neste momento, não"],
+      nota: "Os resultados variam e não são garantidos. Entrar na lista não é compra nem compromisso.",
+      cta: "Seguir para o próximo passo",
+    },
+
     // ── Compromisso ──
     {
       tipo: "confirma",
@@ -381,7 +416,7 @@ export const dia00: Dia = {
   fim: {
     kicker: "Matrícula concluída",
     titulo: "Agora sua jornada começa.",
-    lede: "Guardei tudo que você me contou. Daqui a 21 dias a gente volta em algumas dessas respostas para você ver o tanto que mudou.",
+    lede: "Guardei tudo que você me contou. No Dia 21 eu te faço de novo aquelas três perguntas de 0 a 10, para você ver o tanto que mudou.",
     badge: "Dia 0 de 21 concluído",
     feito: [
       "Preencheu sua matrícula",

@@ -209,7 +209,7 @@ export const dia07: Dia = {
           ],
         },
       ],
-      nota: "Se você conseguiu uma reunião, não espere o Dia 11: toque em Biblioteca, no topo da página, e abra o Caderno de Campo no capítulo “Como conduzir uma conversa comercial” (p. 21). E se fechou contrato, clique em “Fechei meu primeiro contrato” na página da sua jornada, não importa em que dia você esteja.",
+      nota: "Se você conseguiu uma reunião, não espere o Dia 11: na página da sua jornada, toque em “Vou fazer uma reunião” — está tudo lá para você se preparar. E se fechou contrato, clique em “Fechei meu primeiro contrato” na página da sua jornada, não importa em que dia você esteja.",
       cta: "Concluir minha missão de hoje",
     },
   ],

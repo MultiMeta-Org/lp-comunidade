@@ -68,6 +68,9 @@ export const dia01: Dia = {
         "**Cliente** — a pessoa comprou.",
         "**Pós-venda** — onboarding, experiência, relacionamento.",
       ],
+      // A Nati é visual: o mapa em estrada substitui as seis caixas. O texto
+      // continua aqui porque vira o alt da imagem.
+      imagem: { src: "/desafio/caminho-comercial.webp", largura: 1100, altura: 2312 },
       destaque: "Venda não começa no fechamento.",
       cta: "Entendi",
     },

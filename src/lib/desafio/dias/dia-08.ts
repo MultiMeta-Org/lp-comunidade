@@ -237,7 +237,7 @@ export const dia08: Dia = {
           obrigatorio: false,
         },
       ],
-      nota: "Conseguiu uma reunião? Não espere o Dia 11 — a Biblioteca tem como conduzir sua primeira conversa. Fechou? Clique em “Fechei meu primeiro contrato”.",
+      nota: "Conseguiu uma reunião? Não espere o Dia 11 — toque em “Vou fazer uma reunião” na sua jornada. Fechou? Clique em “Fechei meu primeiro contrato”.",
       cta: "Concluir minha missão de hoje",
     },
   ],

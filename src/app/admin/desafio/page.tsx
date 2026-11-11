@@ -303,6 +303,26 @@ export default async function AdminDesafioPage({
                   </span>
                 </div>
                 <ListaDeRanking itens={i.detalhe} total={i.total} />
+                <details className="group border-t border-border pt-3">
+                  <summary className="cursor-pointer text-xs font-semibold text-primary hover:underline">
+                    Ver quem entrou na lista
+                  </summary>
+                  <ul className="mt-3 flex flex-col gap-2">
+                    {i.pessoas.map((p) => (
+                      <li key={p.email} className="rounded-lg bg-muted/60 px-3 py-2 text-xs leading-relaxed">
+                        <b className="block font-semibold text-foreground">{p.nome ?? p.email}</b>
+                        <span className="block text-muted-foreground">
+                          {p.email}
+                          {p.whatsapp ? ` · ${p.whatsapp}` : " · sem WhatsApp"}
+                          {p.regiao ? ` · ${p.regiao}` : ""}
+                        </span>
+                        {p.resposta && (
+                          <span className="block text-muted-foreground/80">“{p.resposta}”</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               </div>
             ))}
           </div>

@@ -28,6 +28,7 @@ import {
   registrarInteresseAction,
   salvarNotasAction,
   salvarPassoAction,
+  salvarWhatsappAction,
 } from "@/app/desafio/actions"
 import type { Empresa, Operacao } from "@/lib/desafio-server"
 import { Celebracao } from "@/components/desafio/celebracao"
@@ -60,6 +61,7 @@ export function Missao({
   radarInicial,
   jaConcluido,
   interesses,
+  whatsapp,
   operacao,
   proximo,
   vizinhos,
@@ -71,6 +73,8 @@ export function Missao({
   jaConcluido: boolean
   /** Interesses que ela já declarou → resposta dada. */
   interesses: Record<string, string | null>
+  /** O WhatsApp que ela deixou numa lista de interessadas (fica na matrícula). */
+  whatsapp: string | null
   /** O funil dela, para o passo `funil` do Dia 14. */
   operacao: Operacao
   /** O dia seguinte, para o botão da celebração levar direto a ele. */
@@ -247,6 +251,7 @@ export function Missao({
             radar={radar}
             setRadar={setRadar}
             interesses={interesses}
+            whatsapp={whatsapp}
             operacao={operacao}
             setErro={setErro}
             antesDeAvancarRef={antesDeAvancarRef}
@@ -480,6 +485,7 @@ type CorpoProps = {
   radar: Empresa[]
   setRadar: React.Dispatch<React.SetStateAction<Empresa[]>>
   interesses: Record<string, string | null>
+  whatsapp: string | null
   operacao: Operacao
   setErro: (e: string | null) => void
   antesDeAvancarRef: React.MutableRefObject<AntesDeAvancar | null>
@@ -499,7 +505,14 @@ function CorpoDoPasso(props: CorpoProps) {
       return <Audio label={passo.label} src={passo.audioUrl} />
 
     case "leitura":
-      return <Leitura corpo={passo.corpo} destaque={passo.destaque} links={passo.links} />
+      return (
+        <Leitura
+          corpo={passo.corpo}
+          destaque={passo.destaque}
+          links={passo.links}
+          imagem={passo.imagem}
+        />
+      )
 
     case "formulario":
       return <Campos {...props} campos={passo.campos} />
@@ -746,14 +759,25 @@ function Leitura({
   corpo,
   destaque,
   links,
+  imagem,
 }: {
   corpo: readonly string[]
   destaque?: string
   links?: readonly { rotulo: string; href: string }[]
+  imagem?: { src: string; largura: number; altura: number }
 }) {
   return (
     <div className="flex flex-col gap-3">
-      {corpo.map((linha, n) => (
+      {imagem ? (
+        // eslint-disable-next-line @next/next/no-img-element -- arte estática, já otimizada em webp
+        <img
+          src={imagem.src}
+          width={imagem.largura}
+          height={imagem.altura}
+          alt={corpo.map((l) => l.replaceAll("**", "")).join(" ")}
+          className="h-auto w-full rounded-[18px] border border-border"
+        />
+      ) : corpo.map((linha, n) => (
         <p
           key={n}
           className="whitespace-pre-line rounded-[14px] border border-border bg-card px-4 py-3 text-sm leading-relaxed text-muted-foreground"
@@ -2107,6 +2131,7 @@ function Interesse({
   passo,
   dia,
   interesses,
+  whatsapp,
 }: { passo: Extract<Passo, { tipo: "interesse" }> } & CorpoProps) {
   const jaDeclarado = passo.interesse in interesses
   const [dentro, setDentro] = useState(jaDeclarado)
@@ -2152,6 +2177,8 @@ function Interesse({
         </span>
       </div>
 
+      <ContatoDaLista inicial={whatsapp} />
+
       <div className="flex flex-col gap-2">
         <span className="text-[13px] font-semibold leading-snug text-foreground">
           {passo.pergunta}
@@ -2182,6 +2209,68 @@ function Interesse({
         <X className="h-3 w-3" />
         Mudei de ideia
       </button>
+    </div>
+  )
+}
+
+/**
+ * O WhatsApp de quem entrou numa lista. Sem ele a equipe tem o nome e a
+ * cidade (da matrícula), mas não tem como chamar — e o pedido da Nati é
+ * justamente não depender de a aluna procurar o suporte. Um número só para
+ * todas as listas: ela não deveria digitar o mesmo telefone três vezes.
+ */
+function ContatoDaLista({ inicial }: { inicial: string | null }) {
+  const [telefone, setTelefone] = useState(inicial ?? "")
+  const [salvo, setSalvo] = useState(inicial)
+  const [aviso, setAviso] = useState<string | null>(null)
+  const [salvando, startSalvar] = useTransition()
+  const mudou = telefone !== (salvo ?? "")
+
+  function salvar() {
+    const erro = problemaNoTelefone(telefone)
+    if (erro || !telefone) {
+      setAviso(erro ?? "Escreva o seu WhatsApp com DDD.")
+      return
+    }
+    startSalvar(async () => {
+      const res = await salvarWhatsappAction(telefone)
+      if (!res.ok) return setAviso(res.error ?? "Não consegui salvar agora. Tenta de novo?")
+      setSalvo(telefone)
+      setAviso(null)
+    })
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-[13px] font-semibold leading-snug text-foreground">
+        Qual é o seu WhatsApp? É por ele que a equipe vai te chamar.
+      </span>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          value={telefone}
+          onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
+          placeholder="(11) 98765-4321"
+          aria-label="Seu WhatsApp"
+          className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
+        />
+        <button
+          type="button"
+          onClick={salvar}
+          disabled={salvando || !mudou}
+          className="inline-flex flex-none items-center justify-center gap-1.5 rounded-full bg-secondary px-5 py-2.5 text-xs font-semibold text-secondary-foreground transition-all duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
+        >
+          {salvo && !mudou ? <Check className="h-3.5 w-3.5" /> : null}
+          {salvando ? "Salvando…" : salvo && !mudou ? "Salvo" : "Salvar"}
+        </button>
+      </div>
+      {aviso && (
+        <small role="alert" className="text-xs font-semibold text-destructive">
+          {aviso}
+        </small>
+      )}
     </div>
   )
 }

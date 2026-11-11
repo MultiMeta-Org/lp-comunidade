@@ -61,7 +61,22 @@ export type Aluna = {
   fechados: number
 }
 
-export type Interesse = { nome: string; total: number; detalhe: Ranking[] }
+/** Quem entrou numa lista, com o que a equipe precisa para chamar. */
+export type Interessada = {
+  email: string
+  nome: string | null
+  whatsapp: string | null
+  /** "Cidade/UF", da matrícula. */
+  regiao: string | null
+  resposta: string | null
+}
+
+export type Interesse = {
+  nome: string
+  total: number
+  detalhe: Ranking[]
+  pessoas: Interessada[]
+}
 
 export type PainelDoDesafio = {
   visaoGeral: VisaoGeral
@@ -101,7 +116,7 @@ export async function getPainelDoDesafio(): Promise<PainelDoDesafio> {
       db.from("desafio_dores").select("dor, alunas, pct"),
       db.from("desafio_distribuicao").select("campo, valor, alunas, pct"),
       db.from("desafio_transformacao").select("*"),
-      db.from("desafio_interesses").select("interesse, resposta"),
+      db.from("desafio_interesses").select("email, interesse, resposta, created_at").order("created_at"),
       db.from("desafio_alunas").select("no_radar, abordadas, em_conversa, reunioes, propostas, fechados"),
     ])
 
@@ -142,6 +157,38 @@ export async function getPainelDoDesafio(): Promise<PainelDoDesafio> {
   // Os interesses vêm como linhas cruas (uma por aluna) porque a resposta é
   // texto livre vindo das opções do dia — agrupar aqui é mais barato que uma
   // view por interesse.
+  // Nome, cidade e WhatsApp saem da matrícula (Dia 0); o telefone da compra
+  // na Hotmart é a reserva para quem entrou na lista sem deixar o WhatsApp.
+  const emails = [...new Set((interesses.data ?? []).map((i) => i.email))]
+  const [matriculas, compras] = emails.length
+    ? await Promise.all([
+        db.from("desafio_progresso").select("email, respostas").eq("dia", 0).in("email", emails),
+        db.from("authorized_emails").select("email, phone, buyer_name").in("email", emails),
+      ])
+    : [{ data: [] }, { data: [] }]
+  const matriculaDe = new Map(
+    (matriculas.data ?? []).map((m) => [m.email, (m.respostas ?? {}) as Record<string, unknown>])
+  )
+  const compraDe = new Map((compras.data ?? []).map((c) => [c.email, c]))
+  const texto = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null)
+
+  const pessoasPorInteresse = new Map<string, Interessada[]>()
+  for (const i of interesses.data ?? []) {
+    const m = matriculaDe.get(i.email) ?? {}
+    const c = compraDe.get(i.email)
+    const cidade = texto(m.cidade)
+    const uf = texto(m.uf)?.toUpperCase() ?? null
+    const lista = pessoasPorInteresse.get(i.interesse) ?? []
+    lista.push({
+      email: i.email,
+      nome: texto(m.nome_completo) ?? c?.buyer_name ?? null,
+      whatsapp: texto(m.whatsapp) ?? c?.phone ?? null,
+      regiao: [cidade, uf].filter(Boolean).join("/") || null,
+      resposta: i.resposta,
+    })
+    pessoasPorInteresse.set(i.interesse, lista)
+  }
+
   const porInteresse = new Map<string, Map<string, number>>()
   for (const i of interesses.data ?? []) {
     const respostas = porInteresse.get(i.interesse) ?? new Map<string, number>()
@@ -191,6 +238,7 @@ export async function getPainelDoDesafio(): Promise<PainelDoDesafio> {
         nome: NOME_DO_INTERESSE[slug] ?? slug,
         total: detalhe.reduce((s, d) => s + d.alunas, 0),
         detalhe,
+        pessoas: pessoasPorInteresse.get(slug) ?? [],
       }
     }),
     comercial,
