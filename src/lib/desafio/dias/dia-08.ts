@@ -1,3 +1,4 @@
+import { ONBOARDING_MARKETPLACE_URL } from "@/lib/links"
 import type { Dia } from "../tipos"
 
 /**
@@ -181,6 +182,23 @@ export const dia08: Dia = {
           inline: true,
         },
       ],
+    },
+
+    // O acesso foi liberado quando ela abriu o dia (ver DIA_DO_MARKETPLACE). O
+    // botão leva às boas-vindas, não direto ao marketplace: o vídeo de lá
+    // precisa vir antes, senão ela entra perdida.
+    {
+      tipo: "leitura",
+      chave: "bonus-marketplace",
+      ask: "Você ganhou um presente: acesso bônus ao nosso Marketplace.",
+      support:
+        "É lá que empresas publicam oportunidades para closers como você. O seu acesso já está liberado.",
+      corpo: [
+        "**Antes de entrar, assista ao vídeo de boas-vindas inteiro.** Ele mostra como criar a sua conta e como usar a plataforma. Só clique no botão do Marketplace depois de assistir, senão você vai ficar perdida.",
+        "Na página de boas-vindas você encontra o vídeo e, logo abaixo, o botão para entrar no Marketplace.",
+      ],
+      links: [{ rotulo: "Assistir ao vídeo e acessar o Marketplace", href: ONBOARDING_MARKETPLACE_URL }],
+      cta: "Já assisti e acessei",
     },
 
     {

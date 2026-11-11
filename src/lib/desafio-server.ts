@@ -229,6 +229,41 @@ export async function desafioEncerrado(email: string): Promise<boolean> {
 }
 
 /**
+ * Libera o Marketplace (conexaomultimeta.com.br) de bônus para quem chegou no
+ * Dia 8. O marketplace barra closer que não está ativa em
+ * `marketplace.authorized_emails`; é essa linha que entra aqui.
+ *
+ * - Idempotente: quem já tem linha (comprou o treinamento, cortesia, ou já
+ *   passou por aqui) fica como está — inclusive "revoked". Um reembolso não é
+ *   desfeito por abrir um dia do Desafio.
+ * - `authorized_at` é o início do Desafio (a compra), não hoje: no Dia 8 ela já
+ *   passou dos 7 dias de garantia, e a espera de 7 dias que o marketplace
+ *   conta a partir dessa data não a trava de novo.
+ * - O sync marketplace → comunidade (pg_cron) vai ver a linha nova; para ela,
+ *   que já está ativa no portal, só confirma o que existe.
+ */
+export async function liberarMarketplace(email: string): Promise<void> {
+  const e = norm(email)
+  const inicio = await getInicioDoDesafio(e)
+  const marketplace = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  ).schema("marketplace")
+
+  const { error } = await marketplace.from("authorized_emails").upsert(
+    {
+      email: e,
+      status: "active",
+      source: "desafio",
+      authorized_at: (inicio ?? new Date()).toISOString(),
+    },
+    { onConflict: "email", ignoreDuplicates: true }
+  )
+  if (error) console.error("[desafio] liberarMarketplace:", error.message)
+}
+
+/**
  * Guarda o avanço da missão: as respostas até aqui e o passo em que ela está.
  *
  * As respostas são MESCLADAS com o que já existe, não substituídas. Um passo

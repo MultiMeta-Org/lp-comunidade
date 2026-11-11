@@ -47,6 +47,17 @@ export const LIVE_CLASS_URL = "https://meet.google.com/kgp-mkqc-ryt"
 /** Notion — materiais e templates (libera 7 dias após a compra). */
 export const NOTION_URL = "https://welcome-aboard-multimeta.lovable.app/"
 
+/**
+ * Boas-vindas ao Marketplace (Lovable): o vídeo que ela precisa ver ANTES de
+ * entrar, e os botões do Marketplace e do Notion. É o que o Dia 8 do Desafio
+ * entrega junto com o acesso bônus.
+ */
+export const ONBOARDING_MARKETPLACE_URL = "https://welcome-aboard-multimeta.lovable.app/"
+
+/** Rotina Comercial no Notion. Só leitura: ela duplica para o Notion dela. */
+export const ROTINA_COMERCIAL_NOTION_URL =
+  "https://fifth-sunday-ce4.notion.site/Rotina-Comercial-1b48db03d7e38032a653c9952b8145bc"
+
 /** Suporte no WhatsApp (atendimento direto). */
 export const SUPPORT_URL = "https://wa.me/message/2BXZEO5TDW4QN1"
 

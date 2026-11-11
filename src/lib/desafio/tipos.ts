@@ -95,7 +95,13 @@ export type Passo =
   /** Uma ou mais perguntas numa tela. */
   | (Base & { tipo: "formulario"; campos: readonly Campo[] })
   /** Só ler: resumo do dia, princípio, "guarde isso". Nada a responder. */
-  | (Base & { tipo: "leitura"; corpo: readonly string[]; destaque?: string })
+  | (Base & {
+      tipo: "leitura"
+      corpo: readonly string[]
+      destaque?: string
+      /** Botões para fora do portal (abrem em outra aba). */
+      links?: readonly { rotulo: string; href: string }[]
+    })
   /** Ela declara o que fez. Avança quando tudo está marcado. */
   | (Base & { tipo: "confirma"; itens: readonly string[] })
   /** Script falado no vídeo = script disponível para copiar (regra do Dia 3). */

@@ -6,8 +6,9 @@ import {
   getJornada,
   getOperacao,
   getRadar,
+  liberarMarketplace,
 } from "@/lib/desafio-server"
-import { diaAtual, diaDisponivel, getDia, podeAbrir, semanaAberta, type ProximoDia } from "@/lib/desafio"
+import { DIA_DO_MARKETPLACE, diaAtual, diaDisponivel, getDia, podeAbrir, semanaAberta, type ProximoDia } from "@/lib/desafio"
 import { materiaisDoDia } from "@/lib/desafio/biblioteca"
 import { assinarMateriais } from "@/lib/desafio/biblioteca-server"
 import { Atmosphere } from "@/components/atmosphere"
@@ -30,7 +31,7 @@ export default async function DiaPage({
 }: {
   params: Promise<{ n: string }>
 }) {
-  const { email } = await requireDesafio()
+  const { email, admin } = await requireDesafio()
 
   const { n } = await params
   const numero = Number(n)
@@ -51,6 +52,11 @@ export default async function DiaPage({
   // Correr na frente não dá: o Desafio é um dia por vez. Volta para a jornada,
   // onde o dia dela está em destaque — não para um erro.
   if (!podeAbrir(numero, jornada.concluidos, jornada.liberacao)) redirect("/desafio")
+
+  // Chegou no Dia 8 (abrir já prova isso): ganha o Marketplace de bônus. Do 9
+  // em diante também, para quem passou do 8 antes de a liberação existir.
+  // Admin não precisa — e não vira closer autorizada por conferir conteúdo.
+  if (numero >= DIA_DO_MARKETPLACE && !admin) await liberarMarketplace(email)
 
   // Para o botão do fim: depois de concluir este, o seguinte já abre? Só não
   // abre se não existe ainda ou se a semana dele está fechada — aí a

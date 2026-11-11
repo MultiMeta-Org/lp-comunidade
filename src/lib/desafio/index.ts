@@ -208,6 +208,12 @@ export function calcularLiberacao(inicio: Date | null, agora: Date = new Date())
  */
 export const PRAZO_DO_DESAFIO_DIAS = 30
 
+/**
+ * O dia em que ela ganha o Marketplace de bônus. A liberação acontece quando
+ * ela ABRE este dia (ou um seguinte) — e abrir já exige ter chegado nele.
+ */
+export const DIA_DO_MARKETPLACE = 8
+
 /** Passou do prazo. Sem data de início, não fecha: errar para o lado de quem pagou. */
 export function prazoEncerrado(inicio: Date | null, agora: Date = new Date()): boolean {
   if (!inicio) return false

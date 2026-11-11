@@ -1,3 +1,4 @@
+import { ROTINA_COMERCIAL_NOTION_URL } from "@/lib/links"
 import type { Dia } from "../tipos"
 
 /**
@@ -190,6 +191,20 @@ export const dia19: Dia = {
           inline: true,
         },
       ],
+    },
+
+    {
+      tipo: "leitura",
+      chave: "rotina-comercial",
+      ask: "Leve a sua Rotina Comercial para dentro da empresa.",
+      support:
+        "Quando você entrar numa operação, é ela que organiza o seu dia: o que fazer, em que ordem, e como acompanhar.",
+      corpo: [
+        "**Para usar, você precisa duplicar a página.** Abra o link, clique em **Duplicar** (no canto de cima, à direita) e escolha o seu Notion. Sem duplicar, a página é só para ler e você não consegue editar.",
+        "Ainda não tem Notion? Crie uma conta gratuita em notion.so antes de duplicar.",
+      ],
+      links: [{ rotulo: "Abrir a Rotina Comercial no Notion", href: ROTINA_COMERCIAL_NOTION_URL }],
+      cta: "Já dupliquei",
     },
 
     {
