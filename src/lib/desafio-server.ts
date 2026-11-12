@@ -153,6 +153,8 @@ export async function assinarVideosDoDia(dia: Dia): Promise<Dia> {
 // ─────────────────────────────────────────────────────────────
 
 const POSITIVOS = new Set(["PURCHASE_APPROVED", "PURCHASE_COMPLETE"])
+// O pedido de reembolso (PURCHASE_PROTEST) tira o produto, mas NÃO zera o
+// início: se ela cancelar o pedido, o prazo segue contando da compra.
 const NEGATIVOS = new Set(["PURCHASE_REFUNDED", "PURCHASE_CHARGEBACK"])
 
 /** Escapa curingas do ILIKE: o e-mail é comparado sem caixa, não como padrão. */

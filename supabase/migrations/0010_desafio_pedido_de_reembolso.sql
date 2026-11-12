@@ -1,0 +1,19 @@
+-- ═══════════════════════════════════════════════════════════════════
+-- Espelho documental — a migration REAL vive no repo do CRM
+-- (multimeta-crm-1), dono único do schema comunidade.*:
+--   20261112120000_comunidade_desafio_pedido_de_reembolso.sql
+--
+-- O Desafio passa a fechar no PEDIDO de reembolso (PURCHASE_PROTEST), não no
+-- estorno, como fecha um produto hospedado na Hotmart:
+--
+--   • o webhook do portal grava o pedido em desafio_purchases e desliga
+--     has_desafio; a aprovação que a Hotmart manda quando a aluna cancela o
+--     pedido apaga o pedido registrado, e o produto volta;
+--   • comunidade.refresh_desafio_entitlement lê o PURCHASE_PROTEST como perda
+--     — sem isso o sync de 5 minutos devolveria o produto — e, no empate de
+--     horário, a perda vence;
+--   • reembolsos antigos gravados com o order_date (empatados com a
+--     aprovação) passam a ter a hora em que chegaram.
+--
+-- Só o Desafio. O Laboratório e o Método seguem perdendo no estorno.
+-- ═══════════════════════════════════════════════════════════════════

@@ -11,6 +11,8 @@ import { NextRequest, NextResponse } from "next/server"
 interface HotmartPayload {
   id?: string
   event?: string
+  /** Quando o EVENTO aconteceu (ms desde epoch) — não a compra. */
+  creation_date?: number
   data?: {
     product?: { id?: number }
     purchase?: { transaction?: string; order_date?: number }
@@ -33,6 +35,11 @@ export type Postback = {
   productId: string | null
   /** order_date da compra (ISO) — ancora o gate de 7 dias. */
   purchaseTimestamp: string
+  /**
+   * Quando o evento aconteceu (ISO). Num reembolso, é o dia do pedido — e não
+   * o da compra, que é o mesmo da aprovação e empataria com ela.
+   */
+  eventTimestamp: string
 }
 
 /**
@@ -96,6 +103,12 @@ export async function lerPostback(
       ? new Date(orderDateMs).toISOString()
       : new Date().toISOString()
 
+  const eventMs = body.creation_date
+  const eventTimestamp =
+    typeof eventMs === "number" && eventMs > 0
+      ? new Date(eventMs).toISOString()
+      : new Date().toISOString()
+
   return {
     postback: {
       event: body.event,
@@ -108,6 +121,7 @@ export async function lerPostback(
       transactionId: body.data?.purchase?.transaction || null,
       productId,
       purchaseTimestamp,
+      eventTimestamp,
     },
   }
 }

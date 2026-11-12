@@ -15,6 +15,13 @@ export const runtime = "nodejs"
  *
  * PURCHASE_REFUNDED / PURCHASE_CHARGEBACK → status='revoked' (perde o acesso).
  *
+ * PURCHASE_PROTEST (o "pedido de reembolso" da Hotmart) → só no Desafio: perde
+ *   o produto no momento do pedido, não 7 dias depois quando o dinheiro volta.
+ *   É o que acontece com produto hospedado na Hotmart, e é o que dá ao time a
+ *   chance de reverter: sem acesso, a aluna que quer tentar de novo precisa
+ *   cancelar o pedido. Ao cancelar, a Hotmart aprova a compra de novo — e a
+ *   aprovação retira o pedido registrado, então o acesso volta sozinho.
+ *
  * A Comunidade VIP é produto à parte na Hotmart: compra dela liga
  * `has_comunidade_vip`, reembolso dela SÓ desliga a flag — o acesso ao portal
  * é do Método e não cai junto. Quais ids são a VIP está em
@@ -58,12 +65,15 @@ const EXTRAS = [
     compras: "vip_purchases",
     /** A coluna derivada em authorized_emails. */
     coluna: "has_comunidade_vip",
+    /** Perde o produto já no pedido de reembolso, sem esperar o estorno. */
+    perdeNoPedido: false,
   },
   {
     nome: "Desafio Empreendedora Anônima",
     produtos: "desafio_products",
     compras: "desafio_purchases",
     coluna: "has_desafio",
+    perdeNoPedido: true,
   },
 ] as const
 
@@ -92,6 +102,7 @@ export async function POST(req: NextRequest) {
     transactionId,
     productId,
     purchaseTimestamp,
+    eventTimestamp,
   } = lido.postback
 
   const db = createComunidadeServiceClient()
@@ -140,12 +151,36 @@ export async function POST(req: NextRequest) {
    * portal concedeu seria desfeita pelo cron cinco minutos depois.
    */
   const registraCompra = async (alvo: Extra) => {
+    const positivo = event === "PURCHASE_APPROVED" || event === "PURCHASE_COMPLETE"
+
+    // A compra aprovada de novo é o pedido de reembolso cancelado: o pedido
+    // sai do registro, senão a derivação continuaria vendo ele como o evento
+    // mais recente — a aprovação repetida cai no índice único e não entra.
+    if (positivo && alvo.perdeNoPedido && transactionId) {
+      const { data: retirados, error } = await db
+        .from(alvo.compras)
+        .delete()
+        .eq("email", buyerEmail)
+        .eq("transaction_id", transactionId)
+        .eq("event_type", "PURCHASE_PROTEST")
+        .select("id")
+      if (error) {
+        console.error(`[hotmart] retirar pedido de reembolso (${alvo.nome}) falhou:`, error.message)
+      } else if (retirados.length) {
+        console.log(`[hotmart] pedido de reembolso cancelado (${alvo.nome}): ${buyerEmail}`)
+      }
+    }
+
     const { error } = await db.from(alvo.compras).insert({
       email: buyerEmail,
       hotmart_product_id: productId,
       transaction_id: transactionId,
       event_type: event ?? "DESCONHECIDO",
-      occurred_at: purchaseTimestamp,
+      // A derivação decide pelo evento mais recente. A compra ancora no dia
+      // da compra (é o início do prazo do Desafio); a perda, no dia em que
+      // aconteceu — com o order_date, o reembolso empatava com a aprovação e
+      // o sync devolvia o produto a quem tinha pedido o dinheiro de volta.
+      occurred_at: positivo ? purchaseTimestamp : eventTimestamp,
     })
     // Postback repetido cai no índice único por (e-mail, transação, evento):
     // não é erro, é o mesmo fato chegando duas vezes.
@@ -314,6 +349,32 @@ export async function POST(req: NextRequest) {
         }
         console.log(`[hotmart] revogado: ${buyerEmail}`)
         return NextResponse.json({ received: true, status: "revoked", email: buyerEmail })
+      }
+
+      case "PURCHASE_PROTEST": {
+        // Pedido de reembolso. Só o produto que perde no pedido reage; nos
+        // outros (e no Método) quem tira o acesso é o reembolso efetivado.
+        if (!extra?.perdeNoPedido) {
+          console.log(`[hotmart] pedido de reembolso sem efeito: ${buyerEmail}`)
+          return NextResponse.json({ received: true, ignored: true, reason: "protest" })
+        }
+
+        await registraCompra(extra)
+        const { error } = await db
+          .from("authorized_emails")
+          .update(ligaExtra(extra, false))
+          .eq("email", buyerEmail)
+        if (error) {
+          console.error(`[hotmart] pedido de reembolso ${extra.nome} error:`, error.message)
+          return NextResponse.json({ error: "Database error" }, { status: 500 })
+        }
+        console.log(`[hotmart] ${extra.nome} suspenso por pedido de reembolso: ${buyerEmail}`)
+        return NextResponse.json({
+          received: true,
+          status: "extra_suspended",
+          produto: extra.nome,
+          email: buyerEmail,
+        })
       }
 
       default:
