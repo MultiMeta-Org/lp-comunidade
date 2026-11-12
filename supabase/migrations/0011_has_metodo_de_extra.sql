@@ -1,0 +1,15 @@
+-- ═══════════════════════════════════════════════════════════════════
+-- Espelho documental — a migration REAL vive no repo do CRM
+-- (multimeta-crm-1), dono único do schema comunidade.*:
+--   20261112130000_comunidade_has_metodo_de_extra.sql
+--
+-- Compra só de um extra (Desafio, Laboratório) não dá o Método. O trigger
+-- authorized_emails_has_metodo passa a desligar has_metodo no INSERT também
+-- para os produtos de vip_products e desafio_products — antes, só para o
+-- Mapa. É o mesmo conserto de 8acd432 (webhook do portal), agora no banco,
+-- por onde passa também o sync do marketplace.
+--
+-- O default de has_metodo continua TRUE: o sync insere compradoras do Método
+-- sem dizer a coluna. Dado: 16 compradoras só do Desafio perderam o Método
+-- que tinham ganhado por engano.
+-- ═══════════════════════════════════════════════════════════════════
