@@ -316,7 +316,7 @@ export const dia11: Dia = {
     },
 
     // Pedido da Nati: onde se fala de CRM, a aluna precisa poder contratar.
-    // R$ 89,90 é o valor de aluna; o de empresa vai subir (confirmado pela equipe).
+    // R$ 89,90 é o valor de aluna (confirmado pela equipe).
     {
       tipo: "leitura",
       chave: "crm",
@@ -325,7 +325,7 @@ export const dia11: Dia = {
         "Cada reunião gera um próximo passo, cada proposta um retorno para cobrar. O CRM da MultiMeta guarda tudo isso por você: empresas, etapas, follow-ups, reuniões e propostas, num lugar só.",
       corpo: [
         "**O Radar do Desafio é o seu treino.** O CRM é a ferramenta que você leva para o dia a dia com os seus clientes — e para dentro da empresa quando fechar o primeiro contrato.",
-        "**Para você, aluna, o CRM sai por R$ 89,90 por mês.** Esse é o valor de aluna: para empresas, o preço vai aumentar — garantir agora mantém a sua condição.",
+        "**Para você, aluna, o CRM sai por R$ 89,90 por mês.**",
         "Ficou com dúvida antes de contratar? Fale com o nosso time pelo WhatsApp do suporte.",
       ],
       links: [{ rotulo: "Conhecer e contratar o CRM", href: CRM_SIGNUP_URL }],

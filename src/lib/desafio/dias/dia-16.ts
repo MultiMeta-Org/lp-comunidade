@@ -165,7 +165,7 @@ export const dia16: Dia = {
       opcional: true,
       ask: "Quer profissionalizar sua operação?",
       support:
-        "Você acabou de organizar sua carteira à mão, e viu o trabalho que dá. A MultiMeta tem duas ferramentas para exatamente essas duas etapas: o Quiz organiza a ENTRADA e a coleta de informação (formulários comerciais, cadastro, qualificação, triagem); o CRM organiza o ANDAMENTO (empresas, etapas, follow-ups, próximas ações, reuniões, propostas, clientes). Como aluna da Empreendedora Anônima, o CRM sai por R$ 89,90 por mês — para empresas, o preço vai aumentar.",
+        "Você acabou de organizar sua carteira à mão, e viu o trabalho que dá. A MultiMeta tem duas ferramentas para exatamente essas duas etapas: o Quiz organiza a ENTRADA e a coleta de informação (formulários comerciais, cadastro, qualificação, triagem); o CRM organiza o ANDAMENTO (empresas, etapas, follow-ups, próximas ações, reuniões, propostas, clientes). Como aluna da Empreendedora Anônima, o CRM sai por R$ 89,90 por mês.",
       pergunta: "O que mais te interessa agora?",
       opcoes: [
         "As duas, quero organizar tudo",
