@@ -1,4 +1,5 @@
 import { CRM_SIGNUP_URL } from "@/lib/links"
+import { MONIQUE_FECHAMENTO_URL } from "../biblioteca"
 import type { Dia } from "../tipos"
 
 /**
@@ -85,6 +86,21 @@ export const dia11: Dia = {
         "**Leve preço para a reunião.** É mais fácil fechar na reunião do que depois. Antes da sua, dê uma olhada nos modelos de remuneração do Dia 12 para já saber o que cobrar.",
       ],
       cta: "Vamos lá",
+    },
+
+    // Pedido da Nati: a reunião real da Monique vem antes do roteiro — ver que
+    // é leve prepara mais que qualquer script.
+    {
+      tipo: "video",
+      chave: "reuniao-ao-vivo",
+      label: "Reunião ao vivo: a Monique fechando R$ 6.500",
+      videoUrl: MONIQUE_FECHAMENTO_URL,
+      formato: "horizontal",
+      ask: "Antes do roteiro, veja uma reunião de verdade.",
+      support:
+        "É a Monique numa reunião real, do começo ao fechamento de uma mentoria de R$ 6.500. Repare como é uma conversa leve — ela mais pergunta e escuta do que fala.",
+      nota: "Essa reunião passou de uma hora porque a cliente deu abertura para conversar. Normalmente uma reunião leva de 20 a 30 minutos, e está tudo bem — isso depende da abertura de cada pessoa. O vídeo fica também na Biblioteca.",
+      cta: "Já assisti",
     },
 
     // A Nati pediu a prática ANTES dos scripts: olhar a empresa com quem ela

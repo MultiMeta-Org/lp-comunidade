@@ -29,6 +29,11 @@ export default async function ReuniaoPage() {
       lede="Nessa primeira conversa você se apresenta, entende a empresa e mostra onde o seu trabalho faz sentido. O contrato vem depois. Siga na ordem:"
       acessos={[
         {
+          titulo: "Veja uma reunião de verdade",
+          texto: "A Monique numa reunião real, do começo ao fechamento de R$ 6.500. Assista antes da sua: você vai ver que é uma conversa leve.",
+          href: "/desafio/biblioteca/fechamento-high-ticket",
+        },
+        {
           titulo: "Prepare a reunião",
           texto: "Caderno de Campo, capítulo “Preparação para uma reunião” (p. 33).",
           href: linkDoCaderno(33),

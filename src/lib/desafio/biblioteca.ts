@@ -15,9 +15,7 @@
  *
  * Sem `arquivo` = o material ainda não chegou: a Biblioteca mostra "em breve"
  * e o dia não mostra nada. Falta o modelo de apresentação do Dia 14, que a
- * Nati ainda vai achar, e o vídeo do Dia 13 (fechamento high ticket), que é a
- * gravação de uma reunião de venda real com clientes identificáveis — está
- * baixado, mas só entra com o ok da Nati sobre o consentimento delas.
+ * Nati ainda vai achar.
  *
  * A BIA conhece as aulas pelas transcrições em
  * multimeta-bia/conteudo/desafio/biblioteca-<chave>.md, que apontam para
@@ -49,6 +47,14 @@ export const TRILHAS: Record<Trilha, { titulo: string; descricao: string }> = {
 }
 
 const pasta = (nome: string) => `storage://videos/desafio/biblioteca/${nome}`
+
+/**
+ * A reunião ao vivo da Monique (fechamento de R$ 6.500). A Nati pediu que ela
+ * venha ANTES do roteiro de reunião do Dia 11 e na página "Vou fazer uma
+ * reunião": ver que é leve prepara mais que qualquer script.
+ */
+export const MONIQUE_FECHAMENTO_URL =
+  "https://drive.google.com/file/d/1aJTN98NJBkdqQgY4ZoZIZI5OVF_5LIgK/view"
 
 export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
   // ── SDR ──
@@ -123,11 +129,16 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
   },
   {
     chave: "fechamento-high-ticket",
-    titulo: "Fechamento high ticket",
-    resumo: "A aula de fechamento que acompanha o Dia 13.",
+    titulo: "Reunião ao vivo: fechamento de R$ 6.500",
+    resumo: "A Monique conduzindo uma reunião real, do começo ao fechamento de uma mentoria high ticket. Essa durou mais de uma hora porque a cliente deu abertura para conversar — normalmente uma reunião leva de 20 a 30 minutos, e está tudo bem.",
     trilha: "closer",
     tipo: "video",
+    // Fica no Drive (link público), não no bucket: é o único material assim.
+    // A página do material toca no player do Drive, como os vídeos dos dias.
+    arquivo: MONIQUE_FECHAMENTO_URL,
+    duracao: "1h06",
     dia: 13,
+    aprofunda: [11],
   },
   {
     chave: "objecoes-e-follow-up",
