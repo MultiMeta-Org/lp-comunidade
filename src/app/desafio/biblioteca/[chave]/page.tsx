@@ -6,7 +6,6 @@ import { MATERIAIS_DA_BIBLIOTECA, TRILHAS, getMaterial } from "@/lib/desafio/bib
 import { assinarMateriais } from "@/lib/desafio/biblioteca-server"
 import { Atmosphere } from "@/components/atmosphere"
 import { CardDoMaterial } from "@/components/desafio/biblioteca"
-import { isDirectVideoFile, toVideoEmbedUrl } from "@/lib/lessons"
 
 /**
  * Uma aula extra da Biblioteca, tocando no portal.
@@ -51,18 +50,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ chave
           {m.titulo}
         </h1>
 
-        {m.arquivo && !isDirectVideoFile(m.arquivo) ? (
-          // Link do Drive: toca no player dele, como os vídeos dos dias.
-          <div className="relative aspect-video w-full overflow-hidden rounded-[18px] border border-border bg-black shadow-sm">
-            <iframe
-              src={toVideoEmbedUrl(m.arquivo)}
-              title={m.titulo}
-              className="absolute inset-0 h-full w-full"
-              allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        ) : m.arquivo ? (
+        {m.arquivo ? (
           <video
             controls
             preload="metadata"

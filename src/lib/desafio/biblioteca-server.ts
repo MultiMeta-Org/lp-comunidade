@@ -57,13 +57,7 @@ export async function assinarMateriais(
   return materiais.map((m) => ({
     ...m,
     disponivel: Boolean(m.arquivo),
-    // Link de fora do bucket (o Drive público da reunião da Monique) passa como está.
-    arquivo:
-      campos.includes("arquivo") && m.arquivo
-        ? m.arquivo.startsWith("storage://")
-          ? assinadas.get(m.arquivo)
-          : m.arquivo
-        : undefined,
+    arquivo: campos.includes("arquivo") && m.arquivo ? assinadas.get(m.arquivo) : undefined,
     capa: m.capa ? assinadas.get(m.capa) : undefined,
   }))
 }

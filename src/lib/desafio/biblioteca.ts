@@ -51,10 +51,10 @@ const pasta = (nome: string) => `storage://videos/desafio/biblioteca/${nome}`
 /**
  * A reunião ao vivo da Monique (fechamento de R$ 6.500). A Nati pediu que ela
  * venha ANTES do roteiro de reunião do Dia 11 e na página "Vou fazer uma
- * reunião": ver que é leve prepara mais que qualquer script.
+ * reunião": ver que é leve prepara mais que qualquer script. 66 min, por isso
+ * mais comprimido que as outras aulas (o bucket aceita até 500 MB).
  */
-export const MONIQUE_FECHAMENTO_URL =
-  "https://drive.google.com/file/d/1aJTN98NJBkdqQgY4ZoZIZI5OVF_5LIgK/view"
+export const MONIQUE_FECHAMENTO_URL = pasta("fechamento-high-ticket.mp4")
 
 export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
   // ── SDR ──
@@ -133,9 +133,8 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     resumo: "A Monique conduzindo uma reunião real, do começo ao fechamento de uma mentoria high ticket. Essa durou mais de uma hora porque a cliente deu abertura para conversar — normalmente uma reunião leva de 20 a 30 minutos, e está tudo bem.",
     trilha: "closer",
     tipo: "video",
-    // Fica no Drive (link público), não no bucket: é o único material assim.
-    // A página do material toca no player do Drive, como os vídeos dos dias.
     arquivo: MONIQUE_FECHAMENTO_URL,
+    capa: pasta("fechamento-high-ticket.jpg"),
     duracao: "1h06",
     dia: 13,
     aprofunda: [11],
