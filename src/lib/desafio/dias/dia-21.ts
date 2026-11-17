@@ -70,6 +70,7 @@ export const dia21: Dia = {
       tipo: "audio",
       chave: "video-dia-21",
       label: "Dia 21 — Agora você sabe o que fazer",
+      audioUrl: "storage://audios/desafio/dia-21.mp3",
       ask: "Ouça o último áudio.",
       support:
         "Antes de falar do que vem depois, eu quero que você volte mentalmente para o Dia 1 — e veja de onde você saiu.",

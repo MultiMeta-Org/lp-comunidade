@@ -43,6 +43,7 @@ export const dia20: Dia = {
       tipo: "audio",
       chave: "video-dia-20",
       label: "Dia 20 — Essa habilidade pode te levar muito mais longe",
+      audioUrl: "storage://audios/desafio/dia-20.mp3",
       ask: "Ouça o áudio de hoje.",
       support:
         "Ele mostra os caminhos reais de crescimento de quem trabalha com comercial — e quanto essa habilidade vale além do primeiro contrato.",

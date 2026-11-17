@@ -50,6 +50,7 @@ export const dia19: Dia = {
       tipo: "audio",
       chave: "video-dia-19",
       label: "Dia 19 — Saber se apresentar como profissional",
+      audioUrl: "storage://audios/desafio/dia-19.mp3",
       ask: "Ouça o áudio de hoje.",
       support:
         "Ele mostra como você se apresenta para o mercado sem precisar de audiência, seguidores nem feed bonito.",
