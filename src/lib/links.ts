@@ -67,6 +67,9 @@ export const MARKETPLACE_URL = "https://www.conexaomultimeta.com.br/"
 /** CRM da MultiMeta — contatos e follow-up das alunas. */
 export const CRM_URL = "https://www.crmmultimeta.com.br"
 
+/** Cadastro no CRM — o botão de contratar que o Desafio mostra. */
+export const CRM_SIGNUP_URL = "https://www.crmmultimeta.com.br/signup"
+
 /** MultiQuiz — quizzes que captam clientes. */
 export const MULTIQUIZ_URL = "https://multi-quiz.com/pt-BR"
 

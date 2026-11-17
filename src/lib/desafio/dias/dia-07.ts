@@ -60,11 +60,11 @@ export const dia07: Dia = {
       ask: "Suas trinta empresas não vieram do mesmo lugar.",
       support: "E é isso que decide como você começa a conversa.",
       corpo: [
-        "**Porta 1 — indicação ou conexão.** Alguém indicou a empresa ou abriu a porta. É a melhor.",
-        "**Porta 2 — você já conhece a empresa.** Você é cliente, conhece o profissional, acompanha há um tempo.",
+        "**Porta 1 — indicação ou conexão.** Alguém indicou a empresa ou abriu a porta para você. Ou você tem conexão com quem está lá: já conhece, tem amizade, já trabalhou junto. É a melhor porta, porque o relacionamento já existe.",
+        "**Porta 2 — você já conhece a empresa.** Você é ou foi cliente, conhece o trabalho, acompanha há um tempo — mas ainda não tem relação com quem decide.",
         "**Porta 3 — prospecção fria.** Não existe relacionamento nenhum ainda.",
       ],
-      nota: "Em nenhuma das três você apresenta proposta, manda PDF, manda currículo, conta a história da sua vida nem pergunta “vocês precisam de Closer?”.",
+      nota: "Em nenhuma das três você manda proposta, PDF ou currículo, conta a história da sua vida ou pergunta “vocês precisam de Closer?”. Chegar assim afasta: ninguém gosta de ser abordado só para receber uma venda. Precisa ter conexão — não é disparar mensagem copia e cola sem contexto. Por enquanto, só leia e siga o passo a passo.",
       cta: "Entendi",
     },
 
@@ -73,17 +73,17 @@ export const dia07: Dia = {
       chave: "scripts-indicacao",
       ask: "Porta 1 — quando alguém te indicou.",
       support:
-        "Duas versões, porque muda se a pessoa que indicou já avisou ou não. Troque nome, empresa e contexto — não copie sem ler.",
+        "Duas versões, porque muda se a pessoa que indicou já avisou ou não. Troque nome, empresa e contexto — não copie sem ler. Todos os scripts de hoje também ficam na **Central de Scripts**, no topo das páginas do Desafio.",
       mensagens: [
         {
           titulo: "Quando quem indicou já avisou",
           texto:
-            "Oi, [nome]! Tudo bem? Meu nome é [seu nome]. A [nome da indicação] comentou com você sobre mim e me passou seu contato. Estou iniciando minha atuação profissional na área comercial como SDR e Closer e gostaria de conhecer um pouco melhor como vocês trabalham essa parte na [empresa]. Posso te fazer uma pergunta rápida?",
+            "Oi, [nome]! Tudo bem? Meu nome é [seu nome]. A [nome da indicação] comentou com você sobre mim e me passou seu contato. Estou iniciando minha atuação profissional na área comercial — ajudo empresas a não perder os clientes interessados que chegam até elas — e gostaria de conhecer um pouco melhor como vocês trabalham essa parte na [empresa]. Posso te fazer uma pergunta rápida?",
         },
         {
           titulo: "Quando você tem o nome, mas não houve apresentação",
           texto:
-            "Oi, [nome]! Tudo bem? Meu nome é [seu nome]. A [nome] me indicou conhecer o trabalho de vocês na [empresa]. Estou atuando na área comercial como SDR e Closer e achei que faria sentido conhecer um pouco melhor como vocês trabalham essa parte por aí. Posso te fazer uma pergunta rápida?",
+            "Oi, [nome]! Tudo bem? Meu nome é [seu nome]. A [nome] me indicou conhecer o trabalho de vocês na [empresa]. Trabalho na área comercial, ajudando empresas a transformar mais interessados em clientes, e achei que faria sentido conhecer um pouco melhor como vocês trabalham essa parte por aí. Posso te fazer uma pergunta rápida?",
         },
       ],
       confirmacao: "Li e sei como adaptar.",
@@ -98,7 +98,7 @@ export const dia07: Dia = {
       mensagens: [
         {
           texto:
-            "Oi, [nome]! Tudo bem? Eu já conheço o trabalho de vocês há [contexto verdadeiro] e estou atuando profissionalmente na área comercial como SDR e Closer. Esses dias comecei a olhar a empresa também com esse olhar comercial e fiquei curiosa para entender um pouco melhor como vocês trabalham essa parte hoje. Posso te fazer uma pergunta?",
+            "Oi, [nome]! Tudo bem? Eu já conheço o trabalho de vocês há [contexto verdadeiro] e hoje trabalho na área comercial, ajudando empresas a atender e acompanhar melhor quem chega interessado. Esses dias comecei a olhar a empresa também com esse olhar comercial e fiquei curiosa para entender um pouco melhor como vocês trabalham essa parte hoje. Posso te fazer uma pergunta?",
         },
       ],
       confirmacao: "Li e sei como adaptar.",
@@ -114,7 +114,7 @@ export const dia07: Dia = {
         {
           titulo: "Quando você sabe com quem falar",
           texto:
-            "Oi, [nome]! Tudo bem? Meu nome é [seu nome]. Conheci a [empresa] através de [onde encontrou] e estou atuando profissionalmente na área comercial como SDR e Closer. Estava conhecendo um pouco melhor o trabalho de vocês e queria te fazer uma pergunta rápida sobre a parte comercial. Posso?",
+            "Oi, [nome]! Tudo bem? Meu nome é [seu nome]. Conheci a [empresa] através de [onde encontrou] e trabalho na área comercial, ajudando empresas a vender mais para quem já chega interessado. Estava conhecendo um pouco melhor o trabalho de vocês e queria te fazer uma pergunta rápida sobre a parte comercial. Posso?",
         },
         {
           titulo: "Quando é o WhatsApp geral e você não sabe o nome",
@@ -138,12 +138,12 @@ export const dia07: Dia = {
         {
           titulo: "Se perguntarem “sobre o quê?”",
           texto:
-            "Eu atuo como SDR e Closer e estou conhecendo melhor algumas empresas do segmento para entender como trabalham hoje a geração, o acompanhamento e a conversão das oportunidades comerciais. Queria entender brevemente como funciona por aí e ver se existe algum ponto em que minha atuação poderia fazer sentido.",
+            "Eu trabalho na área comercial e estou conhecendo melhor algumas empresas do segmento para entender como elas atendem e acompanham quem chega interessado — muita venda se perde nesse caminho sem ninguém perceber. Hoje, como funciona isso por aí?",
         },
         {
           titulo: "Se perguntarem “você está vendendo alguma coisa?”",
           texto:
-            "Eu estou buscando empresas com as quais minha atuação comercial possa fazer sentido, sim. Mas antes de oferecer qualquer trabalho, prefiro entender como vocês funcionam hoje para saber se existe realmente alguma oportunidade de contribuir.",
+            "Eu estou buscando empresas com as quais minha atuação comercial possa fazer sentido, sim. Mas antes de oferecer qualquer trabalho, prefiro entender como vocês funcionam hoje para saber se existe realmente alguma oportunidade de contribuir. Posso te fazer uma pergunta sobre isso?",
         },
         {
           titulo: "Se responderem “pode perguntar”",
@@ -167,7 +167,7 @@ export const dia07: Dia = {
       defineStatus: "abordagem-enviada",
       ask: "Agora envie dez abordagens.",
       support:
-        "Comece pelas cinco que você escolheu ontem e pegue outras cinco do Radar. A primeira mensagem talvez leve dez minutos porque você vai revisar vinte vezes. Na décima, você já vai entender muito mais.",
+        "Comece pelas cinco que você escolheu ontem e pegue outras cinco do Radar.\n\n**Você não precisa se sentir pronta.** Antes de enviar, olhe o Instagram da empresa e veja o que dá para puxar de conversa a partir do que você viu — isso te deixa mais confiante. Depois, envie.\n\n**Volume é fundamental:** o “não” é mais comum que o “sim”, e é indo para cima de dez empresas que você começa a viver esse processo e chega no seu primeiro contrato. A primeira mensagem talvez leve dez minutos. Na décima, você já vai entender muito mais.",
       campos: [
         {
           tipo: "radio",
@@ -193,14 +193,14 @@ export const dia07: Dia = {
       chave: "aconteceu-algo",
       ask: "Alguma empresa já respondeu?",
       support:
-        "Pode ser que nenhuma tenha respondido ainda, e isso é absolutamente normal no primeiro dia. Mas se a vida real andou mais rápido que o Desafio, me conta.",
+        "Pode ser que nenhuma tenha respondido ainda, e isso é absolutamente normal no primeiro dia. Mas se alguma já respondeu — ou se a conversa já foi longe —, me conta aqui.",
       campos: [
         {
           tipo: "radio",
           chave: "resultado",
-          rotulo: "Como está até agora?",
+          rotulo: "Até agora, o que aconteceu?",
           opcoes: [
-            "Não ainda",
+            "Nenhuma respondeu ainda",
             "Sim, respondeu",
             "Começamos uma conversa",
             "Consegui uma reunião",
@@ -209,7 +209,7 @@ export const dia07: Dia = {
           ],
         },
       ],
-      nota: "Se você conseguiu uma reunião, não espere o Dia 11: na página da sua jornada, toque em “Vou fazer uma reunião” — está tudo lá para você se preparar. E se fechou contrato, clique em “Fechei meu primeiro contrato” na página da sua jornada, não importa em que dia você esteja.",
+      nota: "Conseguiu uma reunião? Não espere o Dia 11: toque em “Vou fazer uma reunião”, no fim desta página — esse botão fica no fim de todos os dias do Desafio, com tudo para você se preparar. Fechou contrato? Toque em “Fechei meu contrato”, logo ao lado, não importa em que dia você esteja.",
       cta: "Concluir minha missão de hoje",
     },
   ],

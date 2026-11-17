@@ -63,7 +63,7 @@ export const dia09: Dia = {
       chave: "central-follow-up",
       ask: "A central de follow-up.",
       support:
-        "Dez situações, dez mensagens. Volte aqui sempre que precisar retomar alguma conversa — hoje e nos próximos dias.",
+        "Dez situações, dez mensagens. Todas ficam guardadas na **Central de Scripts** (no topo das páginas do Desafio), na gaveta Follow-up — é lá que você pega quando precisar retomar uma conversa, hoje e nos próximos dias.",
       mensagens: [
         {
           titulo: "Não respondeu à primeira abordagem",
@@ -73,17 +73,17 @@ export const dia09: Dia = {
         {
           titulo: "Segundo e último follow-up",
           texto:
-            "Oi, [nome]! Vou fazer uma última tentativa por aqui para não ficar te chamando sem necessidade. Tenho interesse em conhecer melhor a operação comercial da [empresa] e entender se minha atuação como SDR + Closer poderia fazer sentido em algum momento. Se não for uma prioridade agora, sem problema.",
+            "Oi, [nome]! Vou fazer uma última tentativa por aqui para não ficar te chamando sem necessidade. Tenho interesse em conhecer melhor a operação comercial da [empresa] e entender se minha atuação na área comercial poderia fazer sentido em algum momento. Se não for uma prioridade agora, sem problema — posso te procurar mais para frente?",
         },
         {
           titulo: "A conversa parou",
           texto:
-            "Oi, [nome]! Retomando nossa conversa porque fiquei com aquela dúvida sobre [contexto]. Quando tiver um tempinho, me conta.",
+            "Oi, [nome]! Retomando nossa conversa porque fiquei com aquela dúvida sobre [contexto]. Como vocês fazem isso hoje?",
         },
         {
           titulo: "Você identificou uma possível dor e a conversa parou",
           texto:
-            "Oi, [nome]! Fiquei pensando no que você comentou sobre [situação]. Queria entender um pouco melhor essa parte para ver se existe alguma forma em que eu possa contribuir. Quando conseguir, me chama por aqui.",
+            "Oi, [nome]! Fiquei pensando no que você comentou sobre [situação]. Queria entender um pouco melhor essa parte para ver se existe alguma forma em que eu possa contribuir. Hoje, quem cuida disso por aí?",
         },
         {
           titulo: "Pediu para chamar depois",
@@ -107,7 +107,7 @@ export const dia09: Dia = {
         {
           titulo: "Proposta enviada",
           texto:
-            "Oi, [nome]! Queria saber se conseguiu analisar a proposta que te enviei. Se surgiu alguma dúvida ou algum ponto que queira conversar antes de decidir, estou à disposição.",
+            "Oi, [nome]! Queria saber se conseguiu analisar a proposta que te enviei. Ficou alguma dúvida ou algum ponto que você queira ajustar antes de decidir?",
         },
         {
           titulo: "Recebeu um não",
@@ -128,7 +128,7 @@ export const dia09: Dia = {
       },
       ask: "Agora os follow-ups.",
       support:
-        "Comece pelas empresas que estão esperando há mais tempo. Para cada uma, copie a mensagem da situação dela, envie, e registre quando você vai voltar.",
+        "Não é para falar com todas as empresas hoje — só com as que precisam de retomada: quem não respondeu à sua abordagem, quem parou no meio da conversa e quem tem data combinada para hoje. Comece pelas que esperam há mais tempo.\n\nPara cada uma: toque nela, copie a mensagem da situação, envie e registre quando você vai voltar. Terminou as que precisavam? Toque em “Terminei por hoje, seguir”.",
       campos: [
         {
           tipo: "radio",

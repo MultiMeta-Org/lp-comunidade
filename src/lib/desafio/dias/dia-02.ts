@@ -61,6 +61,23 @@ export const dia02: Dia = {
       cta: "Já assisti",
     },
 
+    // A celebração diz "entendeu a rotina de uma SDR, de uma Closer, separou o
+    // que é sua responsabilidade" — e isso só existia no vídeo. A Nati pediu
+    // por escrito, para quem quiser reler.
+    {
+      tipo: "leitura",
+      chave: "rotina-sdr-closer",
+      ask: "Como é o dia de uma SDR e de uma Closer.",
+      support: "O que você viu no vídeo, por escrito, para voltar quando quiser.",
+      corpo: [
+        "**A rotina da SDR — antes da venda.** Ela busca e encontra empresas ou pessoas interessadas, responde quem chegou, faz as primeiras perguntas para entender se aquele contato tem potencial (qualificar), faz follow-up com quem não respondeu e agenda a reunião ou a avaliação. No fim do dia, cada conversa tem um registro e um próximo passo.",
+        "**A rotina da Closer — a decisão.** Ela recebe as oportunidades mais maduras, se prepara antes de cada reunião, conduz a conversa entendendo a necessidade do cliente, apresenta a proposta, lida com as dúvidas e objeções, negocia e fecha. Depois, acompanha quem ficou de pensar até ter uma resposta.",
+        "**SDR + Closer.** Em muitas empresas, principalmente as pequenas, a mesma profissional faz as duas coisas: abre a conversa e conduz até o fechamento.",
+        "**O que é sua responsabilidade:** responder rápido, fazer boas perguntas, conduzir cada conversa até um próximo passo, fazer o follow-up no dia combinado e registrar tudo.\n**O que não é:** a qualidade do produto, o preço que a empresa define, o volume de anúncios ou a decisão final do cliente. Você cuida muito bem da sua parte — e pergunta sobre o resto.",
+      ],
+      cta: "Entendi",
+    },
+
     {
       tipo: "leitura",
       chave: "lembre-se",

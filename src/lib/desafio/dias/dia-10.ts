@@ -79,7 +79,7 @@ export const dia10: Dia = {
         {
           titulo: "Convite para reunião",
           texto:
-            "Pelo que você me contou, acho que pode existir um espaço em que minha atuação faça sentido. Se você quiser, podemos marcar uma conversa rápida para eu entender melhor como funciona essa parte hoje e te explicar como eu poderia contribuir.",
+            "Pelo que você me contou, acho que pode existir um espaço em que minha atuação faça sentido. Se você quiser, podemos marcar uma conversa rápida para eu entender melhor como funciona essa parte hoje e te explicar como eu poderia contribuir. Qual dia fica melhor para você?",
         },
         {
           titulo: "Quando você identificou uma situação específica",
@@ -89,7 +89,7 @@ export const dia10: Dia = {
         {
           titulo: "Se perguntarem “como você trabalha?”",
           texto:
-            "Posso te explicar, sim. Como o formato depende bastante de como a operação de vocês funciona hoje, acho melhor eu entender primeiro algumas coisas e aí te mostrar onde minha atuação poderia entrar. Se quiser, podemos fazer uma conversa rápida.",
+            "Posso te explicar, sim. Como o formato depende bastante de como a operação de vocês funciona hoje, acho melhor eu entender primeiro algumas coisas e aí te mostrar onde minha atuação poderia entrar. Podemos fazer uma conversa rápida de uns 20 minutos esta semana?",
         },
         {
           titulo: "Se perguntarem “quanto você cobra?”",
@@ -103,9 +103,9 @@ export const dia10: Dia = {
     {
       tipo: "copiar",
       chave: "scripts-agenda",
-      ask: "E os de marcar, confirmar e remarcar.",
+      ask: "Depois do sim: scripts para marcar o horário, confirmar e remarcar a reunião.",
       support:
-        "Marcar horário é onde muita reunião se perde. Ofereça duas opções, confirme no dia anterior e no dia.",
+        "Marcar horário é onde muita reunião se perde. Ofereça duas opções, confirme no dia anterior e no dia. Estes e os de convite ficam na **Central de Scripts**, na gaveta “Antes da reunião”.",
       mensagens: [
         {
           titulo: "Marcar horário",
@@ -146,7 +146,8 @@ export const dia10: Dia = {
       quantidade: 5,
       defineStatus: "abordagem-enviada",
       ask: "Enquanto isso, sua operação continua: mais cinco abordagens.",
-      support: "Com estas, você chega a vinte e cinco empresas abordadas.",
+      support:
+        "Cinco empresas NOVAS, que ainda não receberam mensagem. Se o seu Radar não tiver mais nenhuma assim, cadastre aqui embaixo — é assim que a lista cresce até 100. Com estas, você chega a vinte e cinco empresas abordadas.",
       campos: [
         {
           tipo: "radio",
@@ -174,7 +175,7 @@ export const dia10: Dia = {
       },
       ask: "Zere seus follow-ups do dia.",
       support:
-        "Todos executados ou reagendados. E toda conversa aberta precisa sair daqui com próximo passo.",
+        "Só as empresas que precisam de você hoje: quem tem retomada marcada para hoje (ou atrasada) e as conversas que estão abertas. Toque em uma, registre o que fez e o próximo passo, e passe para a próxima. Quando acabar as de hoje, toque em “Terminei por hoje, seguir”.",
       campos: [
         {
           tipo: "radio",
@@ -202,7 +203,7 @@ export const dia10: Dia = {
       },
       ask: "Existe alguma oportunidade que já faz sentido levar para reunião?",
       support:
-        "Se sim, convide com o script e preencha a ficha abaixo — é ela que você vai abrir cinco minutos antes da conversa. Se não, pode seguir: reunião forçada não ajuda ninguém.",
+        "Se sim, convide com os scripts de convite (eles estão dois passos atrás e na **Central de Scripts**, gaveta “Antes da reunião”) e preencha a ficha abaixo — é ela que você vai abrir cinco minutos antes da conversa.\n\nAinda não tem nenhuma? Tudo bem: toque em “Nenhuma por agora, seguir”. Você não fica presa aqui — reunião forçada não ajuda ninguém.",
       campos: [
         { tipo: "texto", chave: "data_reuniao", rotulo: "Que dia?", placeholder: "12/10" },
         { tipo: "texto", chave: "hora_reuniao", rotulo: "Que horário?", placeholder: "15h" },
@@ -232,7 +233,7 @@ export const dia10: Dia = {
           rotulo: "O que você ainda precisa entender?",
         },
       ],
-      nota: "Conseguiu a reunião antes de aprender a conduzir? Vá à Biblioteca: tem a aula, o roteiro, as perguntas e como terminar a reunião. Sua oportunidade real tem prioridade sobre o calendário das aulas.",
+      nota: "Conseguiu a reunião antes de aprender a conduzir? Toque em “Vou fazer uma reunião”, no fim desta página: está lá a preparação, o roteiro e as perguntas. Sua oportunidade real tem prioridade sobre o calendário das aulas.",
       cta: "Concluir minha missão de hoje",
     },
   ],

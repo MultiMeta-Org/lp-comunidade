@@ -60,7 +60,7 @@ export const dia14: Dia = {
       chave: "meu-funil",
       ask: "Meu funil até agora.",
       support:
-        "Você não precisa calcular nada. Isso saiu do que você mesma registrou nos últimos dias.",
+        "Você não precisa calcular nada. Isso saiu do estágio de cada empresa no seu Radar. Cada linha conta quantas empresas chegaram até aquela etapa.",
       cta: "Entendi",
     },
 
@@ -160,7 +160,7 @@ export const dia14: Dia = {
       defineStatus: "abordagem-enviada",
       ask: "E mais cinco abordagens.",
       support:
-        "Com estas você chega a quarenta e cinco. Faltam apenas cinco para a meta mínima do Desafio.",
+        "Empresas que ainda não receberam mensagem — se faltar, cadastre aqui embaixo. Com estas você chega a quarenta e cinco. Faltam apenas cinco para a meta mínima do Desafio.",
       campos: [
         {
           tipo: "radio",
@@ -196,13 +196,13 @@ export const dia14: Dia = {
   fim: {
     kicker: "Dia 14 concluído",
     titulo: "Agora você sabe onde agir.",
-    lede: "Você começou com uma empresa. Agora existem sessenta no seu radar e você já iniciou conversa com quarenta e cinco. Isso não é sensação — é o que os seus próprios registros mostram.",
+    lede: "Você começou com uma empresa, há duas semanas. Olha quantas existem agora no seu radar. Isso não é sensação — é o que os seus próprios registros mostram.",
     badge: "Dia 14 de 21 concluído",
     placar: { de: "radar", label: "empresas no seu radar" },
     feito: [
       "Leu o seu próprio funil",
       "Identificou onde a sua operação está travando",
-      "Levou o radar a sessenta empresas",
+      "Fez o seu radar crescer mais uma vez",
       "Pediu mais três indicações",
       "Enviou mais cinco abordagens",
       "Zerou a operação do dia",

@@ -61,9 +61,8 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     arquivo: pasta("sdr-2.mp4"),
     capa: pasta("sdr-2.jpg"),
     duracao: "5 min",
-    // O "vídeo SDR" que a Nati pôs no Dia 10 é esta mesma gravação, com seis
-    // segundos a mais; o "SDR 2.0" é a edição. Um card só, em vez de dois iguais.
-    dia: 10,
+    // Já foi o material do Dia 10; a Nati trocou pelo vídeo do CRM, que é o
+    // assunto do dia. Segue como aprofundamento do follow-up.
     aprofunda: [9],
   },
   {
@@ -195,6 +194,8 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     arquivo: pasta("crm.mp4"),
     capa: pasta("crm.jpg"),
     duracao: "8 min",
+    // Pedido da Nati: o vídeo do CRM é o do Dia 10, no alto do dia.
+    dia: 10,
     aprofunda: [11],
   },
 ]

@@ -15,11 +15,12 @@ import {
   Play,
   Plus,
   Search,
+  Target,
   Trash2,
   X,
 } from "lucide-react"
 import type { Campo, Dia, Passo, ProximoDia, Respostas, StatusRadar } from "@/lib/desafio"
-import { STATUS_RADAR, rotuloDoBotao } from "@/lib/desafio"
+import { ORDEM_STATUS_RADAR, STATUS_RADAR, rotuloDoBotao } from "@/lib/desafio"
 import {
   addEmpresaAction,
   arquivarEmpresaAction,
@@ -205,6 +206,7 @@ export function Missao({
         fim={dia.fim}
         empresasNoRadar={radar.length}
         proximo={proximo}
+        onVoltar={() => setCelebrando(false)}
       />
     )
   }
@@ -241,6 +243,18 @@ export function Missao({
             <Negrito texto={passo.support} />
           </p>
         )}
+
+        {passo.mostrar && typeof respostas[passo.mostrar.chave] === "string" &&
+          (respostas[passo.mostrar.chave] as string).trim() !== "" && (
+            <figure className="flex flex-col gap-1.5 rounded-[18px] border border-primary/35 bg-primary-subtle px-4 py-4 sm:px-5">
+              <figcaption className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
+                {passo.mostrar.rotulo}
+              </figcaption>
+              <blockquote className="whitespace-pre-line text-[15px] leading-relaxed text-foreground">
+                {respostas[passo.mostrar.chave] as string}
+              </blockquote>
+            </figure>
+          )}
 
         <div className="mt-2">
           <CorpoDoPasso
@@ -457,8 +471,9 @@ function RecadoDoVolume({ tem, meta, audio }: { tem: number; meta: number; audio
         que sai o seu primeiro sim. Ninguém vai completar essa lista por você.
       </p>
       <p className="text-[13px] leading-relaxed text-muted-foreground">
-        Seu Radar fica no topo de todas as páginas do Desafio. Lembrou de uma empresa no
-        meio de outra missão? Abra e adicione na hora.
+        Seu Radar fica no topo de todas as páginas do Desafio, no botão do alvo{" "}
+        <Target className="inline h-3.5 w-3.5 align-[-2px] text-foreground" aria-label="alvo" />.
+        Lembrou de uma empresa no meio de outra missão? Abra e adicione na hora.
       </p>
     </div>
   )
@@ -552,7 +567,7 @@ function CorpoDoPasso(props: CorpoProps) {
       return <Interesse {...props} passo={passo} />
 
     case "funil":
-      return <Funil operacao={props.operacao} />
+      return <Funil radar={props.radar} />
 
     case "diagnostico":
       return (
@@ -576,15 +591,23 @@ function CorpoDoPasso(props: CorpoProps) {
  * mostrar taxa ainda. Uma aluna no Dia 14 vendo "taxa de conversão 4%" não
  * ganha informação — ganha ansiedade, contra um benchmark que ela não tem.
  */
-function Funil({ operacao }: { operacao: Operacao }) {
-  const { placar, reunioesRealizadas } = operacao
+function Funil({ radar }: { radar: Empresa[] }) {
+  // Cada linha conta quem CHEGOU até ali, e não quem está parado ali: a
+  // empresa em "Proposta" também conversou e também teve reunião. Contar só
+  // o estágio atual mostrava "0 em conversa" e "1 proposta" lado a lado, e a
+  // aluna não entendia de onde a proposta tinha vindo.
+  const chegou = (s: StatusRadar) =>
+    radar.filter(
+      (e) =>
+        ORDEM_STATUS_RADAR[e.status as StatusRadar] >= ORDEM_STATUS_RADAR[s]
+    ).length
   const linhas = [
-    { rotulo: "Empresas no seu radar", n: placar.noRadar },
-    { rotulo: "Abordadas", n: placar.abordadas },
-    { rotulo: "Em conversa", n: placar.emConversa },
-    { rotulo: "Reuniões", n: placar.reunioes + reunioesRealizadas.length },
-    { rotulo: "Propostas", n: placar.propostas },
-    { rotulo: "Contratos", n: placar.fechados },
+    { rotulo: "Empresas no seu Radar", n: radar.length },
+    { rotulo: "Receberam sua abordagem", n: chegou("abordagem-enviada") },
+    { rotulo: "Responderam ou conversaram com você", n: chegou("respondeu") },
+    { rotulo: "Chegaram a uma reunião", n: chegou("reuniao") },
+    { rotulo: "Receberam proposta", n: chegou("proposta") },
+    { rotulo: "Contratos fechados", n: chegou("fechado") },
   ]
 
   return (
@@ -601,6 +624,12 @@ function Funil({ operacao }: { operacao: Operacao }) {
         </div>
       ))}
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+        Os números saem do estágio de cada empresa no seu Radar. Uma empresa respondeu,
+        marcou reunião ou recebeu proposta? Abra o Radar (o botão do alvo, no topo), toque
+        no lápis da empresa e mude o estágio — ou mude no “Em que pé está” quando ela
+        aparecer numa missão.
+      </p>
+      <p className="text-xs leading-relaxed text-muted-foreground">
         São números absolutos, não porcentagem. Você está no Dia 14 da sua carreira
         comercial — comparar sua taxa com a de alguém não te diria nada de útil.
       </p>
@@ -1457,7 +1486,10 @@ export function RadarEditor({
 
       <p className="text-xs leading-relaxed text-muted-foreground">
         Seu Radar não acaba hoje. Sempre que encontrar uma empresa nova durante a
-        jornada, volte aqui e adicione — ele fica no topo de todas as páginas do Desafio.
+        jornada, adicione na hora: ele fica no topo de todas as páginas do Desafio, no
+        botão do alvo{" "}
+        <Target className="inline h-3.5 w-3.5 align-[-2px] text-foreground" aria-label="alvo" />{" "}
+        ao lado do livro da Biblioteca.
       </p>
     </div>
   )
@@ -1730,17 +1762,39 @@ function EmpresaDoPasso({
   const [segmento, setSegmento] = useState("")
   const [canal, setCanal] = useState<string | null>(null)
 
+  const [editandoDados, setEditandoDados] = useState(false)
+  const [verAbordadas, setVerAbordadas] = useState(false)
+  const [novas, setNovas] = useState(0)
+
   const empresa = radar.find((e) => e.id === escolhida)
-  const naoFeitas = radar.filter((e) => !feitas.includes(e.id))
-  // No dia de abordar, as que ainda não receberam mensagem vêm primeiro — as
-  // já abordadas continuam na lista (ela pode voltar a falar com uma), mas
-  // embaixo e com o selo, para não abordar de novo sem perceber.
-  const disponiveis =
-    passo.defineStatus === "abordagem-enviada"
-      ? [
-          ...naoFeitas.filter((e) => e.status === "no-radar"),
-          ...naoFeitas.filter((e) => e.status !== "no-radar"),
-        ]
+  // `entreAs`: só as que ela percorreu no passo indicado (as três do Raio-X).
+  const doPassoAnterior = passo.entreAs ? respostas[`${passo.entreAs}:empresas`] : null
+  const universo = Array.isArray(doPassoAnterior)
+    ? radar.filter((e) => doPassoAnterior.includes(e.id))
+    : radar
+  const naoFeitas = universo.filter((e) => !feitas.includes(e.id))
+  // No dia de abordar, a lista é das que ainda não receberam mensagem. As já
+  // abordadas ficam atrás de um toque: misturadas, a aluna que não cadastrou
+  // empresa nova via só as de sempre e achava que tinha de abordar de novo.
+  const abordar = passo.defineStatus === "abordagem-enviada"
+  const novasNoRadar = naoFeitas.filter((e) => e.status === "no-radar")
+  const jaAbordadas = naoFeitas.filter((e) => e.status !== "no-radar")
+  // Nos passos `livre` (conversas, follow-ups, reuniões, propostas) a lista é
+  // de quem já está em contato, e quem tem retomada vencida vem primeiro. O
+  // Radar inteiro ali, inclusive empresas nunca abordadas, fazia a aluna
+  // achar que precisava falar com todas.
+  const emContato = naoFeitas
+    .filter((e) => e.status !== "no-radar" && e.status !== "sem-interesse")
+    .sort((a, b) => (a.proximaAcaoEm ?? "9999").localeCompare(b.proximaAcaoEm ?? "9999"))
+  const foraDoContato = naoFeitas.filter((e) => !emContato.includes(e))
+  const disponiveis = abordar
+    ? verAbordadas
+      ? [...novasNoRadar, ...jaAbordadas]
+      : novasNoRadar
+    : livre
+      ? verAbordadas
+        ? [...emContato, ...foraDoContato]
+        : emContato
       : naoFeitas
   const completo = feitas.length >= meta
 
@@ -1754,18 +1808,44 @@ function EmpresaDoPasso({
    * respostas voltam preenchidas.
    */
   function escolher(id: string) {
-    const salvas = radar.find((e) => e.id === id)?.notas?.[`dia-${dia}`]
+    const doRadar = radar.find((e) => e.id === id)
+    const notas = doRadar?.notas ?? {}
+    // Primeiro o que ela respondeu neste dia; o que faltar, a mesma pergunta
+    // respondida em outro dia (a "porta" do Dia 7 volta no 10, no 13…).
+    // Sem isso a mesma empresa voltava "do zero" a cada dia, e a aluna lia
+    // que o portal não tinha guardado nada.
+    const ordem = [
+      `dia-${dia}`,
+      ...Object.keys(notas)
+        .filter((k) => k !== `dia-${dia}`)
+        .sort((a, b) => Number(b.slice(4)) - Number(a.slice(4))),
+    ]
     const deste: Respostas = {}
-    if (salvas && typeof salvas === "object") {
-      for (const campo of passo.campos) {
+    for (const campo of passo.campos) {
+      for (const k of ordem) {
+        const salvas = notas[k]
+        if (!salvas || typeof salvas !== "object") continue
         const v = (salvas as Record<string, unknown>)[campo.chave]
-        if (v !== undefined && v !== null) deste[campo.chave] = v as Respostas[string]
+        if (v !== undefined && v !== null && v !== "") {
+          deste[campo.chave] = v as Respostas[string]
+          break
+        }
       }
     }
     setEscolhida(id)
     setRodada(deste)
+    setProxima(doRadar?.proximaAcao ?? "")
+    setProximaEm(doRadar?.proximaAcaoEm ?? "")
+    setEditandoDados(false)
+  }
+
+  /** Acabou de cadastrar no próprio passo: já abre a rodada dela, limpa. */
+  function escolherNova(nova: Empresa) {
+    setEscolhida(nova.id)
+    setRodada({})
     setProxima("")
     setProximaEm("")
+    setEditandoDados(false)
   }
 
   function notasDaRodada(): Record<string, unknown> {
@@ -1833,7 +1913,10 @@ function EmpresaDoPasso({
         setRodada({})
         setProxima("")
         setProximaEm("")
-        return { ok: true, respostas: { [chaveFeitas]: novas }, ficar: !livre && novas.length < meta }
+        // `livre` fica no passo depois de cada conversa: pular sozinho para a
+        // tela seguinte depois da primeira fazia a aluna achar que só podia
+        // registrar uma. Ela segue quando quiser, com nada aberto.
+        return { ok: true, respostas: { [chaveFeitas]: novas }, ficar: livre || novas.length < meta }
       }
 
       // Cadastro (Dia 1): cria a empresa e grava as respostas de uma vez só.
@@ -1871,7 +1954,17 @@ function EmpresaDoPasso({
   // Antes de abrir uma empresa, "Concluir" mentia: ainda não há o que concluir,
   // e quem apertava ia cadastrar mais empresas no Radar achando que era isso.
   const semEscolha = !livre && !passo.cadastro && !completo && escolhida === null
-  const rotulo = maisUma ? "Próxima empresa" : semEscolha ? "Escolha uma empresa acima" : null
+  const rotulo = maisUma
+    ? "Próxima empresa"
+    : semEscolha
+      ? "Escolha uma empresa acima"
+      : livre && escolhida !== null
+        ? "Salvar esta conversa"
+        : livre
+          ? feitas.length > 0
+            ? "Terminei por hoje, seguir"
+            : "Nenhuma por agora, seguir"
+          : null
   useEffect(() => {
     setRotulo(rotulo)
     return () => setRotulo(null)
@@ -2000,12 +2093,21 @@ function EmpresaDoPasso({
                 {etiquetaDoStatus(empresa)}
               </span>
             )}
+            <button
+              type="button"
+              aria-label={`Editar os dados de ${empresa.nome}`}
+              onClick={() => setEditandoDados((v) => !v)}
+              className="flex-none p-1 text-primary hover:text-primary/80"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
             {!passo.cadastro && (disponiveis.length > 1 || feitas.includes(empresa.id)) && (
               <button
                 type="button"
                 onClick={() => {
                   setEscolhida(null)
                   setRodada({})
+                  setEditandoDados(false)
                 }}
                 className="flex-none text-[11px] font-semibold text-primary underline underline-offset-2"
               >
@@ -2013,7 +2115,36 @@ function EmpresaDoPasso({
               </button>
             )}
           </div>
-          <DadosDaEmpresa empresa={empresa} />
+          {/* O lápis corrige nome, contato e estágio aqui mesmo — antes isso só
+              existia na página do Radar, e no Dia 1 não havia como mudar o nome
+              da empresa que ela tinha acabado de cadastrar. */}
+          {editandoDados ? (
+            <FormularioDaEmpresa
+              inicial={empresa}
+              pedeData={dia >= 7}
+              rotulo="Salvar alterações"
+              onCancelar={() => setEditandoDados(false)}
+              onSalvar={async (dados) => {
+                const res = await editarEmpresaAction(empresa.id, dados)
+                if (!res.ok) return res.error
+                setRadar((r) => r.map((e) => (e.id === empresa.id ? res.empresa : e)))
+                setEditandoDados(false)
+                return null
+              }}
+            />
+          ) : (
+            <DadosDaEmpresa empresa={empresa} />
+          )}
+          {/* Em que pé está a conversa: a pergunta do dia nem sempre é o
+              estágio real, e ela precisa poder dizer "já estou em reunião". */}
+          {!passo.cadastro && !editandoDados && (
+            <EstagioRapido
+              empresa={empresa}
+              onMudou={(atualizada) =>
+                setRadar((r) => r.map((e) => (e.id === atualizada.id ? atualizada : e)))
+              }
+            />
+          )}
         </div>
 
         {perguntas}
@@ -2079,13 +2210,71 @@ function EmpresaDoPasso({
     )
   }
 
+  // Cadastrar aqui mesmo, sem sair da missão: "volte ao Radar e adicione" fazia
+  // a aluna perder a página em que estava — e ela simplesmente não adicionava.
+  // Não aparece quando a lista é fechada (as três do Raio-X).
+  const cadastroRapido = !passo.entreAs && (
+    <details
+      className="group rounded-[18px] border border-dashed border-border bg-card/60 px-4 py-3"
+      open={disponiveis.length === 0}
+    >
+      <summary className="flex cursor-pointer list-none items-center gap-2 text-[13px] font-semibold text-primary">
+        <Plus className="h-3.5 w-3.5" />
+        Cadastrar uma empresa nova no Radar
+      </summary>
+      <div className="mt-3">
+        <FormularioDaEmpresa
+          key={novas}
+          pedeData={dia >= 7}
+          rotulo="Adicionar e escolher esta"
+          onSalvar={async (dados) => {
+            const res = await addEmpresaAction({ ...dados, dia })
+            if (!res.ok) return res.error
+            setRadar((r) => [...r, res.empresa])
+            setNovas((n) => n + 1)
+            escolherNova(res.empresa)
+            return null
+          }}
+        />
+      </div>
+    </details>
+  )
+
   // Escolher uma das que ela já tem.
   if (disponiveis.length === 0) {
     return (
-      <p className="rounded-[14px] border border-dashed border-border bg-card px-4 py-4 text-sm leading-relaxed text-muted-foreground">
-        Você já percorreu todas as empresas do seu Radar. Volte ao{" "}
-        <b className="text-foreground">Radar</b> e cadastre mais uma para continuar daqui.
-      </p>
+      <div className="flex flex-col gap-3">
+        {contador}
+        {feitas.length > 0 && listaDasFeitas}
+        <p className="rounded-[14px] border border-dashed border-border bg-card px-4 py-4 text-sm leading-relaxed text-muted-foreground">
+          {livre
+            ? "Nenhuma empresa do seu Radar está em conversa com você ainda — e tudo bem. Pode seguir no botão abaixo."
+            : abordar && jaAbordadas.length > 0
+            ? "Todas as empresas do seu Radar já receberam abordagem. Para abordar mais, cadastre empresas novas aqui embaixo — é assim que a sua lista chega a 100."
+            : passo.entreAs
+              ? "Você já escolheu entre as empresas deste dia."
+              : "Você já percorreu todas as empresas do seu Radar. Cadastre mais uma aqui embaixo para continuar."}
+        </p>
+        {!livre && cadastroRapido}
+        {livre && foraDoContato.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setVerAbordadas(true)}
+            className="w-fit text-xs font-semibold text-primary underline underline-offset-2"
+          >
+            Mostrar as outras {foraDoContato.length} empresas do Radar
+          </button>
+        )}
+        {abordar && jaAbordadas.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setVerAbordadas(true)}
+            className="w-fit text-xs font-semibold text-primary underline underline-offset-2"
+          >
+            Quero voltar a falar com uma que já abordei
+          </button>
+        )}
+      </div>
     )
   }
 
@@ -2094,6 +2283,19 @@ function EmpresaDoPasso({
       {contador}
 
       {feitas.length > 0 && listaDasFeitas}
+
+      {abordar && !verAbordadas && (
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          Aqui aparecem só as empresas do seu Radar que ainda não receberam mensagem.
+        </p>
+      )}
+      {livre && !verAbordadas && (
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          Aqui aparecem só as empresas com quem você já está em contato — as com retomada
+          marcada para mais cedo vêm primeiro. Não precisa passar por todas: só as que
+          pedem algo de você hoje.
+        </p>
+      )}
 
       <div className="flex flex-col gap-2">
         {disponiveis.map((e) => (
@@ -2107,6 +2309,28 @@ function EmpresaDoPasso({
         ))}
       </div>
 
+      {abordar && !verAbordadas && jaAbordadas.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setVerAbordadas(true)}
+          className="w-fit text-xs font-semibold text-primary underline underline-offset-2"
+        >
+          Mostrar também as {jaAbordadas.length} que já abordei
+        </button>
+      )}
+
+      {livre && !verAbordadas && foraDoContato.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setVerAbordadas(true)}
+          className="w-fit text-xs font-semibold text-primary underline underline-offset-2"
+        >
+          Mostrar as outras {foraDoContato.length} empresas do Radar
+        </button>
+      )}
+
+      {!livre && cadastroRapido}
+
       {livre && (
         <p className="text-xs leading-relaxed text-muted-foreground">
           Se nenhuma respondeu ainda, pode seguir. Quantas respondem não está sob o
@@ -2114,6 +2338,57 @@ function EmpresaDoPasso({
         </p>
       )}
     </div>
+  )
+}
+
+/**
+ * O estágio da empresa, trocado direto na rodada. Grava na hora, pelo mesmo
+ * caminho do lápis do Radar.
+ */
+function EstagioRapido({
+  empresa,
+  onMudou,
+}: {
+  empresa: Empresa
+  onMudou: (e: Empresa) => void
+}) {
+  const [salvando, startSalvar] = useTransition()
+  const [aviso, setAviso] = useState<string | null>(null)
+
+  return (
+    <label className="flex items-center gap-2 border-t border-border/60 pt-2 text-[12.5px] text-foreground">
+      <span className="flex-none text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+        Em que pé está
+      </span>
+      <select
+        value={empresa.status}
+        disabled={salvando}
+        onChange={(e) => {
+          const status = e.target.value as StatusRadar
+          startSalvar(async () => {
+            const res = await editarEmpresaAction(empresa.id, {
+              nome: empresa.nome,
+              segmento: empresa.segmento ?? undefined,
+              contato: empresa.contato ?? undefined,
+              telefone: empresa.telefone ?? undefined,
+              primeiroContatoEm: empresa.primeiroContatoEm ?? undefined,
+              status,
+            })
+            if (!res.ok) return setAviso(res.error)
+            setAviso(null)
+            onMudou(res.empresa)
+          })
+        }}
+        className="min-w-0 flex-1 rounded-lg border border-input bg-card px-2 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none"
+      >
+        {(Object.keys(STATUS_RADAR) as StatusRadar[]).map((s) => (
+          <option key={s} value={s}>
+            {STATUS_RADAR[s]}
+          </option>
+        ))}
+      </select>
+      {aviso && <small className="text-xs font-semibold text-destructive">{aviso}</small>}
+    </label>
   )
 }
 
@@ -2158,7 +2433,7 @@ function Interesse({
           }}
           className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/50 bg-card px-6 py-3 text-sm font-semibold text-primary transition-all duration-300 hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
         >
-          Quero entrar na lista
+          {passo.botao ?? "Quero entrar na lista"}
         </button>
         <p className="text-xs text-muted-foreground">
           Sem compromisso nenhum. Se não for para você, é só seguir para o próximo
@@ -2173,7 +2448,9 @@ function Interesse({
       <div className="flex items-center gap-3 rounded-[18px] border border-primary/35 bg-primary-subtle px-5 py-4">
         <Check className="h-4 w-4 flex-none text-primary" strokeWidth={3} />
         <span className="text-sm font-semibold text-foreground">
-          Você está na lista de interessadas.
+          {passo.botao
+            ? "Pronto! A nossa equipe vai entrar em contato com você."
+            : "Você está na lista de interessadas."}
         </span>
       </div>
 

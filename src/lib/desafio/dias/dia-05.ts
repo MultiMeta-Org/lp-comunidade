@@ -46,7 +46,7 @@ export const dia05: Dia = {
       formato: "vertical",
       ask: "Assista ao vídeo de hoje.",
       support:
-        "Ele mostra como responder “o que você faz?” e “como você poderia me ajudar?” sem gaguejar e sem prometer o que você não controla.",
+        "Nele eu te conto com quem você vai conversar numa reunião — o próprio empresário ou o setor responsável pela contratação —, como responder “o que você faz?” e como olhar para a remuneração. Os próximos passos trazem tudo isso por escrito.",
       cta: "Já assisti",
     },
 
@@ -75,13 +75,14 @@ export const dia05: Dia = {
       chave: "whatsapp",
       ask: "Deixe seu WhatsApp profissional.",
       support:
-        "A proposta é deixar o WhatsApp com uma apresentação mais profissional, pensando na imagem que queremos transmitir nos contatos comerciais.\n\n• **Foto de perfil:** escolher uma foto nítida, com boa iluminação e aparência profissional. Não precisa ser uma foto de estúdio, mas deve ser bem apresentada e transmitir credibilidade.\n• **Nome do perfil:** utilizar o nome pelo qual você deseja ser reconhecida profissionalmente.\n• **Descrição:** se possível, incluir a profissão ou área de atuação, como SDR e Closer Comercial, para que as pessoas identifiquem rapidamente com o que você trabalha.\n\nA ideia é fazer pequenos ajustes que transmitam mais profissionalismo e confiança, sem perder a naturalidade.",
+        "A proposta é deixar o WhatsApp com uma apresentação mais profissional, pensando na imagem que queremos transmitir nos contatos comerciais. Faça os ajustes abaixo e, quando terminar cada um, marque para concluir.\n\n• **Foto de perfil:** escolher uma foto nítida, com boa iluminação e aparência profissional. Não precisa ser uma foto de estúdio, mas deve ser bem apresentada e transmitir credibilidade.\n• **Nome do perfil:** utilizar o nome pelo qual você deseja ser reconhecida profissionalmente.\n• **Descrição:** se possível, incluir a profissão ou área de atuação, como **Especialista Comercial** ou **Setor Comercial**, para que as pessoas identifiquem rapidamente com o que você trabalha. Evite “SDR” e “Closer” aqui: a maioria dos empresários não conhece esses termos.\n\nA ideia é fazer pequenos ajustes que transmitam mais profissionalismo e confiança, sem perder a naturalidade.",
       itens: [
         "Minha foto está adequada.",
         "Meu nome está identificável.",
         "Minha descrição profissional está pronta.",
       ],
-      nota: "Sugestão de descrição: Profissional Comercial | SDR + Closer",
+      nota: "Sugestão de descrição: Especialista Comercial | Vendas e atendimento",
+      cta: "Pronto, tudo marcado",
     },
 
     {
@@ -94,12 +95,12 @@ export const dia05: Dia = {
         {
           titulo: "Opção A — estou começando",
           texto:
-            "Estou iniciando minha atuação profissional na área comercial como SDR e Closer, trabalhando com prospecção, desenvolvimento de oportunidades, follow-up e vendas.",
+            "Estou iniciando minha atuação profissional na área comercial, ajudando empresas a atender, acompanhar e converter os interessados que chegam até elas em vendas.",
         },
         {
           titulo: "Opção B — mais direta",
           texto:
-            "Eu trabalho na área comercial como SDR e Closer. Atuo desde a busca e desenvolvimento de oportunidades até follow-up e fechamento, dependendo da operação da empresa.",
+            "Eu trabalho na área comercial. Ajudo empresas desde a busca de novos clientes até o acompanhamento e o fechamento das vendas, dependendo de como cada empresa funciona.",
         },
       ],
       confirmacao: "Copiei a que combina mais comigo.",
@@ -117,7 +118,7 @@ export const dia05: Dia = {
           chave: "apresentacao",
           rotulo: "Minha apresentação",
           placeholder:
-            "Eu trabalho na área comercial como SDR e Closer…",
+            "Eu trabalho na área comercial, ajudando empresas a…",
         },
       ],
     },
@@ -128,8 +129,8 @@ export const dia05: Dia = {
       ask: "Agora fale em voz alta. Três vezes.",
       support:
         "Parece bobo, eu sei. Mas na primeira vez essa frase vai soar estranha até para você. Na terceira já começa a ficar diferente — e daqui a alguns dias você vai falar isso numa conversa real.",
+      mostrar: { chave: "apresentacao", rotulo: "A sua apresentação" },
       itens: ["Falei minha apresentação três vezes em voz alta."],
-      cta: "Concluir minha missão de hoje",
     },
 
     // ── Central de scripts: fica no dia, para ela voltar quando precisar ──
@@ -138,25 +139,25 @@ export const dia05: Dia = {
       chave: "central-de-scripts",
       ask: "Guarde esses três para quando a conversa vier.",
       support:
-        "Você não precisa decorar. Quando alguém perguntar, volte aqui e copie.",
+        "Você não precisa decorar. Eles ficam guardados na **Central de Scripts** — o botão de mensagem no topo de todas as páginas do Desafio —, junto com todos os outros scripts da jornada.",
       mensagens: [
         {
           titulo: "“O que você faz?”",
           texto:
-            "Eu trabalho na área comercial como SDR e Closer. Atuo desde a busca e desenvolvimento de oportunidades até follow-up e fechamento, dependendo da operação da empresa.",
+            "Eu trabalho na área comercial. Ajudo empresas desde a busca de novos clientes até o acompanhamento e o fechamento das vendas. E vocês, como funciona a parte comercial por aí hoje?",
         },
         {
           titulo: "“Como você poderia me ajudar?”",
           texto:
-            "Primeiro eu precisaria entender um pouco melhor como funciona o comercial de vocês hoje, como chegam as oportunidades e como esses contatos são conduzidos. A partir disso consigo entender melhor onde eu poderia contribuir.",
+            "Primeiro eu precisaria entender um pouco melhor como funciona o comercial de vocês hoje, como chegam as oportunidades e como esses contatos são conduzidos. A partir disso consigo entender melhor onde eu poderia contribuir. Hoje, como os novos clientes costumam chegar até vocês?",
         },
         {
           titulo: "Quando alguém quiser indicar você",
           texto:
-            "Claro, pode passar meu contato sim. Estou iniciando minha atuação profissional na área comercial como SDR e Closer, trabalhando com prospecção, desenvolvimento de oportunidades, follow-up e vendas. Vou gostar de conhecer melhor o negócio e entender como funciona o comercial por lá.",
+            "Claro, pode passar meu contato sim! Estou iniciando minha atuação na área comercial, ajudando empresas a atender, acompanhar e fechar as vendas com os interessados que chegam. Vou gostar de conhecer melhor o negócio. Você me conta um pouquinho do que essa empresa faz?",
         },
       ],
-      confirmacao: "Li os três e sei onde encontrar.",
+      confirmacao: "Li os três e sei que ficam na Central de Scripts.",
       cta: "Concluir o Dia 5",
     },
   ],

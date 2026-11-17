@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { BookOpen, ListOrdered, Target } from "lucide-react"
+import { BookOpen, ListOrdered, MessageSquareText, Target } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { requireDesafio } from "@/lib/guard"
 import { getJornada } from "@/lib/desafio-server"
@@ -52,6 +52,10 @@ export default async function DesafioLayout({
             <Link href="/desafio/biblioteca" aria-label="Biblioteca" className={ATALHO}>
               <BookOpen className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Biblioteca</span>
+            </Link>
+            <Link href="/desafio/scripts" aria-label="Central de Scripts" className={ATALHO}>
+              <MessageSquareText className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Scripts</span>
             </Link>
             <JornadaMenu
               concluidos={concluidos}

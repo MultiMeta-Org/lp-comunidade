@@ -143,7 +143,10 @@ export async function addEmpresaAction(entrada: {
     origem: entrada.origem,
     diaOrigem: typeof entrada.dia === "number" ? entrada.dia : null,
   })
-  if (res.ok) refresh()
+  // Sem refresh(): o Radar da tela já se atualiza no cliente. O refresh
+  // re-renderizava a página inteira do dia a cada empresa, e no celular uma
+  // falha nesse meio derrubava a tela ("This page couldn't load") com a aluna
+  // no meio do cadastro.
   return res
 }
 
@@ -174,7 +177,7 @@ export async function editarEmpresaAction(
     primeiroContatoEm: entrada.primeiroContatoEm,
     status: entrada.status,
   })
-  if (res.ok) refresh()
+  // Sem refresh(), pelo mesmo motivo do cadastro: a tela já tem a empresa nova.
   return res
 }
 

@@ -9,6 +9,16 @@ import { Central } from "@/components/desafio/central"
  * e se vende. Quem marca reunião no Dia 7 não pode esperar o Dia 12 para
  * saber como se preparar — então o caminho fica à mão em qualquer dia.
  */
+/** As perguntas que fazem o empresário contar a operação (Dias 8 e 11). */
+const PERGUNTAS_CHAVE = [
+  "Me conta um pouco sobre a empresa hoje. O que vocês vendem e quem normalmente compra de vocês?",
+  "Hoje, como normalmente chegam novos clientes ou pessoas interessadas em vocês?",
+  "Quando uma pessoa demonstra interesse, o que acontece a partir dali? Quem fica responsável por esse contato?",
+  "E quando a pessoa demonstra interesse, mas não compra naquele momento, o que vocês fazem hoje?",
+  "Olhando para a sua parte comercial, o que mais te incomoda ou o que você sente que poderia funcionar melhor?",
+  "Se essa parte estivesse funcionando melhor, o que você gostaria que mudasse na prática?",
+]
+
 export default async function ReuniaoPage() {
   await requireDesafio()
 
@@ -43,10 +53,9 @@ export default async function ReuniaoPage() {
           fora: true,
         },
         {
-          titulo: "Tenha os scripts à mão",
-          texto: "Caderno de Campo, “Modelos de mensagens” (p. 59).",
-          href: linkDoCaderno(59),
-          fora: true,
+          titulo: "Tenha o roteiro e os scripts à mão",
+          texto: "Central de Scripts: gavetas “Antes da reunião”, “Na reunião” e “Depois da reunião”. Deixe aberta durante a conversa.",
+          href: "/desafio/scripts",
         },
         {
           titulo: "Registre no seu Radar",
@@ -54,6 +63,24 @@ export default async function ReuniaoPage() {
           href: "/desafio/radar",
         },
       ]}
+      rodape={
+        <section className="flex flex-col gap-3 rounded-2xl border border-primary/30 bg-primary-subtle/50 px-4 py-5 sm:px-5">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
+            As perguntas-chave para entender a empresa
+          </p>
+          <ol className="flex list-decimal flex-col gap-2 pl-5 text-sm leading-relaxed text-foreground">
+            {PERGUNTAS_CHAVE.map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+          </ol>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            Uma reunião costuma durar de 20 a 30 minutos — e está tudo bem. Algumas se
+            estendem porque o empresário dá abertura para conversar mais; isso depende de
+            cada pessoa. E, sempre que puder, saia com o valor já falado: é mais fácil
+            fechar ali do que depois.
+          </p>
+        </section>
+      }
     />
   )
 }

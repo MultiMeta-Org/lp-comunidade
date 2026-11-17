@@ -64,6 +64,7 @@ export const dia15: Dia = {
       ask: "Assista ao vídeo da Fase 3.",
       support:
         "Ele abre a sua terceira semana: o que você vai aprender e fazer do Dia 15 ao Dia 21. Se precisar, volte nele nos próximos dias.",
+      nota: "Fechou um contrato com um cliente? Toque em “Fechei meu contrato”, no fim de qualquer página do Desafio, e fale com o nosso time: a gente te adiciona na plataforma de pagamento da Conexão MultiMeta.",
       cta: "Já assisti",
     },
 
@@ -136,17 +137,19 @@ export const dia15: Dia = {
         {
           tipo: "texto",
           chave: "meta_empresas_dia",
-          rotulo: "Novas empresas por dia",
+          rotulo: "Novas empresas no Radar por dia",
+          ajuda: "Empresas que você vai encontrar e cadastrar — elas ainda não sabem de você.",
           placeholder: "5",
         },
         {
           tipo: "texto",
           chave: "meta_abordagens_dia",
           rotulo: "Novas abordagens por dia",
+          ajuda: "Empresas do seu Radar que vão receber a sua primeira mensagem.",
           placeholder: "5",
         },
       ],
-      nota: "Follow-ups vencidos e conversas abertas não entram na meta: esses são todos, todo dia. Não é meta, é o trabalho.",
+      nota: "Follow-ups e conversas abertas ficam fora dessa conta, porque não têm número: você responde todas as conversas e faz todos os follow-ups do dia, todos os dias. Isso não é meta — é o trabalho.",
     },
 
     {
@@ -165,7 +168,7 @@ export const dia15: Dia = {
       defineStatus: "abordagem-enviada",
       ask: "E agora as cinco que te levam a cinquenta.",
       support:
-        "Cinquenta empresas abordadas é a meta mínima do Desafio. Mínima — você ainda tem dias de operação pela frente.",
+        "Empresas que ainda não receberam mensagem — se faltar, cadastre aqui embaixo. Cinquenta empresas abordadas é a meta mínima do Desafio. Mínima — você ainda tem dias de operação pela frente.",
       campos: [
         {
           tipo: "radio",
@@ -204,7 +207,7 @@ export const dia15: Dia = {
       opcional: true,
       ask: "Sua maior dificuldade é fazer o trabalho caber na rotina da casa?",
       support:
-        "Se essa é a parte mais difícil para você, me conta. Não é frescura e não é falta de organização — é uma dificuldade real de quem trabalha de casa com uma casa funcionando em volta.",
+        "Se essa é a parte mais difícil para você, me conta. Não é frescura e não é falta de organização — é uma dificuldade real de quem trabalha de casa com uma casa funcionando em volta.\n\nA nossa equipe pode te ajudar a organizar a rotina da casa para abrir espaço para o trabalho. Se fizer sentido para você, toque no botão e a gente te procura para explicar como.",
       pergunta: "O que mais pesa hoje?",
       opcoes: [
         "Não consigo um horário sem interrupção",
@@ -212,8 +215,8 @@ export const dia15: Dia = {
         "Tenho o tempo, mas não consigo me concentrar",
         "Trabalho fora e sobra pouca energia",
       ],
-      nota: "Quem levanta a mão aqui recebe material sobre isso quando a gente preparar. Nada automático, nada de venda agora.",
-      cta: "Quero saber mais",
+      botao: "Tenho interesse — quero que a equipe me procure",
+      nota: "Sem compromisso. Se não for para você, é só seguir.",
     },
   ],
 

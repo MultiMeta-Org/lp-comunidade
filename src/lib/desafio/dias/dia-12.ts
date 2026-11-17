@@ -73,7 +73,7 @@ export const dia12: Dia = {
       chave: "modelos-de-escopo",
       ask: "Dois exemplos de escopo, para você ver a forma.",
       support:
-        "Não copie: use como molde. Marque só o que você realmente vai assumir.",
+        "Não copie: use como molde. Na hora de montar a sua, escreva só o que você realmente vai assumir.",
       corpo: [
         "**Atuação SDR** — objetivo: organizar e desenvolver as oportunidades comerciais que chegam à empresa. Responsabilidades: realizar primeiro contato, qualificar oportunidades, acompanhar interessados, executar follow-ups, agendar oportunidades qualificadas para a próxima etapa, registrar o andamento comercial.",
         "**Atuação Closer** — objetivo: conduzir as oportunidades qualificadas até a decisão comercial. Responsabilidades: conduzir reuniões, entender a necessidade, apresentar a solução, trabalhar objeções, negociar, fechar, registrar o andamento.",
@@ -111,7 +111,7 @@ export const dia12: Dia = {
       },
       ask: "Tem alguma oportunidade para montar proposta?",
       support:
-        "Se sim, abra a empresa e monte aqui. Se não, pode seguir — você aprendeu hoje para estar pronta, não para criar trabalho artificial.",
+        "Já conversou ou se reuniu com alguma empresa que abriu espaço para uma proposta? Toque nela e monte aqui. Se ainda não, toque em “Nenhuma por agora, seguir” — você aprendeu hoje para estar pronta, não para criar trabalho artificial.",
       campos: [
         {
           tipo: "area",
@@ -177,7 +177,7 @@ export const dia12: Dia = {
       chave: "modelo-proposta",
       ask: "O modelo da proposta.",
       support:
-        "Copie, troque o que está entre colchetes, mande. Oito blocos, nada de vinte e sete páginas.",
+        "Copie, troque o que está entre colchetes, mande. Oito blocos, nada de vinte e sete páginas. Se quiser deixar mais bonita, monte o mesmo texto no Canva ou no Word — a proposta é o pré-fechamento; o contrato vem depois que ela for aprovada.",
       mensagens: [
         {
           titulo: "Proposta de atuação comercial",
@@ -215,7 +215,7 @@ Previsão: [data]
 Com a aprovação da proposta, seguimos para contrato, alinhamento inicial e início da operação.`,
         },
       ],
-      confirmacao: "Guardei o modelo e sei onde encontrar.",
+      confirmacao: "Guardei o modelo — ele fica na Central de Scripts, gaveta “Depois da reunião”.",
     },
 
     {
@@ -223,7 +223,7 @@ Com a aprovação da proposta, seguimos para contrato, alinhamento inicial e in�
       chave: "scripts-proposta",
       ask: "E os scripts de enviar e sustentar a proposta.",
       support:
-        "O primeiro é o mais importante do dia: ele cria o follow-up antes de a proposta existir.",
+        "O primeiro é o mais importante do dia: ele cria o follow-up antes de a proposta existir. Todos ficam na **Central de Scripts**, gaveta “Depois da reunião”.",
       mensagens: [
         {
           titulo: "Combinar o envio ANTES de enviar",
@@ -233,7 +233,7 @@ Com a aprovação da proposta, seguimos para contrato, alinhamento inicial e in�
         {
           titulo: "Enviar a proposta",
           texto:
-            "Oi, [nome]! Conforme combinamos, organizei a proposta com base no que conversamos. Estou te enviando por aqui. Dá uma olhada com calma e, como alinhamos, [dia] retomamos para conversar sobre qualquer dúvida e próximos passos.",
+            "Oi, [nome]! Conforme combinamos, organizei a proposta com base no que conversamos. Estou te enviando por aqui. Dá uma olhada com calma e, como alinhamos, [dia] retomamos para conversar sobre qualquer dúvida e próximos passos. Combinado?",
         },
         {
           titulo: "Se disserem “está caro”",
@@ -243,7 +243,7 @@ Com a aprovação da proposta, seguimos para contrato, alinhamento inicial e in�
         {
           titulo: "Se pedirem desconto",
           texto:
-            "Podemos olhar o formato. Antes de mexer no valor, prefiro entender o que precisaria mudar para fazer sentido para vocês.",
+            "Podemos olhar o formato. Antes de mexer no valor, me conta: o que precisaria mudar para fazer sentido para vocês?",
         },
         {
           titulo: "Se disserem “preciso pensar”",
@@ -262,7 +262,7 @@ Com a aprovação da proposta, seguimos para contrato, alinhamento inicial e in�
       defineStatus: "abordagem-enviada",
       ask: "E a operação continua: mais cinco abordagens.",
       support:
-        "Vale para os dois caminhos. Com estas, você chega a trinta e cinco empresas abordadas.",
+        "Vale para os dois caminhos. Cinco empresas NOVAS — se faltar, cadastre aqui embaixo. Com estas, você chega a trinta e cinco empresas abordadas.",
       campos: [
         {
           tipo: "radio",

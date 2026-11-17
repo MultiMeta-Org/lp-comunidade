@@ -87,7 +87,7 @@ export const dia08: Dia = {
       chave: "banco-de-perguntas",
       ask: "As perguntas, prontas para copiar.",
       support:
-        "As três primeiras abrem qualquer conversa. As três últimas são para quando você já souber quem cuida do comercial lá.",
+        "Quando uma empresa te responder e a conversa começar, faça perguntas para entender melhor como ela funciona — por exemplo: “como os interessados chegam até vocês hoje?”. É isso que te mostra onde o seu trabalho pode ajudar.\n\nAs três primeiras abrem qualquer conversa. As três últimas são para quando você já souber quem cuida do comercial lá. Todas ficam também na **Central de Scripts**, no topo das páginas do Desafio.",
       mensagens: [
         {
           titulo: "Como chegam?",
@@ -138,12 +138,12 @@ export const dia08: Dia = {
         {
           titulo: "Mostrar a conexão com a sua atuação",
           texto:
-            "Entendi. Essa é justamente uma parte em que minha atuação pode fazer sentido, porque trabalho no desenvolvimento e acompanhamento dessas oportunidades dentro do processo comercial.",
+            "Entendi. Essa é justamente uma parte em que minha atuação pode fazer sentido, porque trabalho no desenvolvimento e acompanhamento dessas oportunidades dentro do processo comercial. Hoje, quantos desses contatos você sente que acabam se perdendo?",
         },
         {
           titulo: "Convidar para uma reunião",
           texto:
-            "Pelo que você me contou, acho que pode existir um espaço em que eu consiga contribuir. Se fizer sentido para você, podemos marcar uma conversa rápida para eu entender melhor a operação e te explicar como eu trabalharia.",
+            "Pelo que você me contou, acho que pode existir um espaço em que eu consiga contribuir. Se fizer sentido para você, podemos marcar uma conversa rápida para eu entender melhor a operação e te explicar como eu trabalharia. Qual dia fica melhor para você esta semana?",
         },
         {
           titulo: "Se perguntarem o preço agora",
@@ -192,10 +192,11 @@ export const dia08: Dia = {
       chave: "bonus-marketplace",
       ask: "Você ganhou um presente: acesso bônus ao nosso Marketplace.",
       support:
-        "É lá que empresas publicam oportunidades para closers como você. O seu acesso já está liberado.",
+        "Esse é um bônus do Desafio, um presente meu para quem chegou até aqui. É lá que empresas publicam oportunidades para closers como você — e o seu acesso já está liberado.",
       corpo: [
         "**Antes de entrar, assista ao vídeo de boas-vindas inteiro.** Ele mostra como criar a sua conta e como usar a plataforma. Só clique no botão do Marketplace depois de assistir, senão você vai ficar perdida.",
         "Na página de boas-vindas você encontra o vídeo e, logo abaixo, o botão para entrar no Marketplace.",
+        "Não conseguiu entrar? Escreva para **suporte@multimetaapp.com.br** com o e-mail que você usou na compra do Desafio — a equipe olha esse e-mail todos os dias.",
       ],
       links: [{ rotulo: "Assistir ao vídeo e acessar o Marketplace", href: ONBOARDING_MARKETPLACE_URL }],
       cta: "Já assisti e acessei",
@@ -237,7 +238,7 @@ export const dia08: Dia = {
           obrigatorio: false,
         },
       ],
-      nota: "Conseguiu uma reunião? Não espere o Dia 11 — toque em “Vou fazer uma reunião” na sua jornada. Fechou? Clique em “Fechei meu primeiro contrato”.",
+      nota: "Conseguiu uma reunião? Não espere o Dia 11 — toque em “Vou fazer uma reunião”, no fim desta página (ele fica no fim de todos os dias). Fechou? Toque em “Fechei meu contrato”, logo ao lado.",
       cta: "Concluir minha missão de hoje",
     },
   ],
@@ -245,7 +246,7 @@ export const dia08: Dia = {
   fim: {
     kicker: "Dia 8 concluído",
     titulo: "Suas conversas agora têm para onde ir.",
-    lede: "Toda conversa que você trabalhou hoje saiu daqui com um próximo passo escrito no Radar. É isso que impede uma oportunidade de morrer de esquecimento.",
+    lede: "Toda conversa que você trabalhou hoje saiu com um próximo passo escrito no Radar. É isso que impede uma oportunidade de cair no esquecimento.",
     badge: "Dia 8 de 21 concluído",
     feito: [
       "Aprendeu as três coisas que você quer entender de uma empresa",

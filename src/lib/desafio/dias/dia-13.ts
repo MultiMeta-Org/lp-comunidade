@@ -101,7 +101,7 @@ export const dia13: Dia = {
       chave: "objecoes-preco",
       ask: "As objeções de preço e de tempo.",
       support:
-        "Nenhuma delas defende o valor. Todas perguntam primeiro.",
+        "Nenhuma delas defende o valor. Todas perguntam primeiro. Elas ficam na **Central de Scripts**, gaveta “Objeções”.",
       mensagens: [
         {
           titulo: "“Está caro”",
@@ -217,7 +217,7 @@ export const dia13: Dia = {
       origemSugerida: "busca",
       ask: "Agora a gente volta a abastecer o seu radar.",
       support:
-        "Mais dez empresas, para chegar a quarenta. Sem Raio-X — só nome, o que ela faz e o contato.",
+        "Mais dez empresas NOVAS — que você ainda não abordou —, para chegar a quarenta. Sem Raio-X: só nome, o que ela faz e o contato. Logo depois, você aborda cinco delas.",
       nota: "Existe um erro perigoso quando uma oportunidade começa a avançar: você para de prospectar porque “tem uma proposta”. Enquanto não existe contrato, continue construindo oportunidades.",
     },
 
@@ -226,7 +226,7 @@ export const dia13: Dia = {
       chave: "indicacoes-rodada-2",
       ask: "E vamos pedir indicação de novo.",
       support:
-        "Já passou tempo desde o Dia 3, e as pessoas lembram de coisas diferentes em momentos diferentes. Mande para mais três pessoas.",
+        "Já passou tempo desde o Dia 3, e as pessoas lembram de coisas diferentes em momentos diferentes. Mande para mais três pessoas. Este e os outros pedidos de indicação ficam na **Central de Scripts**.",
       mensagens: [
         {
           texto:
@@ -242,7 +242,8 @@ export const dia13: Dia = {
       quantidade: 5,
       defineStatus: "abordagem-enviada",
       ask: "E mais cinco abordagens.",
-      support: "Com estas, você chega a quarenta empresas abordadas.",
+      support:
+        "Comece pelas empresas novas que você acabou de cadastrar — a lista abaixo mostra só as que ainda não receberam mensagem. Com estas, você chega a quarenta empresas abordadas.",
       campos: [
         {
           tipo: "radio",
@@ -271,7 +272,7 @@ export const dia13: Dia = {
       },
       ask: "Alguma proposta ou conversa avançada trouxe objeção?",
       support:
-        "Se não tem nenhuma objeção hoje, você não precisa inventar uma. Pode seguir.",
+        "Toque em cada empresa em que apareceu uma objeção e registre. Pode ser mais de uma — a tela espera você terminar. Se não tem nenhuma hoje, não precisa inventar: toque em “Nenhuma por agora, seguir”.",
       campos: [
         {
           tipo: "radio",

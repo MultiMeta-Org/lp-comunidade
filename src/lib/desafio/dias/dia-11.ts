@@ -1,3 +1,4 @@
+import { CRM_SIGNUP_URL } from "@/lib/links"
 import type { Dia } from "../tipos"
 
 /**
@@ -71,16 +72,53 @@ export const dia11: Dia = {
     },
 
     {
+      tipo: "leitura",
+      chave: "dia-de-preparar",
+      ask: "Hoje é o dia de se preparar para a reunião.",
+      support:
+        "Tenha você uma reunião marcada ou não, hoje você monta o que precisa ter em mãos quando ela acontecer.",
+      corpo: [
+        "**1. Olhe para a empresa** com quem você já conversou: o que você já sabe e o que ainda falta entender.",
+        "**2. Leia o roteiro da reunião,** em cinco etapas. Ele é para abrir DURANTE a reunião online — você não precisa decorar nada.",
+        "**3. Registre** a reunião que fez (se já fez) e siga com as suas abordagens.",
+        "**Quanto tempo dura?** Normalmente de 20 a 30 minutos — e está tudo bem. Algumas se estendem porque o empresário dá abertura para conversar mais; isso depende de cada pessoa.",
+        "**Leve preço para a reunião.** É mais fácil fechar na reunião do que depois. Antes da sua, dê uma olhada nos modelos de remuneração do Dia 12 para já saber o que cobrar.",
+      ],
+      cta: "Vamos lá",
+    },
+
+    // A Nati pediu a prática ANTES dos scripts: olhar a empresa com quem ela
+    // já conversou é o começo da preparação, e o roteiro vem depois.
+    {
+      tipo: "empresa",
+      chave: "pratica-reuniao",
+      ask: "Primeiro, olhe para a empresa.",
+      support:
+        "Escolha a empresa com quem você vai ter (ou gostaria de ter) uma reunião — alguém com quem você já conversou por mensagem — e responda duas coisas. Toda preparação de reunião começa aqui.",
+      campos: [
+        {
+          tipo: "area",
+          chave: "o_que_eu_ja_sei",
+          rotulo: "O que eu já sei sobre o comercial dessa empresa?",
+        },
+        {
+          tipo: "area",
+          chave: "o_que_entenderia_em_reuniao",
+          rotulo: "O que eu ainda precisaria entender em uma reunião?",
+        },
+      ],
+    },
+    {
       tipo: "copiar",
       chave: "roteiro-abertura",
-      ask: "Etapa 1 — a abertura.",
+      ask: "Roteiro da reunião online — Etapa 1: os primeiros minutos.",
       support:
-        "Não precisa fazer discurso. Essa abertura já estabelece a lógica da reunião: primeiro entender, depois propor.",
+        "A partir daqui é o roteiro para usar DURANTE a reunião com o empresário: deixe esta página (ou a Central de Scripts, gaveta “Na reunião”) aberta enquanto conversa.\n\nNa abertura, não precisa fazer discurso. Ela já estabelece a lógica da reunião: primeiro entender, depois propor.",
       mensagens: [
         {
           titulo: "Abertura",
           texto:
-            "Obrigada por separar esse tempo para conversar comigo, [nome]. Como te falei, eu atuo na área comercial como SDR e Closer. Antes de te explicar onde eu poderia contribuir, queria entender um pouco melhor como vocês trabalham hoje, porque não quero te propor alguma coisa sem conhecer minimamente a operação. Pode ser?",
+            "Obrigada por separar esse tempo para conversar comigo, [nome]. Como te falei, eu trabalho na área comercial, ajudando empresas a atender, acompanhar e fechar vendas com quem chega interessado. Antes de te explicar onde eu poderia contribuir, queria entender um pouco melhor como vocês trabalham hoje, porque não quero te propor alguma coisa sem conhecer minimamente a operação. Pode ser?",
         },
         {
           titulo: "Se a reunião veio de uma situação específica",
@@ -195,7 +233,7 @@ export const dia11: Dia = {
       chave: "roteiro-conexao",
       ask: "Etapa 5 — conecte sua atuação e combine o próximo passo.",
       support:
-        "Só agora. E se não existir oportunidade, dizer isso constrói mais reputação do que forçar uma proposta.",
+        "Só agora. E se não existir oportunidade, dizer isso constrói mais reputação do que forçar uma proposta.\n\n**Sempre que puder, saia da reunião com o valor já falado** — é mais fácil fechar ali do que depois. Os modelos de remuneração estão no Dia 12. Se ainda estiver insegura para falar o preço na hora, use os dois scripts de “proposta depois” abaixo.",
       mensagens: [
         {
           titulo: "Se a necessidade for de SDR",
@@ -218,12 +256,12 @@ export const dia11: Dia = {
             "Pelo que você me contou, hoje eu não vejo um ponto em que faria sentido eu te propor uma atuação só para tentar fechar alguma coisa. Mas foi muito bom conhecer a operação e, se esse cenário mudar, podemos conversar novamente.",
         },
         {
-          titulo: "Pedir permissão para enviar proposta",
+          titulo: "Se ainda não se sentir segura para falar o valor: pedir para enviar proposta",
           texto:
             "Eu consigo enxergar uma possibilidade de atuação aqui. Quero organizar o escopo e te apresentar um formato coerente com o que conversamos. Posso te enviar uma proposta?",
         },
         {
-          titulo: "Se perguntarem o preço na reunião",
+          titulo: "Se perguntarem o preço e você ainda não tiver o valor",
           texto:
             "Quero definir primeiro exatamente o que ficaria sob minha responsabilidade para não te passar um valor desconectado do trabalho. Posso organizar isso e te retornar com uma proposta?",
         },
@@ -242,7 +280,8 @@ export const dia11: Dia = {
       quantidade: 5,
       defineStatus: "abordagem-enviada",
       ask: "Sua operação continua: mais cinco abordagens.",
-      support: "Com estas, você chega a trinta empresas abordadas.",
+      support:
+        "Cinco empresas NOVAS, que ainda não receberam mensagem — se faltar, cadastre aqui embaixo. Com estas, você chega a trinta empresas abordadas.",
       campos: [
         {
           tipo: "radio",
@@ -260,6 +299,22 @@ export const dia11: Dia = {
       ],
     },
 
+    // Pedido da Nati: onde se fala de CRM, a aluna precisa poder contratar.
+    // O preço/condição de aluna entra aqui quando for confirmado.
+    {
+      tipo: "leitura",
+      chave: "crm",
+      ask: "Com reuniões e propostas, a memória não dá mais conta.",
+      support:
+        "Cada reunião gera um próximo passo, cada proposta um retorno para cobrar. O CRM da MultiMeta guarda tudo isso por você: empresas, etapas, follow-ups, reuniões e propostas, num lugar só.",
+      corpo: [
+        "**O Radar do Desafio é o seu treino.** O CRM é a ferramenta que você leva para o dia a dia com os seus clientes — e para dentro da empresa quando fechar o primeiro contrato.",
+        "Ficou com dúvida antes de contratar? Fale com o nosso time pelo WhatsApp do suporte.",
+      ],
+      links: [{ rotulo: "Conhecer e contratar o CRM", href: CRM_SIGNUP_URL }],
+      cta: "Continuar",
+    },
+
     {
       tipo: "empresa",
       chave: "ficha-pos-reuniao",
@@ -271,7 +326,7 @@ export const dia11: Dia = {
       },
       ask: "Fez alguma reunião? Registre agora, enquanto está fresco.",
       support:
-        "Se você não tem reunião, não invente uma — pode seguir. Se fez, preencha aqui: é isso que vai para o seu Radar.",
+        "Se você ainda não teve reunião, não invente uma — toque em “Nenhuma por agora, seguir”. Se fez, preencha aqui: é isso que vai para o seu Radar.",
       campos: [
         {
           tipo: "area",
@@ -311,35 +366,15 @@ export const dia11: Dia = {
         },
       ],
       nota: "Ficou algum escopo estranho em cima da mesa — responder Instagram, fazer tráfego, atender cliente? Anote aqui. Isso é conversa de escopo, e a gente resolve antes de proposta.",
-    },
-
-    // Quem não tem reunião faz a prática curta. Sem simulação teatral.
-    {
-      tipo: "empresa",
-      chave: "pratica-reuniao",
-      ask: "Agora uma prática rápida.",
-      support:
-        "Escolha uma empresa com quem você já conversou e responda duas coisas. Isso é o começo de qualquer preparação de reunião.",
-      campos: [
-        {
-          tipo: "area",
-          chave: "o_que_eu_ja_sei",
-          rotulo: "O que eu já sei sobre o comercial dessa empresa?",
-        },
-        {
-          tipo: "area",
-          chave: "o_que_entenderia_em_reuniao",
-          rotulo: "O que eu ainda precisaria entender em uma reunião?",
-        },
-      ],
       cta: "Concluir minha missão de hoje",
     },
+
   ],
 
   fim: {
     kicker: "Dia 11 concluído",
     titulo: "Percebe onde você chegou?",
-    lede: "Você começou essa jornada sem saber exatamente como uma SDR e uma Closer trabalham. Agora já sabe encontrar empresas, abordar, conversar, acompanhar e sentar com um empresário para entender a operação dele.",
+    lede: "Você começou essa jornada sem saber exatamente como uma SDR e uma Closer trabalham. Agora já sabe encontrar empresas, abordar, conversar, acompanhar — e tem o roteiro para sentar com um empresário. Ainda não teve reunião? Treine: leia o roteiro em voz alta, como se a conversa fosse hoje.",
     badge: "Dia 11 de 21 concluído",
     feito: [
       "Recebeu o roteiro completo de reunião, para abrir durante a call",

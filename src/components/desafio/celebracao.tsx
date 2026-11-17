@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Check } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check } from "lucide-react"
 import type { Fim, ProximoDia } from "@/lib/desafio"
 import { dataCurta, diaDisponivel, semanaDoDia } from "@/lib/desafio"
 
@@ -21,10 +21,13 @@ export function Celebracao({
   fim,
   empresasNoRadar,
   proximo,
+  onVoltar,
 }: {
   fim: Fim
   empresasNoRadar: number
   proximo: ProximoDia
+  /** Volta ao último passo do dia — para reler um script antes de seguir. */
+  onVoltar?: () => void
 }) {
   const temProximo = diaDisponivel(proximo.n)
 
@@ -112,6 +115,19 @@ export function Celebracao({
           : "Voltar para a minha jornada"}
         <ArrowRight className="h-4 w-4" />
       </Link>
+
+      {/* Sem isto, o único jeito de reler o passo de antes era o voltar do
+          navegador — que saía do dia e recomeçava a missão do primeiro passo. */}
+      {onVoltar && (
+        <button
+          type="button"
+          onClick={onVoltar}
+          className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-primary"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Voltar para o dia
+        </button>
+      )}
     </div>
   )
 }

@@ -62,6 +62,42 @@ export function DiasVizinhos({
         )}
       </div>
 
+      {/* A vida real não espera o calendário do Desafio: a reunião pode sair no
+          Dia 7, o contrato no 9. Os dois caminhos ficam no pé de todo dia, e
+          não só na página da jornada, onde ninguém lembrava de procurar. */}
+      <div className="grid grid-cols-2 gap-2">
+        <Link
+          href="/desafio/reuniao"
+          className="flex flex-col gap-0.5 rounded-2xl border border-primary/35 bg-primary-subtle px-4 py-3 transition-colors hover:border-primary"
+        >
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary">
+            Tenho reunião
+          </span>
+          <b className="text-[13px] font-semibold leading-snug text-foreground">
+            Vou fazer uma reunião com um empresário
+          </b>
+        </Link>
+        <Link
+          href="/desafio/fechei"
+          className="flex flex-col gap-0.5 rounded-2xl border border-secondary/40 bg-secondary-subtle/50 px-4 py-3 transition-colors hover:border-secondary"
+        >
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-secondary">
+            Contrato fechado
+          </span>
+          <b className="text-[13px] font-semibold leading-snug text-foreground">
+            Fechei meu contrato
+          </b>
+        </Link>
+      </div>
+      <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs font-semibold">
+        <Link href="/desafio/radar" className="text-primary hover:underline">
+          + Adicionar empresa ao Radar
+        </Link>
+        <Link href="/desafio/scripts" className="text-primary hover:underline">
+          Central de Scripts
+        </Link>
+      </div>
+
       <JornadaMenu
         concluidos={concluidos}
         atual={atual}

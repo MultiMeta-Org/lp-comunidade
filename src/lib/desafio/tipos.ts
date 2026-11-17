@@ -77,6 +77,12 @@ type Base = {
   nota?: string
   /** Texto do botão. Padrão: "Continuar"; no último passo, "Concluir". */
   cta?: string
+  /**
+   * Mostra, no alto do passo, o que ela respondeu num campo anterior do MESMO
+   * dia. É o "falei minha apresentação três vezes" do Dia 5: sem a frase dela
+   * na tela, ela precisava voltar um passo para lembrar o que escreveu.
+   */
+  mostrar?: { chave: string; rotulo: string }
 }
 
 export type Passo =
@@ -189,6 +195,13 @@ export type Passo =
        * seria burocracia sobre um fato que o sistema já sabe.
        */
       defineStatus?: StatusRadar
+      /**
+       * Só as empresas que ela percorreu num passo `empresa` anterior do
+       * mesmo dia (a `chave` dele). É o "qual delas você quer aprofundar?" do
+       * Dia 4: a pergunta é sobre as três do Raio-X, e mostrar o Radar inteiro
+       * fazia parecer que o Raio-X não tinha sido salvo.
+       */
+      entreAs?: string
     })
   /**
    * O funil dela, com os números de verdade. Nada a responder.
@@ -216,6 +229,8 @@ export type Passo =
       interesse: string
       pergunta: string
       opcoes: readonly string[]
+      /** Texto do botão de levantar a mão. Padrão: "Quero entrar na lista". */
+      botao?: string
       /** Passo que a aluna pode pular sem travar o dia. Interesse não é missão. */
       opcional: true
     })

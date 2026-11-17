@@ -64,7 +64,7 @@ export const dia16: Dia = {
       chave: "scripts-retomada",
       ask: "Dois scripts para retomar o que esfriou.",
       support:
-        "Você vai encontrar follow-up atrasado e conversa que simplesmente parou. Não precisa se desculpar demais — só retomar.",
+        "Você vai encontrar follow-up atrasado e conversa que simplesmente parou. Não precisa se desculpar demais — só retomar. Os dois também ficam na **Central de Scripts**, gaveta “Follow-up”.",
       mensagens: [
         {
           titulo: "Follow-up atrasado",
@@ -105,7 +105,7 @@ export const dia16: Dia = {
           ],
         },
       ],
-      nota: "Encontrou follow-up atrasado? Faça agora, não amanhã. Encontrou retorno prometido que você não deu? Faça agora também. Os scripts estão no passo anterior.",
+      nota: "Encontrou follow-up atrasado? Faça agora, não amanhã. Encontrou retorno prometido que você não deu? Faça agora também. Os scripts estão no passo anterior. Tem proposta para mandar? O modelo de proposta (o pré-fechamento) está na Central de Scripts, gaveta “Depois da reunião”; o modelo de contrato, no alto deste dia, é para depois que a proposta for aprovada.",
     },
 
     {
@@ -124,7 +124,8 @@ export const dia16: Dia = {
       quantidade: 5,
       defineStatus: "abordagem-enviada",
       ask: "E mais cinco abordagens.",
-      support: "Com estas você chega a cinquenta e cinco empresas abordadas.",
+      support:
+        "Empresas que ainda não receberam mensagem — se faltar, cadastre aqui embaixo. Com estas você chega a cinquenta e cinco empresas abordadas.",
       campos: [
         {
           tipo: "radio",
@@ -172,8 +173,8 @@ export const dia16: Dia = {
         "Mais o Quiz, para organizar a entrada",
         "Só quero entender melhor antes",
       ],
-      nota: "Quiz → CRM → conversa → reunião → proposta → venda. Quem levanta a mão aqui recebe os detalhes e a condição — sem compromisso nenhum.",
-      cta: "Quero conhecer o CRM + Quiz",
+      botao: "Tenho interesse — quero que a equipe me procure",
+      nota: "Quiz → CRM → conversa → reunião → proposta → venda. Clicando no botão acima, a nossa equipe entra em contato com você com os detalhes e a condição de aluna — sem compromisso nenhum. Se não for para você agora, é só concluir o dia.",
     },
   ],
 

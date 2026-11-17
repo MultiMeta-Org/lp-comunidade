@@ -133,9 +133,10 @@ export const dia04: Dia = {
     {
       tipo: "empresa",
       chave: "quero-aprofundar",
+      entreAs: "raio-x",
       ask: "Qual delas você quer conhecer melhor primeiro?",
       support:
-        "Escolha uma. Essa empresa volta no Dia 6, já te esperando entre as suas cinco.",
+        "Seus três Raio-X estão salvos. Agora escolha uma dessas três — essa empresa volta no Dia 6, já te esperando entre as suas cinco.",
       campos: [
         {
           tipo: "texto",
