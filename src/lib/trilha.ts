@@ -30,6 +30,12 @@ export function trilhaDaRota(pathname: string): Passo[] {
       trilha.push({ label: "Biblioteca" })
     } else if (partes[1] === "radar") {
       trilha.push({ label: "Meu Radar" })
+    } else if (partes[1] === "scripts") {
+      trilha.push({ label: "Central de Scripts" })
+    } else if (partes[1] === "reuniao") {
+      trilha.push({ label: "Vou fazer uma reunião" })
+    } else if (partes[1] === "fechei") {
+      trilha.push({ label: "Fechei meu contrato" })
     }
     return trilha
   }
