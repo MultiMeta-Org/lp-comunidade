@@ -146,7 +146,7 @@ export function MaterialDoDia({ dia, materiais }: { dia: number; materiais: read
       className="mb-7 rounded-2xl border border-border bg-card/80 p-3 shadow-sm backdrop-blur-sm sm:p-4"
     >
       <div className="mb-1.5 flex items-baseline gap-2 px-2">
-        <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-secondary">
+        <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
           Na Biblioteca
         </span>
         <Link

@@ -45,7 +45,7 @@ export function OperacaoDeHoje({ operacao }: { operacao: Operacao }) {
         <div className="flex flex-col gap-2 border-t border-border pt-4">
           {followUpsDeHoje.length > 0 && (
             <Fila
-              icone={<CalendarClock className="h-4 w-4 flex-none text-secondary" />}
+              icone={<CalendarClock className="h-4 w-4 flex-none text-primary" />}
               titulo={`${followUpsDeHoje.length} ${followUpsDeHoje.length === 1 ? "follow-up" : "follow-ups"} para hoje`}
               sub={followUpsDeHoje
                 .slice(0, 3)

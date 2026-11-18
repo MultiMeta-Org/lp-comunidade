@@ -44,7 +44,7 @@ export function Celebracao({
         <Check className="h-8 w-8 sm:h-9 sm:w-9" strokeWidth={2.6} />
       </span>
 
-      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
         {fim.kicker}
       </p>
       <h1 className="max-w-[18ch] font-display text-[clamp(25px,4vw,33px)] font-bold leading-[1.12] text-foreground">
@@ -56,17 +56,17 @@ export function Celebracao({
 
       {placar && (
         <div className="mt-1 flex flex-col items-center gap-0.5 rounded-[20px] border border-dashed border-secondary bg-secondary-subtle/40 px-6 py-4 sm:px-8">
-          <span className="font-display text-[40px] font-bold leading-none text-secondary sm:text-[46px]">
+          <span className="font-display text-[40px] font-bold leading-none text-primary sm:text-[46px]">
             {placar.n}
           </span>
-          <span className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-secondary">
+          <span className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-primary">
             {placar.label}
           </span>
         </div>
       )}
 
       {fim.feito.length > 0 && (
-        <p className="mt-3 w-full text-left text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
+        <p className="mt-3 w-full text-left text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
           Hoje você:
         </p>
       )}
@@ -89,7 +89,7 @@ export function Celebracao({
       </span>
 
       <section className="mt-4 flex w-full flex-col gap-1.5 rounded-[20px] border border-dashed border-border bg-card px-5 py-5 text-left sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
           {proximo.aberto ? "Próximo dia" : temProximo ? "Amanhã" : "Em breve"}
         </p>
         <p className="text-sm leading-relaxed text-muted-foreground">{fim.amanha}</p>

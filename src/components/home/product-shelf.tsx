@@ -171,7 +171,7 @@ function ProductCard({
       {poster}
       <span className="text-sm font-semibold text-foreground">{product.name}</span>
       {locked && product.cta ? (
-        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-secondary transition-all duration-200 group-hover:gap-1.5">
+        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-primary transition-all duration-200 group-hover:gap-1.5">
           {product.cta}
           <ArrowUpRight className="h-3 w-3" />
         </span>
@@ -264,7 +264,7 @@ function Door({
         </small>
       </span>
 
-      <ArrowUpRight className="relative ml-auto h-4 w-4 flex-none self-start text-border transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-secondary" />
+      <ArrowUpRight className="relative ml-auto h-4 w-4 flex-none self-start text-border transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
     </>
   )
 

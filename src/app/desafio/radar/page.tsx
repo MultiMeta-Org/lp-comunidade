@@ -22,7 +22,7 @@ export default async function RadarPage() {
 
       <div className="relative z-10 mx-auto w-full max-w-2xl">
         <header className="mb-8">
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
             Meu Radar
           </p>
           <h1 className="font-display text-3xl font-bold leading-[1.1] text-foreground sm:text-4xl">

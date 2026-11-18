@@ -298,7 +298,7 @@ export default async function AdminDesafioPage({
               >
                 <div className="flex items-baseline justify-between gap-3">
                   <b className="text-sm font-semibold text-foreground">{i.nome}</b>
-                  <span className="font-display text-xl font-bold text-secondary">
+                  <span className="font-display text-xl font-bold text-primary">
                     {i.total}
                   </span>
                 </div>
@@ -513,7 +513,7 @@ function TabelaDeAlunas({ alunas }: { alunas: Aluna[] }) {
                   </span>
                 )}
                 {a.propostas > 0 && (
-                  <span className="ml-1.5 rounded bg-secondary-subtle px-1.5 py-0.5 text-[10px] font-semibold text-secondary">
+                  <span className="ml-1.5 rounded bg-secondary-subtle px-1.5 py-0.5 text-[10px] font-semibold text-primary">
                     {a.propostas} prop.
                   </span>
                 )}

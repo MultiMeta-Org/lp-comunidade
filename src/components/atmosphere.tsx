@@ -34,7 +34,7 @@ export function Atmosphere({
       {variant === "hub" && (
         <>
           <Sprig className="absolute -left-16 -top-8 w-52 rotate-[8deg] text-primary opacity-[0.16] sm:w-64" />
-          <Sun className="absolute right-6 top-10 w-24 text-secondary opacity-[0.22] sm:right-16 sm:w-32" />
+          <Sun className="absolute right-6 top-10 w-24 text-primary opacity-[0.22] sm:right-16 sm:w-32" />
           <Seedhead className="absolute -right-6 top-56 hidden w-24 rotate-[14deg] text-primary opacity-[0.14] lg:block" />
         </>
       )}
@@ -44,7 +44,7 @@ export function Atmosphere({
       {variant === "library" && (
         <>
           <Sprig className="absolute -right-20 -top-6 w-52 -rotate-[14deg] text-primary opacity-[0.15] sm:w-64" />
-          <Seedhead className="absolute -left-10 top-6 w-20 -rotate-[10deg] text-secondary opacity-[0.16] sm:-left-6 sm:w-24" />
+          <Seedhead className="absolute -left-10 top-6 w-20 -rotate-[10deg] text-primary opacity-[0.16] sm:-left-6 sm:w-24" />
         </>
       )}
 

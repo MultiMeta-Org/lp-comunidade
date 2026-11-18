@@ -47,7 +47,7 @@ export default async function LessonPage({
         <div className="relative z-10 mx-auto w-full max-w-2xl space-y-12">
           {/* ── Lesson header ── */}
           <div className="animate-rise" style={{ "--d": "0ms" } as React.CSSProperties}>
-            <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
+            <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
               {lesson.weekday} · {lesson.date}
             </p>
 
@@ -100,7 +100,7 @@ export default async function LessonPage({
                 download
                 className="group flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4 hover:border-primary/45 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 max-w-sm"
               >
-                <div className="w-10 h-10 rounded-xl bg-secondary-subtle text-secondary flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-secondary-subtle text-primary flex items-center justify-center flex-shrink-0">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">

@@ -22,7 +22,7 @@ export default function ErroDoDesafio({
 
   return (
     <main className="mx-auto flex min-h-[60vh] w-full max-w-md flex-col items-start justify-center gap-4 px-4 py-16">
-      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
         Ops, a página travou
       </p>
       <h1 className="font-display text-2xl font-bold leading-tight text-foreground">

@@ -278,7 +278,7 @@ function TudoFeito({
       </section>
 
       <section className="flex flex-col gap-1.5 rounded-[20px] border border-dashed border-border bg-card px-5 py-5 sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
           {acabou ? "A partir de agora" : proximoEscrito ? "Amanhã" : "Em breve"}
         </p>
         <p className="text-sm leading-relaxed text-muted-foreground">{amanha}</p>
