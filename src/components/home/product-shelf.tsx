@@ -14,7 +14,7 @@ import {
 import { LAB_SLUG, MAPA_SLUG, type Product } from "@/lib/home"
 import { MAPA_GUIA_PDF_URL, MAPA_URL, WHATSAPP_VIP_URL } from "@/lib/links"
 import { LAB_NAME, MAPA_NAME, MATERIAL_NAME } from "@/lib/produto"
-import { Modal } from "@/components/ui/modal"
+import { Modal } from "@/components/modal"
 
 /**
  * Fileira de capas de produto. Uma fileira para o que a aluna já tem, outra
