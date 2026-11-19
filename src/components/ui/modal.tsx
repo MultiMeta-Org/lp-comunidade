@@ -17,6 +17,7 @@ const SIZES = {
 
 /**
  * Diálogo centralizado com overlay. Fecha no Esc, no clique fora e no X.
+ * Sem `onClose`, é obrigatório: não tem X e ignora Esc e clique fora.
  * Trava o scroll do body enquanto está aberto.
  *
  * Vai para o `document.body` por PORTAL, e não onde foi escrito. `fixed` e
@@ -33,7 +34,7 @@ export function Modal({
   children,
 }: {
   title: string
-  onClose: () => void
+  onClose?: () => void
   size?: keyof typeof SIZES
   children: React.ReactNode
 }) {
@@ -44,7 +45,7 @@ export function Modal({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
+      if (e.key === "Escape") onClose?.()
     }
     document.addEventListener("keydown", onKey)
     document.body.style.overflow = "hidden"
@@ -73,14 +74,16 @@ export function Modal({
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Fechar"
-            className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fechar"
+              className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
         <div className="p-5">{children}</div>
       </div>

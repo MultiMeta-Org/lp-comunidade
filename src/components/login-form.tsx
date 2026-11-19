@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Mail } from "lucide-react"
+import { KeyRound, Mail } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase/client"
@@ -17,7 +17,7 @@ import {
   InputOTPSeparator,
 } from "@/components/ui/input-otp"
 
-type Step = "email" | "code"
+type Step = "email" | "code" | "password"
 
 export function LoginForm({ className }: { className?: string }) {
   const router = useRouter()
@@ -30,6 +30,7 @@ export function LoginForm({ className }: { className?: string }) {
   const [step, setStep] = useState<Step>("email")
   const [email, setEmail] = useState("")
   const [code, setCode] = useState("")
+  const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(() =>
     initialStatus ? statusMessage(initialStatus) : ""
@@ -140,6 +141,41 @@ export function LoginForm({ className }: { className?: string }) {
     [email, redirectTo, router]
   )
 
+  /** Login por senha: própria, ou a padrão (aí o pop-up de troca abre no portal). */
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError("")
+    setInfo("")
+    try {
+      const res = await fetch("/api/auth/login-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.toLowerCase().trim(), password }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || "Não foi possível entrar.")
+        setPassword("")
+        setLoading(false)
+        return
+      }
+      router.replace(redirectTo)
+      router.refresh()
+    } catch {
+      setError("Erro de conexão. Tente novamente.")
+      setLoading(false)
+    }
+  }
+
+  const goTo = (next: Step) => {
+    setStep(next)
+    setCode("")
+    setPassword("")
+    setError("")
+    setInfo("")
+  }
+
   // Auto-verifica quando o código completa 6 dígitos (sem efeito colateral em effect).
   const handleCodeChange = (value: string) => {
     setCode(value)
@@ -161,12 +197,14 @@ export function LoginForm({ className }: { className?: string }) {
           </div>
         </div>
         <h1 className="text-2xl font-bold mt-2">
-          {step === "email" ? "Entrar" : "Verifique seu e-mail"}
+          {step === "code" ? "Verifique seu e-mail" : "Entrar"}
         </h1>
         <p className="text-balance text-sm text-muted-foreground">
           {step === "email"
             ? "Use o e-mail da sua compra. Enviaremos um código de acesso."
-            : `Enviamos um código de 6 dígitos para ${email}.`}
+            : step === "password"
+              ? "Use o e-mail da sua compra e a sua senha."
+              : `Enviamos um código de 6 dígitos para ${email}.`}
         </p>
       </div>
 
@@ -220,6 +258,60 @@ export function LoginForm({ className }: { className?: string }) {
               {loading ? "Enviando..." : "Enviar código"}
             </Button>
           </form>
+
+          <button
+            type="button"
+            onClick={() => goTo("password")}
+            disabled={loading || googleLoading}
+            className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <KeyRound className="h-3.5 w-3.5" />
+            Entrar com senha
+          </button>
+        </div>
+      ) : step === "password" ? (
+        <div className="grid gap-4">
+          <form onSubmit={handlePasswordSubmit} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email-senha">E-mail</Label>
+              <Input
+                id="email-senha"
+                type="email"
+                autoComplete="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+                autoFocus={!email}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="senha">Senha</Label>
+              <Input
+                id="senha"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+                autoFocus={!!email}
+              />
+            </div>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Entrando..." : "Entrar"}
+            </Button>
+          </form>
+
+          <button
+            type="button"
+            onClick={() => goTo("email")}
+            className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <Mail className="h-3.5 w-3.5" />
+            Entrar com código por e-mail
+          </button>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-5">
