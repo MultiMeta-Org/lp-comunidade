@@ -1,3 +1,4 @@
+import { CRM_POR_DENTRO_URL, MULTIQUIZ_URL } from "../biblioteca"
 import type { Dia } from "../tipos"
 
 /**
@@ -105,7 +106,7 @@ export const dia16: Dia = {
           ],
         },
       ],
-      nota: "Encontrou follow-up atrasado? Faça agora, não amanhã. Encontrou retorno prometido que você não deu? Faça agora também. Os scripts estão no passo anterior. Tem proposta para mandar? O modelo de proposta (o pré-fechamento) está na Central de Scripts, gaveta “Depois da reunião”; o modelo de contrato, no alto deste dia, é para depois que a proposta for aprovada.",
+      nota: "Encontrou follow-up atrasado? Faça agora, não amanhã. Encontrou retorno prometido que você não deu? Faça agora também. Os scripts estão no passo anterior. Tem proposta para mandar? O modelo de proposta (o pré-fechamento) está na Central de Scripts, gaveta “Depois da reunião”, e a versão pronta no Canva fica no Dia 12; o modelo de contrato, no alto deste dia, é para depois que a proposta for aprovada.",
     },
 
     {
@@ -157,7 +158,30 @@ export const dia16: Dia = {
     },
 
     // Depois do conteúdo e da missão, nunca no topo. E sem preço: aqui o
-    // objetivo é identificar interesse.
+    // objetivo é identificar interesse. Antes da pergunta, as duas ferramentas
+    // funcionando de verdade — interesse com base no que ela viu.
+    {
+      tipo: "video",
+      chave: "crm-por-dentro",
+      label: "O CRM por dentro",
+      videoUrl: CRM_POR_DENTRO_URL,
+      formato: "horizontal",
+      ask: "Agora veja o CRM por dentro.",
+      support:
+        "É o que você acabou de fazer à mão — status, próxima ação, follow-up com data — numa ferramenta que lembra por você e mostra o dia do time inteiro.",
+      cta: "Já assisti",
+    },
+    {
+      tipo: "video",
+      chave: "multiquiz",
+      label: "O MultiQuiz na prática",
+      videoUrl: MULTIQUIZ_URL,
+      formato: "horizontal",
+      ask: "E o Quiz, que organiza a entrada.",
+      support:
+        "Um e-book de presente no Instagram que capta o contato, separa quem está quente e mostra se o público certo está chegando.",
+      cta: "Já assisti",
+    },
     {
       tipo: "interesse",
       chave: "crm-quiz",

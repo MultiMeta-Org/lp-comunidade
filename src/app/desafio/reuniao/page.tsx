@@ -84,6 +84,12 @@ export default async function ReuniaoPage() {
             cada pessoa. E, sempre que puder, saia com o valor já falado: é mais fácil
             fechar ali do que depois.
           </p>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            <b className="font-semibold text-foreground">Onde fazer a reunião:</b> Google
+            Meet ou Zoom — plataformas profissionais, com versão gratuita (no Zoom
+            gratuito a reunião vai até 40 minutos). Mande o link junto com a confirmação
+            do horário.
+          </p>
         </section>
       }
     />

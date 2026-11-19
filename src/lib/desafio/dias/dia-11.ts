@@ -83,6 +83,7 @@ export const dia11: Dia = {
         "**2. Leia o roteiro da reunião,** em cinco etapas. Ele é para abrir DURANTE a reunião online — você não precisa decorar nada.",
         "**3. Registre** a reunião que fez (se já fez) e siga com as suas abordagens.",
         "**Quanto tempo dura?** Normalmente de 20 a 30 minutos — e está tudo bem. Algumas se estendem porque o empresário dá abertura para conversar mais; isso depende de cada pessoa.",
+        "**Onde fazer a reunião?** Use uma plataforma profissional de videochamada: Google Meet ou Zoom. As duas têm versão gratuita — no Zoom gratuito a reunião vai até 40 minutos, o que cobre uma reunião normal. Mande o link junto com a confirmação do horário, para o empresário não ficar perdido.",
         "**Leve preço para a reunião.** É mais fácil fechar na reunião do que depois. Antes da sua, dê uma olhada nos modelos de remuneração do Dia 12 para já saber o que cobrar.",
       ],
       cta: "Vamos lá",
@@ -135,6 +136,13 @@ export const dia11: Dia = {
           titulo: "Abertura",
           texto:
             "Obrigada por separar esse tempo para conversar comigo, [nome]. Como te falei, eu trabalho na área comercial, ajudando empresas a atender, acompanhar e fechar vendas com quem chega interessado. Antes de te explicar onde eu poderia contribuir, queria entender um pouco melhor como vocês trabalham hoje, porque não quero te propor alguma coisa sem conhecer minimamente a operação. Pode ser?",
+        },
+        // Pedido da Nati: logo depois da abertura, o fluxo de atendimento
+        // inteiro numa pergunta só — chegada, atendimento, pós-compra, reembolso.
+        {
+          titulo: "O fluxo de atendimento",
+          texto:
+            "Me conta um pouco como é o fluxo de atendimento. Como os leads chegam (organicamente ou tráfego pago)? Vocês têm uma pessoa específica para atender e tirar as dúvidas desse possível cliente? Se a pessoa compra, existe algum tipo de suporte pós-compra caso ela tenha alguma dúvida? Caso a pessoa peça reembolso, existe alguma conversa com ela para tentar reverter esse pedido?",
         },
         {
           titulo: "Se a reunião veio de uma situação específica",

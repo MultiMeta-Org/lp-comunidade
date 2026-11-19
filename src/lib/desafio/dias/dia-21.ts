@@ -267,6 +267,22 @@ export const dia21: Dia = {
       nota: "E presta atenção: você NÃO precisa disso para continuar sua carreira. Você pode construir uma excelente atuação como SDR ou Closer. Isso é para quem olhou para tudo e percebeu que tem ambição de construir algo maior em termos de operação e negócio. Se despertou, conheça — depois você decide se esse é o momento.",
       cta: "Quero conhecer as Sócias de Projeto",
     },
+
+    // Pedido da Nati: no fim do Desafio, a lista da imersão presencial de novo.
+    // Mesmo interesse dos Dias 0, 1 e 20 — quem já entrou vê o passo marcado,
+    // com a resposta dela, e não entra duas vezes.
+    {
+      tipo: "interesse",
+      chave: "closer-presencial-dia-21",
+      interesse: "closer-presencial",
+      opcional: true,
+      ask: "E a imersão presencial: vender em eventos.",
+      support:
+        "Duas vezes por ano eu faço uma imersão presencial em Brasília para ensinar tudo sobre vender em eventos presenciais. Se você quer participar, entre na lista de interessadas e receba as datas da próxima edição.",
+      pergunta: "Você teria disponibilidade para viajar para Brasília?",
+      opcoes: ["Sim", "Talvez, dependendo da data", "Neste momento, não"],
+      nota: "Já entrou na lista em outro dia? Então ela aparece marcada aqui e você não precisa fazer nada — se quiser, só atualize a sua resposta. Os resultados variam e não são garantidos. Entrar na lista não é compra nem compromisso.",
+    },
   ],
 
   fim: {

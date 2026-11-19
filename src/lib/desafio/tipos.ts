@@ -122,6 +122,8 @@ export type Passo =
       mensagens: readonly { titulo?: string; texto: string }[]
       /** A confirmação de envio. É o que ela controla. */
       confirmacao: string
+      /** Botões para fora do portal, como na leitura (ex.: o modelo no Canva). */
+      links?: readonly { rotulo: string; href: string }[]
     })
   /**
    * O Radar. `meta` é quantas empresas o dia pede no total (não a mais).

@@ -95,6 +95,7 @@ export const dia12: Dia = {
         "**Variável** — remuneração vinculada ao resultado.",
       ],
       nota: "Não digite “quanto devo cobrar?” numa IA e aceite o número que aparecer. A Biblioteca tem a aula de remuneração com exemplos.",
+      links: [{ rotulo: "Assistir a aula de remuneração", href: "/desafio/biblioteca/remuneracao" }],
       cta: "Entendi",
     },
 
@@ -177,7 +178,7 @@ export const dia12: Dia = {
       chave: "modelo-proposta",
       ask: "O modelo da proposta.",
       support:
-        "Copie, troque o que está entre colchetes, mande. Oito blocos, nada de vinte e sete páginas. Se quiser deixar mais bonita, monte o mesmo texto no Canva ou no Word — a proposta é o pré-fechamento; o contrato vem depois que ela for aprovada.",
+        "Copie, troque o que está entre colchetes, mande. Oito blocos, nada de vinte e sete páginas. Se quiser deixar mais bonita, use o modelo pronto no Canva (botão abaixo) ou monte o mesmo texto no Word — a proposta é o pré-fechamento; o contrato vem depois que ela for aprovada.",
       mensagens: [
         {
           titulo: "Proposta de atuação comercial",
@@ -215,6 +216,8 @@ Previsão: [data]
 Com a aprovação da proposta, seguimos para contrato, alinhamento inicial e início da operação.`,
         },
       ],
+      // O modelo pronto no Canva, da Nati: é só duplicar e trocar os textos.
+      links: [{ rotulo: "Abrir o modelo de proposta no Canva", href: "https://canva.link/62vlofvmzwidwxu" }],
       confirmacao: "Guardei o modelo — ele fica na Central de Scripts, gaveta “Depois da reunião”.",
     },
 

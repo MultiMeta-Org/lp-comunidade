@@ -56,6 +56,11 @@ const pasta = (nome: string) => `storage://videos/desafio/biblioteca/${nome}`
  */
 export const MONIQUE_FECHAMENTO_URL = pasta("fechamento-high-ticket.mp4")
 
+/** As demonstrações do CRM e do MultiQuiz, que também passam no Dia 16, antes
+ *  do bloco de interesse. */
+export const CRM_POR_DENTRO_URL = pasta("crm-por-dentro.mp4")
+export const MULTIQUIZ_URL = pasta("multiquiz.mp4")
+
 export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
   // ── SDR ──
   {
@@ -68,8 +73,9 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     capa: pasta("sdr-2.jpg"),
     duracao: "5 min",
     // Já foi o material do Dia 10; a Nati trocou pelo vídeo do CRM, que é o
-    // assunto do dia. Segue como aprofundamento do follow-up.
-    aprofunda: [9],
+    // assunto do dia. Segue como aprofundamento do follow-up — e, a pedido
+    // dela, também no alto do Dia 12, ao lado do vídeo do Closer.
+    aprofunda: [9, 12],
   },
   {
     chave: "mentalidade-sdr",
@@ -173,6 +179,18 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     aprofunda: [21],
   },
   {
+    chave: "remuneracao",
+    titulo: "Remuneração: fixo, comissão ou os dois",
+    resumo: "Os três modelos de remuneração com exemplos de valores, por que só comissão pode render mais quando a empresa tem volume, contrato PJ e como funciona a comissão em produto recorrente.",
+    trilha: "closer",
+    tipo: "video",
+    arquivo: pasta("remuneracao.mp4"),
+    capa: pasta("remuneracao.jpg"),
+    duracao: "10 min",
+    // A aula que o passo dos modelos de remuneração do Dia 12 manda assistir.
+    dia: 12,
+  },
+  {
     chave: "modelo-apresentacao",
     titulo: "Modelo de apresentação",
     resumo: "O modelo para apresentar a sua atuação, do Dia 14.",
@@ -207,6 +225,27 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     // Pedido da Nati: o vídeo do CRM é o do Dia 10, no alto do dia.
     dia: 10,
     aprofunda: [11],
+  },
+  {
+    chave: "crm-por-dentro",
+    titulo: "O CRM por dentro",
+    resumo: "Um lead do cadastro ao fechamento: etapas da jornada, observações, follow-up agendado que vira tarefa, a agenda do time e os relatórios.",
+    trilha: "crm",
+    tipo: "video",
+    arquivo: CRM_POR_DENTRO_URL,
+    capa: pasta("crm-por-dentro.jpg"),
+    duracao: "3 min",
+    aprofunda: [11],
+  },
+  {
+    chave: "multiquiz",
+    titulo: "O MultiQuiz na prática",
+    resumo: "Um e-book de presente no Instagram que capta o contato, mostra quem está quente e diz se o público ideal está chegando.",
+    trilha: "crm",
+    tipo: "video",
+    arquivo: MULTIQUIZ_URL,
+    capa: pasta("multiquiz.jpg"),
+    duracao: "1 min",
   },
 ]
 
