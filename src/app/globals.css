@@ -4,7 +4,7 @@
 /* ===== @multimeta/theme: from MultiMeta-Org/multimeta-ui. Do not edit here; change the registry (the sync PR brings it). ===== */
 
 :root {
-  --radius: 0.5rem;
+    --radius: 0.5rem;
   --background: #fafaf8;
   --foreground: #1c1b19;
   --card: #ffffff;
@@ -132,14 +132,14 @@
 }
 
 @utility font-title {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -0.015em;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.015em;
 }
 
 @utility no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;
   }
@@ -155,29 +155,29 @@
 }
 
 html {
-  color-scheme: light;
+    color-scheme: light;
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-sans);
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
 }
 
 button:not(:disabled),
 [role="button"]:not(:disabled) {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-ring);
-  outline-offset: 2px;
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
 }
 
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline-offset: 1px;
+    outline-offset: 1px;
 }
 
 @media (max-width: 640px) {
@@ -338,4 +338,23 @@ select:focus-visible {
     transform: scale(1);
     opacity: 1;
   }
+}
+  [role="option"]:not([aria-disabled="true"]),
+[role="menuitem"]:not([aria-disabled="true"]),
+[role="menuitemcheckbox"]:not([aria-disabled="true"]),
+[role="menuitemradio"]:not([aria-disabled="true"]),
+[role="tab"]:not(:disabled) {
+    cursor: pointer;
+}
+  [data-slot="input"]:focus-visible,
+[data-slot="textarea"]:focus-visible,
+[data-slot="select-trigger"]:focus-visible,
+[data-slot="input-group-control"]:focus-visible,
+[data-slot="combobox-chip-input"]:focus-visible,
+[cmdk-input]:focus-visible,
+[role="option"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[role="menuitemcheckbox"]:focus-visible,
+[role="menuitemradio"]:focus-visible {
+    outline: none;
 }

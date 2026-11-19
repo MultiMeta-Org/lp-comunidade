@@ -5,7 +5,7 @@ description: MultiMeta design system (@multimeta shadcn registry, Petróleo ligh
 
 # MultiMeta UI (`@multimeta`)
 
-One look for every MultiMeta product: **Petróleo on a warm neutral base, light only**, flat surfaces, Plus Jakarta Sans for UI, Newsreader for the page title only, JetBrains Mono for ids/numbers. The source of truth is the registry `MultiMeta-Org/multimeta-ui`; Bruno approves every change there.
+One look for every MultiMeta product: **Petróleo on a warm neutral base, light only**, flat surfaces, Plus Jakarta Sans for UI and page titles, Newsreader only for marketing headlines (landing, login), JetBrains Mono for ids/numbers. The source of truth is the registry `MultiMeta-Org/multimeta-ui`; Bruno approves every change there.
 
 ## The one rule: never edit design-system files in a product
 
@@ -92,7 +92,7 @@ Items: `theme` `utils` `fonts` · `button` `input` `textarea` `label` `select` `
 - **Table**: right-align numbers with `tabular-nums`; column heads `text-xs font-medium text-muted-foreground`.
 - **InputGroup**: use `InputGroupInput`/`InputGroupTextarea` inside it; addons `align="inline-start" | "inline-end" | "block-start" | "block-end"`.
 - **Combobox**: Base UI (`@base-ui/react`), not Radix: `items`, `value`, `onValueChange`; `multiple` with `ComboboxChips`. Always render `ComboboxEmpty` ("Nada encontrado").
-- **PageHeader**: sticky inside the scrolling `<main>` of `AppShell`; the title shrinks when pinned and `back` shows an arrow only then. The only place `font-title` is used.
+- **PageHeader**: sticky inside the scrolling `<main>` of `AppShell`; the title shrinks when pinned and `back` shows an arrow only then. Its title is Plus Jakarta Sans bold, not `font-title`.
 - **Form primitives**: `Field`, `FieldLabel`, `InfoTip`, `ToggleRow`, `Segmented`, `KeywordChips` (+ `splitKeywords`, `addKeywords`). Strings default to Portuguese; translated apps pass `infoLabel` / `triggerLabel` / `placeholder` / `removeLabel` (ComentAqui does this in `components/campaign-form.tsx`).
 - **StatusDot**: `tone="success" | "warning" | "destructive" | "primary" | "muted"` + the word as children.
 - **AccountSwitcher**: controlled (`accounts`, `value`, `onValueChange`); `allValue` adds "Todas as contas"; `connectHref` adds "Conectar conta" and is the empty-state button; `onOpenChange` to refresh the list. The product owns the state (context, URL `?account=`).
@@ -102,7 +102,7 @@ Items: `theme` `utils` `fonts` · `button` `input` `textarea` `label` `select` `
 
 Colors (use the class, never the hex): `background` `foreground` `card` `popover` `primary` (+ `primary-hover`, `primary-soft`, `primary-foreground`) `secondary` `muted` / `muted-foreground` `accent` `destructive` (+ `destructive-soft`) `success` `warning` `border` `border-strong` `input` `ring` `chart-1..5`. Aliases: `surface` (= muted), `surface-hover` (= accent), `border-hover` (= border-strong), `error` (= destructive).
 
-Type: body and table cells `text-sm`; secondary labels `text-[13px] font-medium`; column heads and captions `text-xs font-medium text-muted-foreground`; page title `font-title text-[26px] sm:text-3xl leading-tight` (via `PageHeader`).
+Type: body and table cells `text-sm`; secondary labels `text-[13px] font-medium`; column heads and captions `text-xs font-medium text-muted-foreground`; page title `text-[26px] sm:text-[2rem] font-bold leading-tight tracking-[-0.02em]` (via `PageHeader`).
 
 Shape and density: controls `h-9` and `rounded-lg`; compact items `rounded-md`; cards and dialogs `rounded-xl` with `ring-1 ring-foreground/10`; icons `size-4` (lucide). Radii are Tailwind's defaults (`--radius` is 0.5rem but `--radius-*` is not remapped).
 
@@ -112,7 +112,7 @@ Shape and density: controls `h-9` and `rounded-lg`; compact items `rounded-md`; 
 |---|---|
 | Use semantic tokens (`bg-card`, `text-muted-foreground`, `border-border`, `bg-primary`). | Use hex values or raw palettes (`bg-slate-*`, `text-gray-*`, `bg-teal-*`, `bg-zinc-*`). |
 | Keep the product light only. | Add `dark:` classes, a `.dark` class or a theme toggle. |
-| Use `font-title` (Newsreader) on the page `h1` only, through `PageHeader`. | Use the serif in card titles, dialogs, tables or buttons. |
+| Use `PageHeader` for the app page `h1`; keep `font-title` (Newsreader) for marketing headlines on landing and login pages. | Use the serif in app page titles, card titles, dialogs, tables or buttons. |
 | Use `tabular-nums` and right-align metrics, counts and R$ values. | Show numbers in proportional figures. |
 | Keep fields at 16px on phones (the components already do). | Force plain `text-sm` on inputs, selects or textareas. |
 | Keep surfaces flat: `bg-card` + `ring-1 ring-foreground/10` or `border-border`. | Add heavy shadows, gradients, glow or glass. |
