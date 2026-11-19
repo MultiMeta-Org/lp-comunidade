@@ -1,3 +1,4 @@
+import { INDICE_DO_CADERNO, linkDoCaderno } from "../caderno"
 import type { Dia } from "../tipos"
 
 /**
@@ -65,6 +66,14 @@ export const dia15: Dia = {
       support:
         "Ele abre a sua terceira semana: o que você vai aprender e fazer do Dia 15 ao Dia 21. Se precisar, volte nele nos próximos dias.",
       nota: "Fechou um contrato com um cliente? Toque em “Fechei meu contrato”, no fim de qualquer página do Desafio, e fale com o nosso time: a gente te adiciona na plataforma de pagamento da Conexão MultiMeta.",
+      // O "material aqui embaixo" do vídeo é o Caderno de Campo (a Nati ia
+      // picotar por aula; ficou inteiro na Biblioteca). O botão abre no Dia 15.
+      links: [
+        {
+          rotulo: "Abrir o Caderno de Campo no Dia 15",
+          href: linkDoCaderno(INDICE_DO_CADERNO.find((c) => c.dia === 15)!.pagina),
+        },
+      ],
       cta: "Já assisti",
     },
 

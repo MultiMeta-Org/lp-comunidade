@@ -34,6 +34,11 @@ export default async function FecheiPage() {
           fora: true,
         },
         {
+          titulo: "Veja uma rotina comercial de verdade",
+          texto: "A Nati e o Fábio, closer dela, mostram como é o dia a dia do trabalho deles. É um exemplo — cada empresa tem o seu jeito.",
+          href: "/desafio/biblioteca/nossa-rotina-comercial",
+        },
+        {
           titulo: "Rotina Comercial no Notion",
           texto: "O passo a passo do seu trabalho diário. Para usar, abra o link e clique em “Duplicar” (no canto de cima, à direita) para levar a página para o seu Notion.",
           href: ROTINA_COMERCIAL_NOTION_URL,

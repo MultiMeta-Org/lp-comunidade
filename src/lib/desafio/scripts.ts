@@ -71,6 +71,12 @@ const GAVETAS: readonly { titulo: string; descricao: string; passos: readonly st
 ]
 
 export type Script = { titulo?: string; texto: string; dia: number }
+
+/** A objeção entre aspas no título ("Se disserem “está caro”" → "está caro"). */
+function objecaoDe(titulo?: string): string | null {
+  const m = titulo?.match(/“([^”]+)”/)
+  return m ? m[1].toLowerCase() : null
+}
 export type Gaveta = { titulo: string; descricao: string; scripts: Script[] }
 
 /**
@@ -95,6 +101,18 @@ export function centralDeScripts(liberacao: Liberacao): Gaveta[] {
     descricao: g.descricao,
     scripts: g.passos.flatMap(ler),
   }))
+
+  // O Dia 12 antecipa "está caro" e "preciso pensar", que o Dia 13 trata com
+  // calma. Com a gaveta de Objeções aberta, a resposta mora só lá — senão a
+  // Central mostrava duas versões quase iguais da mesma objeção.
+  const objecoes = new Set(
+    gavetas.find((g) => g.titulo === "Objeções")?.scripts.map((m) => objecaoDe(m.titulo)) ?? []
+  )
+  objecoes.delete(null)
+  for (const g of gavetas) {
+    if (g.titulo === "Objeções") continue
+    g.scripts = g.scripts.filter((m) => !objecoes.has(objecaoDe(m.titulo)))
+  }
 
   // O que nenhum mapeamento pegou.
   const outros: Script[] = []

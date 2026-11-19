@@ -14,14 +14,14 @@
  *                   aprofundar". A BIA não usa esse campo.
  *
  * Sem `arquivo` = o material ainda não chegou: a Biblioteca mostra "em breve"
- * e o dia não mostra nada. Falta o modelo de apresentação do Dia 14, que a
- * Nati ainda vai achar.
+ * e o dia não mostra nada. Um modelo pode morar fora do bucket (o do Dia 14 é
+ * um design no Canva): aí `arquivo` é o https e o /arquivo só redireciona.
  *
  * A BIA conhece as aulas pelas transcrições em
  * multimeta-bia/conteudo/desafio/biblioteca-<chave>.md, que apontam para
  * /desafio/biblioteca/<chave>: mudou a chave, mude lá também.
  */
-export type Trilha = "sdr" | "closer" | "crm"
+export type Trilha = "sdr" | "closer" | "crm" | "rotina"
 
 export type MaterialDaBiblioteca = {
   /** Vai na URL: /desafio/biblioteca/<chave>. */
@@ -31,7 +31,7 @@ export type MaterialDaBiblioteca = {
   resumo: string
   trilha: Trilha
   tipo: "video" | "modelo"
-  /** `storage://bucket/caminho`. Ausente = ainda não chegou. */
+  /** `storage://bucket/caminho`, ou https para modelo de fora (Canva). Ausente = ainda não chegou. */
   arquivo?: string
   /** Capa do vídeo, também `storage://`. */
   capa?: string
@@ -44,6 +44,8 @@ export const TRILHAS: Record<Trilha, { titulo: string; descricao: string }> = {
   sdr: { titulo: "SDR", descricao: "Prospecção: quem abre a conversa e marca a reunião" },
   closer: { titulo: "Closer", descricao: "Fechamento: quem conduz a reunião e fecha o contrato" },
   crm: { titulo: "CRM", descricao: "Organização: onde cada oportunidade fica registrada" },
+  // O "fui contratada, e agora?" que a Nati pediu na Biblioteca.
+  rotina: { titulo: "Rotina", descricao: "Depois do contrato: o dia a dia do trabalho comercial" },
 }
 
 const pasta = (nome: string) => `storage://videos/desafio/biblioteca/${nome}`
@@ -142,8 +144,8 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     arquivo: MONIQUE_FECHAMENTO_URL,
     capa: pasta("fechamento-high-ticket.jpg"),
     duracao: "1h06",
+    // No Dia 11 ela já é um passo (antes do roteiro): no alto do dia, repetia.
     dia: 13,
-    aprofunda: [11],
   },
   {
     chave: "objecoes-e-follow-up",
@@ -187,15 +189,16 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     arquivo: pasta("remuneracao.mp4"),
     capa: pasta("remuneracao.jpg"),
     duracao: "10 min",
-    // A aula que o passo dos modelos de remuneração do Dia 12 manda assistir.
-    dia: 12,
+    // O Dia 12 a abre pelo botão do passo dos modelos de remuneração — onde a
+    // Nati pediu. Sem `dia`, para não aparecer de novo no alto do mesmo dia.
   },
   {
     chave: "modelo-apresentacao",
     titulo: "Modelo de apresentação",
-    resumo: "O modelo para apresentar a sua atuação, do Dia 14.",
+    resumo: "O modelo no Canva para apresentar a sua atuação com cara de profissional: duplique e troque pelos seus dados.",
     trilha: "closer",
     tipo: "modelo",
+    arquivo: "https://canva.link/zocsf5wtp3r6qe0",
     dia: 14,
   },
   {
@@ -235,7 +238,6 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     arquivo: CRM_POR_DENTRO_URL,
     capa: pasta("crm-por-dentro.jpg"),
     duracao: "3 min",
-    aprofunda: [11],
   },
   {
     chave: "multiquiz",
@@ -246,6 +248,31 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     arquivo: MULTIQUIZ_URL,
     capa: pasta("multiquiz.jpg"),
     duracao: "1 min",
+  },
+
+  // ── Rotina ──
+  {
+    chave: "rotina-comercial-evp",
+    titulo: "Rotina comercial, do jeito do Método EVP",
+    resumo: "O dia de quem trabalha no comercial: o que olhar de manhã, quando prospectar, fazer follow-up e marcar reunião, alimentar o CRM e mandar o relatório para a empresária.",
+    trilha: "rotina",
+    tipo: "video",
+    arquivo: pasta("evp-rotina.mp4"),
+    capa: pasta("evp-rotina.jpg"),
+    duracao: "25 min",
+    // Pedido da Nati: o vídeo da Fase 3 do Método EVP no alto do Dia 19.
+    dia: 19,
+  },
+  {
+    chave: "nossa-rotina-comercial",
+    titulo: "Nossa rotina comercial: a Nati e o Fábio",
+    resumo: "Como a Nati e o Fábio, closer dela, trabalham de verdade: as perguntas do começo, falar como a empresa fala, gravar e transcrever reuniões, metas da semana e o relatório de sexta. É um exemplo — cada empresa tem o seu jeito.",
+    trilha: "rotina",
+    tipo: "video",
+    arquivo: pasta("rotina-comercial.mp4"),
+    capa: pasta("rotina-comercial.jpg"),
+    duracao: "29 min",
+    // Mora no "Fechei meu contrato", que é para onde ela vai depois do sim.
   },
 ]
 

@@ -94,6 +94,8 @@ export type Passo =
       label: string
       videoUrl?: string
       formato?: "horizontal" | "vertical"
+      /** Botões embaixo do vídeo (ex.: o capítulo do Caderno de que ele fala). */
+      links?: readonly { rotulo: string; href: string }[]
     })
   /** Ouvir. Do Dia 8 em diante o conteúdo do dia é áudio, não vídeo. `audioUrl`
    *  ausente mostra a mesma cartela do vídeo não gravado. */

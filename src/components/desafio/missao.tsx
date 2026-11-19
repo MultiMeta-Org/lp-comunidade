@@ -513,7 +513,10 @@ function CorpoDoPasso(props: CorpoProps) {
   switch (passo.tipo) {
     case "video":
       return (
-        <Video label={passo.label} src={passo.videoUrl} formato={passo.formato} />
+        <div className="flex flex-col gap-3">
+          <Video label={passo.label} src={passo.videoUrl} formato={passo.formato} />
+          <LinksDoPasso links={passo.links} />
+        </div>
       )
 
     case "audio":

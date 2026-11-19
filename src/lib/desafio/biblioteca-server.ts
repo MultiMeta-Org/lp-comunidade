@@ -57,7 +57,13 @@ export async function assinarMateriais(
   return materiais.map((m) => ({
     ...m,
     disponivel: Boolean(m.arquivo),
-    arquivo: campos.includes("arquivo") && m.arquivo ? assinadas.get(m.arquivo) : undefined,
+    // Link de fora (o modelo no Canva) não tem o que assinar: passa como está.
+    arquivo:
+      campos.includes("arquivo") && m.arquivo
+        ? separar(m.arquivo)
+          ? assinadas.get(m.arquivo)
+          : m.arquivo
+        : undefined,
     capa: m.capa ? assinadas.get(m.capa) : undefined,
   }))
 }

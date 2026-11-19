@@ -16,7 +16,7 @@ const doisDigitos = (n: number) => String(n).padStart(2, "0")
  *   1. Para hoje — o capítulo do Caderno e o material extra do dia em que ela
  *      está. É o que ela mais vai abrir, então vem primeiro.
  *   2. O Caderno de Campo — o PDF inteiro, com o índice por dia recolhido.
- *   3. As aulas extras por trilha (SDR, Closer, CRM), em cards com a capa.
+ *   3. As aulas extras por trilha (SDR, Closer, CRM, Rotina), em cards com a capa.
  *
  * Tudo liberado, como a apostila impressa: é material para revisar, não a
  * missão (que continua um dia por vez no portal).
