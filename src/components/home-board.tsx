@@ -111,7 +111,7 @@ export function HomeBoard({
             style={{ "--d": "0ms" } as React.CSSProperties}
           >
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-secondary">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
                 {todayLabel(now)}
               </p>
               <h1 className="mt-3 font-display text-4xl font-bold leading-[1.05] text-foreground sm:text-5xl">
@@ -121,7 +121,7 @@ export function HomeBoard({
                     ,<br className="sm:hidden" /> <span className="text-primary">{name}</span>
                   </>
                 ) : null}
-                <span className="text-secondary">.</span>
+                <span className="text-primary">.</span>
               </h1>
             </div>
             <p className="mb-1 max-w-[42ch] text-sm leading-relaxed text-muted-foreground">

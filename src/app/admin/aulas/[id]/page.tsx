@@ -67,7 +67,7 @@ export default async function AulaProgressoPage({
             </span>
           )}
           {lesson.open_to_all && (
-            <span className="rounded bg-secondary-subtle px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-secondary">
+            <span className="rounded bg-secondary-subtle px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-primary">
               aberta para todas
             </span>
           )}

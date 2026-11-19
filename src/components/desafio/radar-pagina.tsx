@@ -16,7 +16,7 @@ export function RadarPagina({ inicial }: { inicial: Empresa[] }) {
     <>
       <RadarEditor dia={null} radar={radar} setRadar={setRadar} setErro={setErro} />
       {erro && (
-        <p role="alert" className="mt-4 text-xs font-semibold text-secondary">
+        <p role="alert" className="mt-4 text-xs font-semibold text-destructive">
           {erro}
         </p>
       )}

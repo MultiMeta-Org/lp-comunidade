@@ -45,12 +45,12 @@ export default async function AulasPage() {
         <div className="relative z-10 mx-auto w-full max-w-4xl">
           {/* ── Título ── */}
           <header className="animate-rise" style={{ "--d": "0ms" } as React.CSSProperties}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-secondary">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
               {lab ? LAB_NAME : "Método EVP"}
             </p>
             <h1 className="mt-3 font-display text-4xl sm:text-5xl font-bold leading-[1.05] text-foreground">
               {lab ? MATERIAL_NAME : PLANTAO_NAME}
-              <span className="text-secondary">.</span>
+              <span className="text-primary">.</span>
             </h1>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
               {lab

@@ -43,7 +43,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ chave
           Biblioteca
         </Link>
 
-        <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-secondary">
+        <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
           {TRILHAS[m.trilha].titulo}
         </p>
         <h1 className="mb-5 font-display text-[clamp(24px,3.6vw,32px)] font-bold leading-[1.15] text-foreground">

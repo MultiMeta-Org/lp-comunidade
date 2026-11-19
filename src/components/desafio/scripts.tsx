@@ -51,7 +51,7 @@ function ScriptParaCopiar({ titulo, texto, dia }: { titulo?: string; texto: stri
     <li className="flex flex-col gap-2.5 rounded-[14px] border border-border bg-background/60 px-4 py-3.5">
       <div className="flex items-baseline gap-2">
         {titulo && (
-          <p className="min-w-0 flex-1 text-[10.5px] font-bold uppercase tracking-[0.12em] text-secondary">
+          <p className="min-w-0 flex-1 text-[10.5px] font-bold uppercase tracking-[0.12em] text-primary">
             {titulo}
           </p>
         )}

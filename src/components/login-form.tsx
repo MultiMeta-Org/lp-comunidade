@@ -15,7 +15,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
   InputOTPSeparator,
-} from "@/components/ui/input-otp"
+} from "@/components/input-otp"
 
 type Step = "email" | "code"
 

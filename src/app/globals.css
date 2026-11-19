@@ -1,52 +1,39 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+/* ===== @multimeta/theme: from MultiMeta-Org/multimeta-ui. Do not edit here; change the registry (the sync PR brings it). ===== */
 
 :root {
-  --background: #F5F2ED;
-  --foreground: #2A2A2A;
-  --card: #FCFAF8;
-  --card-foreground: #2A2A2A;
-  --popover: #FCFAF8;
-  --popover-foreground: #2A2A2A;
-  --primary: #758E67;
-  --primary-foreground: #FFFFFF;
-  --secondary: #C76E49;
-  --secondary-foreground: #FFFFFF;
-  --muted: #E9E0D5;
-  --muted-foreground: #5A524A;
-  --accent: #EDE7DD;
-  --accent-foreground: #2A2A2A;
-  --destructive: #B54A4B;
-  --destructive-foreground: #FFFFFF;
-  --success: #758E67;
-  --success-foreground: #FFFFFF;
-  --warning: #E2B04B;
-  --warning-foreground: #2A2A2A;
-  --info: #6B8DAD;
-  --info-foreground: #FFFFFF;
-  --primary-subtle: #D0DEC8;
-  --secondary-subtle: #F0D1C1;
-  --success-subtle: #D0DEC8;
-  --warning-subtle: #F5E4B8;
-  --info-subtle: #C9DBEA;
-  --destructive-subtle: #ECCECE;
-  --muted-subtle: #E9E0D5;
-  --border: #D8CFC4;
-  --input: #D8CFC4;
-  --ring: #758E67;
-  --radius: 0.5rem;
-  --font-sans: var(--font-geist-sans, Geist), ui-sans-serif, sans-serif, system-ui;
-  /* A fonte de display (títulos, nomes de produto, números) é uma MONOSPACE,
-     e não um slab. O motivo é a leitura de número: o Desafio mostra dígito em
-     toda tela — o anel, o placar, a escala de 0 a 10, o contador dos 21 dias —
-     e os numerais da Enriqueta ficavam baixos e achatados ao lado das palavras.
-     Mono resolve isso de graça: todo dígito tem a mesma largura, então coluna
-     de números alinha sem tabela.
-     Chama-se `display`, e não `mono`, porque o papel dela aqui é esse — a
-     indireção é o que deixa a próxima troca de família custar uma linha. */
-  --font-display-stack: var(--font-geist-mono), ui-monospace, monospace;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --shadow-sm: 0px 4px 12px -3.5px hsl(0 0% 0% / 0.05), 0px 1px 2px -4.5px hsl(0 0% 0% / 0.05);
-  --shadow-md: 0px 4px 12px -3.5px hsl(0 0% 0% / 0.05), 0px 2px 4px -4.5px hsl(0 0% 0% / 0.05);
+    --radius: 0.5rem;
+  --background: #fafaf8;
+  --foreground: #1c1b19;
+  --card: #ffffff;
+  --card-foreground: #1c1b19;
+  --popover: #ffffff;
+  --popover-foreground: #1c1b19;
+  --primary: #1e6767;
+  --primary-hover: #175454;
+  --primary-foreground: #ffffff;
+  --primary-soft: #e0eeec;
+  --secondary: #f3f1ed;
+  --secondary-foreground: #57534e;
+  --muted: #f3f1ed;
+  --muted-foreground: #737069;
+  --accent: #edeae4;
+  --accent-foreground: #1c1b19;
+  --destructive: #b23a2e;
+  --destructive-soft: #fbebe8;
+  --success: #3a7a3f;
+  --warning: #ad6a00;
+  --border: #e9e7e3;
+  --border-strong: #d6d3ce;
+  --input: #d6d3ce;
+  --ring: #1e6767;
+  --chart-1: #1e6767;
+  --chart-2: #d08a4e;
+  --chart-3: #8e9a58;
+  --chart-4: #6c6a9e;
+  --chart-5: #c26e6e;
 }
 
 @theme inline {
@@ -54,46 +41,195 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
   --color-success: var(--success);
   --color-warning: var(--warning);
-  --color-info: var(--info);
-  --color-primary-subtle: var(--primary-subtle);
-  --color-secondary-subtle: var(--secondary-subtle);
-  --color-muted-subtle: var(--muted-subtle);
-  --color-info-subtle: var(--info-subtle);
-  --color-warning-subtle: var(--warning-subtle);
-  --color-info-foreground: var(--info-foreground);
-  --color-warning-foreground: var(--warning-foreground);
-  --color-secondary-foreground: var(--secondary-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-surface: var(--muted);
+  --color-surface-hover: var(--accent);
+  --color-border-hover: var(--border-strong);
+  --color-error: var(--destructive);
+  --font-sans: var(--font-jakarta), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
 
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-  --font-display: var(--font-display-stack);
+@custom-variant dark (&:is(.dark *));
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+@custom-variant data-open {
+  &:where([data-state="open"]),
+  &:where([data-open]:not([data-open="false"])) {
+    @slot;
+  }
+}
 
-  --shadow-sm: var(--shadow-sm);
-  --shadow-md: var(--shadow-md);
+@custom-variant data-closed {
+  &:where([data-state="closed"]),
+  &:where([data-closed]:not([data-closed="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-checked {
+  &:where([data-state="checked"]),
+  &:where([data-checked]:not([data-checked="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-unchecked {
+  &:where([data-state="unchecked"]),
+  &:where([data-unchecked]:not([data-unchecked="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-disabled {
+  &:where([data-disabled="true"]),
+  &:where([data-disabled]:not([data-disabled="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-active {
+  &:where([data-state="active"]),
+  &:where([data-active]:not([data-active="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-horizontal {
+  &:where([data-orientation="horizontal"]) {
+    @slot;
+  }
+}
+
+@custom-variant data-vertical {
+  &:where([data-orientation="vertical"]) {
+    @slot;
+  }
+}
+
+@utility font-title {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+}
+
+@utility no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after,
+  ::backdrop {
+    border-color: var(--color-border);
+  }
+}
+
+html {
+    color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+}
+
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+    cursor: pointer;
+}
+
+:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+    outline-offset: 1px;
+}
+
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== LP Comunidade only: legacy display and educational illustrations. ===== */
+:root {
+  --destructive-foreground: #ffffff;
+  --success-foreground: #ffffff;
+  --warning-foreground: #2a2a2a;
+  --info: #6b8dad;
+  --info-foreground: #ffffff;
+  --primary-subtle: var(--primary-soft);
+  --secondary-subtle: var(--accent);
+  --success-subtle: #d0dec8;
+  --warning-subtle: #f5e4b8;
+  --info-subtle: #c9dbea;
+  --destructive-subtle: #eccece;
+  --muted-subtle: var(--muted);
+  --font-display-stack: var(--font-geist-mono), ui-monospace, monospace;
+  --shadow-sm: 0px 4px 12px -3.5px hsl(0 0% 0% / 0.05), 0px 1px 2px -4.5px hsl(0 0% 0% / 0.05);
+  --shadow-md: 0px 4px 12px -3.5px hsl(0 0% 0% / 0.05), 0px 2px 4px -4.5px hsl(0 0% 0% / 0.05);
+}
+
+@theme inline {
+  --color-info: var(--info);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-secondary-subtle: var(--secondary-subtle);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-info-subtle: var(--info-subtle);
+  --color-destructive-subtle: var(--destructive-subtle);
+  --color-muted-subtle: var(--muted-subtle);
+  --color-info-foreground: var(--info-foreground);
+  --color-warning-foreground: var(--warning-foreground);
+  --font-display: var(--font-display-stack);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -202,4 +338,23 @@ body {
     transform: scale(1);
     opacity: 1;
   }
+}
+  [role="option"]:not([aria-disabled="true"]),
+[role="menuitem"]:not([aria-disabled="true"]),
+[role="menuitemcheckbox"]:not([aria-disabled="true"]),
+[role="menuitemradio"]:not([aria-disabled="true"]),
+[role="tab"]:not(:disabled) {
+    cursor: pointer;
+}
+  [data-slot="input"]:focus-visible,
+[data-slot="textarea"]:focus-visible,
+[data-slot="select-trigger"]:focus-visible,
+[data-slot="input-group-control"]:focus-visible,
+[data-slot="combobox-chip-input"]:focus-visible,
+[cmdk-input]:focus-visible,
+[role="option"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[role="menuitemcheckbox"]:focus-visible,
+[role="menuitemradio"]:focus-visible {
+    outline: none;
 }

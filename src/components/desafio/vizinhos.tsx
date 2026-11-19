@@ -81,7 +81,7 @@ export function DiasVizinhos({
           href="/desafio/fechei"
           className="flex flex-col gap-0.5 rounded-2xl border border-secondary/40 bg-secondary-subtle/50 px-4 py-3 transition-colors hover:border-secondary"
         >
-          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-secondary">
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary">
             Contrato fechado
           </span>
           <b className="text-[13px] font-semibold leading-snug text-foreground">

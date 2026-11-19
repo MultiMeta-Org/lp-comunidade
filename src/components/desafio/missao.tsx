@@ -226,7 +226,7 @@ export function Missao({
       </div>
 
       <div className="mb-6 flex items-baseline gap-3">
-        <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-secondary">
+        <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
           {dia.kicker}
         </span>
         <span className="ml-auto text-[11px] font-semibold text-muted-foreground">
@@ -295,7 +295,7 @@ export function Missao({
           Voltar fica embaixo, onde um toque errado não desfaz o passo. */}
       <div className="mt-9 flex flex-col gap-3.5 border-t border-border pt-6">
         {erro && (
-          <span role="alert" className="text-[13px] font-semibold text-secondary">
+          <span role="alert" className="text-[13px] font-semibold text-destructive">
             {erro}
           </span>
         )}
@@ -459,7 +459,7 @@ function RecadoDoVolume({ tem, meta, audio }: { tem: number; meta: number; audio
       role="status"
       className="flex flex-col gap-3 rounded-[18px] border border-secondary/40 bg-secondary-subtle/40 px-4 py-4 sm:px-5"
     >
-      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-secondary">
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
         {falta === 1 ? "Falta 1 empresa" : `Faltam ${falta} empresas`} para a meta de hoje
       </p>
       {audio && (
@@ -983,7 +983,7 @@ function Opcao({
           botão para fora da tela no celular. */}
       <span className="min-w-0 flex-1 break-words">{rotulo}</span>
       {etiqueta && (
-        <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
+        <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-primary">
           {etiqueta}
         </span>
       )}
@@ -1181,7 +1181,7 @@ function Copiar({
           className="flex flex-col gap-3 rounded-[18px] border border-border bg-card px-4 py-4 sm:px-5"
         >
           {msg.titulo && (
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-secondary">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
               {msg.titulo}
             </p>
           )}
@@ -1418,7 +1418,7 @@ export function RadarEditor({
                     {empresa.nome}
                   </b>
                   {empresa.status !== "no-radar" && (
-                    <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
+                    <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-primary">
                       {STATUS_RADAR[empresa.status as StatusRadar] ?? empresa.status}
                     </span>
                   )}
@@ -1708,7 +1708,7 @@ function FormularioDaEmpresa({
         )}
       </div>
       {aviso && (
-        <small role="status" className="text-xs font-semibold text-secondary">
+        <small role="status" className="text-xs font-semibold text-primary">
           {aviso}
         </small>
       )}
@@ -1971,13 +1971,13 @@ function EmpresaDoPasso({
   }, [rotulo, setRotulo])
 
   const contador = livre ? (
-    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
       {feitas.length === 0
         ? "Nenhuma ainda"
         : `${feitas.length} ${feitas.length === 1 ? "conversa trabalhada" : "conversas trabalhadas"}`}
     </p>
   ) : meta > 1 ? (
-    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
       {completo
         ? `${feitas.length} de ${meta} prontas`
         : `Empresa ${feitas.length + 1} de ${meta}`}
@@ -2089,7 +2089,7 @@ function EmpresaDoPasso({
               </b>
             </span>
             {etiquetaDoStatus(empresa) && (
-              <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-secondary">
+              <span className="flex-none rounded-full bg-secondary-subtle px-2.5 py-1 text-[10px] font-bold text-primary">
                 {etiquetaDoStatus(empresa)}
               </span>
             )}

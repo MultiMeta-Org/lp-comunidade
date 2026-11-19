@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react"
 import Link from "next/link"
 import { BarChart3, Trash2, Upload, FileCheck2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Modal } from "@/components/ui/modal"
+import { Modal } from "@/components/modal"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CATEGORIES, categoryLabel, weekdayFromIso } from "@/lib/lessons"
@@ -281,7 +281,7 @@ export function LessonsManager({
                     <span>·</span>
                     <span>{categoryLabel(l.category)}</span>
                     {l.openToAll && (
-                      <span className="rounded bg-secondary-subtle px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-secondary">
+                      <span className="rounded bg-secondary-subtle px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-primary">
                         aberta
                       </span>
                     )}

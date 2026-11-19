@@ -274,7 +274,7 @@ function BotaoDePosse({
       title={tem ? `Tirar o ${nome} desta aluna` : `Dar o ${nome} a esta aluna`}
       className={`inline-flex cursor-pointer items-center gap-1.5 rounded px-2 py-0.5 text-[11px] font-semibold transition-colors disabled:opacity-60 ${
         tem
-          ? "bg-secondary-subtle text-secondary hover:bg-secondary hover:text-secondary-foreground"
+          ? "bg-secondary-subtle text-primary hover:bg-secondary hover:text-secondary-foreground"
           : "bg-muted text-muted-foreground hover:bg-accent hover:text-foreground"
       }`}
     >
