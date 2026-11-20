@@ -362,7 +362,12 @@ export async function POST(req: NextRequest) {
         await registraCompra(extra)
         const { error } = await db
           .from("authorized_emails")
-          .update(ligaExtra(extra, false))
+          .update({
+            ...ligaExtra(extra, false),
+            // A automação de WhatsApp do reembolso procura o telefone aqui,
+            // e quem comprou antes de o portal gravar o telefone não o tem.
+            ...(buyerPhone ? { phone: buyerPhone } : {}),
+          })
           .eq("email", buyerEmail)
         if (error) {
           console.error(`[hotmart] pedido de reembolso ${extra.nome} error:`, error.message)
