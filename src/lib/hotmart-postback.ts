@@ -21,7 +21,10 @@ interface HotmartPayload {
       name?: string
       first_name?: string
       last_name?: string
+      /** Só no abandono de carrinho; já vem com o 55. */
       phone?: string
+      /** Nas compras: DDD + número, sem o 55 (checkout_phone_code é só o DDD). */
+      checkout_phone?: string
     }
   }
 }
@@ -117,7 +120,7 @@ export async function lerPostback(
         body.data?.buyer?.name ||
         `${body.data?.buyer?.first_name || ""} ${body.data?.buyer?.last_name || ""}`.trim() ||
         null,
-      buyerPhone: body.data?.buyer?.phone || null,
+      buyerPhone: body.data?.buyer?.checkout_phone || body.data?.buyer?.phone || null,
       transactionId: body.data?.purchase?.transaction || null,
       productId,
       purchaseTimestamp,
