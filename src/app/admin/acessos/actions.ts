@@ -3,8 +3,37 @@
 import { revalidatePath } from "next/cache"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
 import { requireAdmin } from "@/lib/guard"
+import { preencherTelefones } from "@/lib/hotmart-telefones"
 
 export type ActionResult = { ok: boolean; error?: string }
+
+export type TelefonesResult =
+  | { ok: true; gravados: number; semNumero: number; temMais: boolean }
+  | { ok: false; error: string }
+
+/**
+ * Busca na Hotmart o telefone de quem está sem — o mesmo passo do sync
+ * noturno, aqui num clique.
+ *
+ * Existe porque esperar o cron (ou chamar a rota com o CRON_SECRET na mão) é
+ * caro demais para uma pergunta tão simples quanto "cadê o WhatsApp dela".
+ * Pode levar alguns minutos quando a fila está cheia: é uma consulta à Hotmart
+ * por aluna sem número.
+ */
+export async function buscarTelefonesNaHotmart(): Promise<TelefonesResult> {
+  await requireAdmin()
+
+  try {
+    const r = await preencherTelefones()
+    revalidateAcessos()
+    revalidatePath("/admin/desafio")
+    return { ok: true, ...r }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error("[admin] telefones:", msg)
+    return { ok: false, error: msg }
+  }
+}
 
 /** As duas rotas do admin que mostram acesso — ambas precisam reler. */
 function revalidateAcessos() {

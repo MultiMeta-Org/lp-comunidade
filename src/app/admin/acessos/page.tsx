@@ -7,6 +7,11 @@ import { Pager } from "@/components/admin/pager"
 
 export const metadata = { title: "Acessos · Admin" }
 
+// O botão "Buscar telefones na Hotmart" é uma server action desta página, e ela
+// faz uma consulta à API por aluna sem número — o padrão de 15s derrubaria a
+// busca no meio.
+export const maxDuration = 300
+
 const PAGE_SIZE = 25
 
 type Filtro = "todos" | "ativos" | "revogados"

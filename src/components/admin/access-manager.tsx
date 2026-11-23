@@ -9,6 +9,7 @@ import { TelefoneWhatsApp } from "@/components/telefone-whatsapp"
 import { LAB_NAME } from "@/lib/produto"
 import {
   addAuthorizedEmail,
+  buscarTelefonesNaHotmart,
   revokeAccess,
   reactivateAccess,
   setDesafioAccess,
@@ -56,6 +57,30 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
   const [error, setError] = useState("")
   const [aviso, setAviso] = useState("")
   const [pending, startTransition] = useTransition()
+  // Transição própria: a busca de telefones leva minutos, e ela não pode
+  // deixar os botões de acesso da tabela travados enquanto roda.
+  const [buscandoTelefones, startBuscaDeTelefones] = useTransition()
+  const [resultadoDaBusca, setResultadoDaBusca] = useState("")
+
+  const buscarTelefones = () => {
+    setResultadoDaBusca("")
+    startBuscaDeTelefones(async () => {
+      const r = await buscarTelefonesNaHotmart()
+      if (!r.ok) {
+        setResultadoDaBusca(`A Hotmart recusou a consulta: ${r.error}`)
+        return
+      }
+      setResultadoDaBusca(
+        [
+          r.gravados === 1 ? "1 telefone preenchido" : `${r.gravados} telefones preenchidos`,
+          r.semNumero > 0 ? `${r.semNumero} sem número cadastrado na Hotmart` : null,
+          r.temMais ? "ainda sobrou fila — clique de novo para continuar" : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      )
+    })
+  }
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
@@ -162,6 +187,24 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
           {pending ? "Salvando..." : "Liberar acesso"}
         </Button>
       </form>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={buscandoTelefones}
+          onClick={buscarTelefones}
+        >
+          {buscandoTelefones ? "Buscando na Hotmart..." : "Buscar telefones na Hotmart"}
+        </Button>
+        <p className="text-xs text-muted-foreground">
+          {buscandoTelefones
+            ? "Pode levar alguns minutos: é uma consulta por aluna sem número."
+            : resultadoDaBusca ||
+              "Preenche o WhatsApp de quem está sem, com o telefone da compra."}
+        </p>
+      </div>
 
       {error && <p className="text-xs text-destructive">{error}</p>}
       {aviso && (

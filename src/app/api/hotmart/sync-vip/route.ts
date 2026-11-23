@@ -1,24 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
-import {
-  listarVendas,
-  listarProdutos,
-  listarTelefones,
-  telefoneDoEmail,
-  pareceComunidadeVip,
-} from "@/lib/hotmart-api"
+import { listarVendas, listarProdutos, pareceComunidadeVip } from "@/lib/hotmart-api"
+import { preencherTelefones } from "@/lib/hotmart-telefones"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
-
-/**
- * Quantas alunas sem telefone o sync consulta por e-mail numa rodada.
- *
- * É uma requisição à Hotmart por aluna, e a rota tem teto de 300s. 300 em lotes
- * de 5 cabem com folga; o que sobrar entra na rodada seguinte, e a fila drena
- * sozinha porque quem é atendida sai dela.
- */
-const LIMITE_POR_EMAIL = 300
 
 /**
  * GET /api/hotmart/sync-vip
@@ -77,22 +63,6 @@ export async function GET(req: NextRequest) {
   if (ids.length === 0) {
     return NextResponse.json({ ok: true, aviso: "Nenhum produto da VIP cadastrado" })
   }
-
-  // O telefone é buscado para os produtos da VIP E do Desafio: quem só comprou
-  // o Desafio também precisa de WhatsApp no admin, e esse id não está em
-  // vip_products.
-  const { data: produtosDoDesafio } = await db
-    .from("desafio_products")
-    .select("hotmart_product_id")
-
-  const idsComTelefone = [
-    ...new Set([
-      ...ids,
-      ...(produtosDoDesafio ?? [])
-        .map((p) => p.hotmart_product_id)
-        .filter((id): id is string => Boolean(id)),
-    ]),
-  ]
 
   let lidas = 0
   let criadas = 0
@@ -206,90 +176,16 @@ export async function GET(req: NextRequest) {
 
   // ── Telefones ──
   //
-  // Preenche `phone` de quem está sem. Só de quem está sem, de propósito: o
-  // número que a aluna confirmou (postback ou digitado por ela) vale mais que o
-  // do cadastro antigo da Hotmart, e sobrescrever desfaria uma correção.
-  //
-  // Tem try próprio porque é um ENFEITE do sync: se a Hotmart recusar
-  // sales/users, o acesso das alunas — que é a razão desta rota existir — não
-  // pode cair junto.
+  // Try próprio porque é um ENFEITE do sync: se a Hotmart recusar sales/users,
+  // o acesso das alunas — que é a razão desta rota existir — não pode cair
+  // junto. A lógica mora em hotmart-telefones.ts porque o botão do admin chama
+  // a mesma coisa.
   try {
-    const telefonePor = new Map<string, string>()
-    for (const id of idsComTelefone) {
-      for (const t of await listarTelefones(id)) {
-        if (!telefonePor.has(t.email)) telefonePor.set(t.email, t.telefone)
-      }
-    }
-
-    const emails = [...telefonePor.keys()]
-    // Em lotes: um `in(...)` com a base inteira estoura o tamanho da URL.
-    for (let i = 0; i < emails.length; i += 200) {
-      const lote = emails.slice(i, i + 200)
-      const { data: semTelefone, error } = await db
-        .from("authorized_emails")
-        .select("email")
-        .in("email", lote)
-        .is("phone", null)
-      if (error) throw new Error(error.message)
-
-      for (const linha of semTelefone ?? []) {
-        const telefone = telefonePor.get(linha.email.toLowerCase())
-        if (!telefone) continue
-        const { error: erroUpdate } = await db
-          .from("authorized_emails")
-          .update({ phone: telefone })
-          .eq("email", linha.email)
-          .is("phone", null)
-        if (erroUpdate) throw new Error(erroUpdate.message)
-        telefonesGravados++
-      }
-    }
-
-    // Quem continuou sem número: pergunta à Hotmart pelo E-MAIL dela, sem
-    // passar por produto. A varredura acima só enxerga os produtos cadastrados
-    // no portal; quem comprou outra coisa da conta não apareceria nela.
-    //
-    // Fora da fila só o seed manual do time (`source='manual'`): aquele e-mail
-    // não tem venda na Hotmart para consultar, e perguntar por ele toda noite
-    // seria gastar requisição para sempre ouvir "não tenho". Todo o resto entra,
-    // inclusive `marketplace_sync`, que é a origem da maior parte da base — o
-    // espelho do marketplace, de onde vem quem comprou o Método.
-    const { data: aindaSemTelefone, error: erroSemTelefone } = await db
-      .from("authorized_emails")
-      .select("email")
-      .is("phone", null)
-      .or("source.is.null,source.neq.manual")
-      .limit(LIMITE_POR_EMAIL)
-    if (erroSemTelefone) throw new Error(erroSemTelefone.message)
-
-    const pendentes = (aindaSemTelefone ?? []).map((l) => l.email)
-    // Em lotes pequenos e em paralelo: uma por vez levaria minutos com algumas
-    // centenas de alunas, e o teto da rota é maxDuration.
-    for (let i = 0; i < pendentes.length; i += 5) {
-      const lote = pendentes.slice(i, i + 5)
-      const achados = await Promise.all(
-        lote.map(async (email) => ({ email, telefone: await telefoneDoEmail(email) }))
-      )
-      for (const { email, telefone } of achados) {
-        if (!telefone) continue
-        const { error } = await db
-          .from("authorized_emails")
-          .update({ phone: telefone })
-          .eq("email", email)
-          .is("phone", null)
-        if (error) throw new Error(error.message)
-        telefonesGravados++
-      }
-    }
-
-    if (telefonesGravados > 0) {
-      console.log(`[sync-vip] ${telefonesGravados} telefone(s) preenchido(s)`)
-    }
-    if (pendentes.length === LIMITE_POR_EMAIL) {
-      console.log(
-        `[sync-vip] teto de ${LIMITE_POR_EMAIL} consultas por rodada atingido — o resto entra na próxima`
-      )
-    }
+    const r = await preencherTelefones()
+    telefonesGravados = r.gravados
+    console.log(
+      `[sync-vip] telefones · ${r.gravados} gravado(s) · ${r.semNumero} sem número na Hotmart${r.temMais ? " · sobrou fila para a próxima rodada" : ""}`
+    )
   } catch (e) {
     console.error("[sync-vip] telefones:", e instanceof Error ? e.message : String(e))
   }
