@@ -4,11 +4,21 @@ import {
   listarVendas,
   listarProdutos,
   listarTelefones,
+  telefoneDoEmail,
   pareceComunidadeVip,
 } from "@/lib/hotmart-api"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
+
+/**
+ * Quantas alunas sem telefone o sync consulta por e-mail numa rodada.
+ *
+ * É uma requisição à Hotmart por aluna, e a rota tem teto de 300s. 300 em lotes
+ * de 5 cabem com folga; o que sobrar entra na rodada seguinte, e a fila drena
+ * sozinha porque quem é atendida sai dela.
+ */
+const LIMITE_POR_EMAIL = 300
 
 /**
  * GET /api/hotmart/sync-vip
@@ -235,8 +245,50 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Quem continuou sem número: pergunta à Hotmart pelo E-MAIL dela, sem
+    // passar por produto. A varredura acima só enxerga os produtos cadastrados
+    // no portal; quem comprou outra coisa da conta não apareceria nela.
+    //
+    // Fora da fila só o seed manual do time (`source='manual'`): aquele e-mail
+    // não tem venda na Hotmart para consultar, e perguntar por ele toda noite
+    // seria gastar requisição para sempre ouvir "não tenho". Todo o resto entra,
+    // inclusive `marketplace_sync`, que é a origem da maior parte da base — o
+    // espelho do marketplace, de onde vem quem comprou o Método.
+    const { data: aindaSemTelefone, error: erroSemTelefone } = await db
+      .from("authorized_emails")
+      .select("email")
+      .is("phone", null)
+      .or("source.is.null,source.neq.manual")
+      .limit(LIMITE_POR_EMAIL)
+    if (erroSemTelefone) throw new Error(erroSemTelefone.message)
+
+    const pendentes = (aindaSemTelefone ?? []).map((l) => l.email)
+    // Em lotes pequenos e em paralelo: uma por vez levaria minutos com algumas
+    // centenas de alunas, e o teto da rota é maxDuration.
+    for (let i = 0; i < pendentes.length; i += 5) {
+      const lote = pendentes.slice(i, i + 5)
+      const achados = await Promise.all(
+        lote.map(async (email) => ({ email, telefone: await telefoneDoEmail(email) }))
+      )
+      for (const { email, telefone } of achados) {
+        if (!telefone) continue
+        const { error } = await db
+          .from("authorized_emails")
+          .update({ phone: telefone })
+          .eq("email", email)
+          .is("phone", null)
+        if (error) throw new Error(error.message)
+        telefonesGravados++
+      }
+    }
+
     if (telefonesGravados > 0) {
       console.log(`[sync-vip] ${telefonesGravados} telefone(s) preenchido(s)`)
+    }
+    if (pendentes.length === LIMITE_POR_EMAIL) {
+      console.log(
+        `[sync-vip] teto de ${LIMITE_POR_EMAIL} consultas por rodada atingido — o resto entra na próxima`
+      )
     }
   } catch (e) {
     console.error("[sync-vip] telefones:", e instanceof Error ? e.message : String(e))

@@ -208,57 +208,100 @@ function primeiroTelefone(
 export async function listarTelefones(
   productId: string
 ): Promise<TelefoneDaCompradora[]> {
-  const token = await getToken()
   const telefones: TelefoneDaCompradora[] = []
   let pageToken: string | undefined
-  let primeiroItemSemTelefone: string | null = null
 
   do {
-    const url = new URL(`${API_BASE}/sales/users`)
-    url.searchParams.set("product_id", productId)
-    url.searchParams.set("max_results", "500")
-    // Mesma armadilha do sales/history: sem start_date a Hotmart devolve
-    // calada só o último mês. Ver janelaDias().
-    url.searchParams.set("start_date", String(inicioDaJanela()))
-    if (pageToken) url.searchParams.set("page_token", pageToken)
-
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    const pagina = await paginaDeUsuarios({
+      product_id: productId,
+      max_results: "500",
+      ...(pageToken ? { page_token: pageToken } : {}),
     })
-    if (!res.ok) {
-      throw new Error(`sales/users falhou (${res.status}): ${await res.text()}`)
+    telefones.push(...pagina.telefones)
+    if (pagina.telefones.length === 0 && pagina.camposSemTelefone) {
+      console.warn(
+        `[hotmart] sales/users do produto ${productId} não trouxe telefone · campos do comprador: ${pagina.camposSemTelefone}`
+      )
     }
-
-    const json = (await res.json()) as SalesUsersResponse
-    for (const item of json.items ?? []) {
-      const comprador = (item.users ?? []).find((u) => u.role === "BUYER")
-      const email = (comprador?.user?.email ?? item.buyer?.email)?.toLowerCase().trim()
-      const telefone =
-        primeiroTelefone(comprador?.user) ?? primeiroTelefone(item.buyer)
-
-      if (!email) continue
-      if (!telefone) {
-        // Diagnóstico de UM item, não de todos: se a Hotmart mudar o nome do
-        // campo, o log diz quais chaves vieram em vez de deixar o resultado
-        // vazio sem explicação.
-        primeiroItemSemTelefone ??= JSON.stringify(
-          Object.keys(comprador?.user ?? item.buyer ?? {}).sort()
-        )
-        continue
-      }
-      telefones.push({ email, telefone })
-    }
-
-    pageToken = json.page_info?.next_page_token
+    pageToken = pagina.proximaPagina
   } while (pageToken)
 
-  if (telefones.length === 0 && primeiroItemSemTelefone) {
-    console.warn(
-      `[hotmart] sales/users do produto ${productId} não trouxe telefone · campos do comprador: ${primeiroItemSemTelefone}`
-    )
+  return telefones
+}
+
+/**
+ * O telefone de UMA compradora, por e-mail — sem passar por produto.
+ *
+ * É a consulta que fecha o buraco que a varredura por produto deixa: ela só
+ * enxerga os produtos cadastrados no portal, e quem comprou outra coisa da
+ * conta (ou um produto que ninguém cadastrou) nunca apareceria. Perguntar pelo
+ * e-mail de quem está sem número vai direto ao caso que importa.
+ *
+ * `null` quando a Hotmart não tem o telefone dela — o que acontece de verdade:
+ * checkout antigo que não pedia celular.
+ */
+export async function telefoneDoEmail(email: string): Promise<string | null> {
+  const pagina = await paginaDeUsuarios({
+    buyer_email: email,
+    max_results: "50",
+  })
+  // Qualquer venda dela serve: é o telefone da pessoa, não da compra. A mais
+  // recente primeiro seria melhor, mas a Hotmart não ordena isto — e um
+  // telefone antigo vale mais que nenhum.
+  return pagina.telefones[0]?.telefone ?? null
+}
+
+/**
+ * Uma página de `sales/users`, já traduzida em pares e-mail → telefone.
+ *
+ * `start_date` entra sempre: sem ele a Hotmart devolve calada só o último mês
+ * (ver janelaDias()). `camposSemTelefone` é diagnóstico — quando a resposta vem
+ * sem telefone nenhum, diz quais chaves vieram, em vez de deixar o resultado
+ * vazio sem explicação.
+ */
+async function paginaDeUsuarios(params: Record<string, string>): Promise<{
+  telefones: TelefoneDaCompradora[]
+  proximaPagina?: string
+  camposSemTelefone: string | null
+}> {
+  const token = await getToken()
+  const url = new URL(`${API_BASE}/sales/users`)
+  url.searchParams.set("start_date", String(inicioDaJanela()))
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v)
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+  })
+  if (!res.ok) {
+    throw new Error(`sales/users falhou (${res.status}): ${await res.text()}`)
   }
 
-  return telefones
+  const json = (await res.json()) as SalesUsersResponse
+  const telefones: TelefoneDaCompradora[] = []
+  let camposSemTelefone: string | null = null
+
+  for (const item of json.items ?? []) {
+    const comprador = (item.users ?? []).find((u) => u.role === "BUYER")
+    const emailDaVenda = (comprador?.user?.email ?? item.buyer?.email)
+      ?.toLowerCase()
+      .trim()
+    const telefone = primeiroTelefone(comprador?.user) ?? primeiroTelefone(item.buyer)
+
+    if (!emailDaVenda) continue
+    if (!telefone) {
+      camposSemTelefone ??= JSON.stringify(
+        Object.keys(comprador?.user ?? item.buyer ?? {}).sort()
+      )
+      continue
+    }
+    telefones.push({ email: emailDaVenda, telefone })
+  }
+
+  return {
+    telefones,
+    proximaPagina: json.page_info?.next_page_token,
+    camposSemTelefone,
+  }
 }
 
 /**
