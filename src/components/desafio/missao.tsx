@@ -33,6 +33,7 @@ import {
 } from "@/app/desafio/actions"
 import type { Empresa, Operacao } from "@/lib/desafio-server"
 import { Celebracao } from "@/components/desafio/celebracao"
+import { Modal } from "@/components/ui/modal"
 import { isDirectVideoFile, toVideoEmbedUrl } from "@/lib/lessons"
 import { formatarTelefone, problemaNoTelefone, telefoneParaWhatsApp } from "@/lib/telefone"
 
@@ -100,12 +101,11 @@ export function Missao({
   const antesDeAvancarRef = useRef<AntesDeAvancar | null>(null)
   /** O passo `empresa` troca o texto do botão no meio das rodadas. */
   const [rotuloDoPasso, setRotuloDoPasso] = useState<string | null>(null)
-  /** Ela apertou para seguir com o Radar abaixo da meta e já viu o recado. */
-  const [seguirAbaixo, setSeguirAbaixo] = useState(false)
+  /** O que falta, mostrado no aviso antes de ela seguir sem completar. */
+  const [aviso, setAviso] = useState<Pendencia[] | null>(null)
 
   const passo = dia.passos[i]
   const ultimo = i === dia.passos.length - 1
-  const abaixoDaMeta = passo.tipo === "radar" && radar.length < passo.meta
 
   // Passo novo começa do topo: o botão de seguir fica lá embaixo, e quem
   // avançava continuava na altura dele, sem ver a pergunta do passo seguinte.
@@ -140,7 +140,12 @@ export function Missao({
     setErro(null)
   }
 
-  function avancar() {
+  /**
+   * `mesmoAssim`: ela já viu o aviso do que falta e escolheu seguir. Nada no
+   * Desafio trava por missão incompleta — mas ninguém passa sem ver o que
+   * deixou para trás.
+   */
+  function avancar(mesmoAssim = false) {
     startSalvar(async () => {
       let atuais = respostas
 
@@ -165,17 +170,17 @@ export function Missao({
         }
       }
 
-      // Abaixo da meta do Radar: o primeiro toque mostra o recado da Nati, o
-      // segundo segue. Não trava — mas também não deixa passar sem ouvir.
-      if (abaixoDaMeta && !seguirAbaixo) {
-        setSeguirAbaixo(true)
-        return
-      }
-
-      const pendencia = oQueFalta(passo, atuais)
-      if (pendencia) {
-        setErro(pendencia)
-        return
+      // No meio do dia, o aviso fala só deste passo. Para concluir, fala do
+      // dia inteiro: é a última chance de ela ver o que pulou lá atrás.
+      if (!mesmoAssim) {
+        const faltando = ultimo
+          ? pendenciasDoDia(dia, atuais, radar.length)
+          : pendenciasDoDia(dia, atuais, radar.length).filter((p) => p.passo === i)
+        if (faltando.length > 0) {
+          setErro(null)
+          setAviso(faltando)
+          return
+        }
       }
 
       if (ultimo) {
@@ -195,7 +200,6 @@ export function Missao({
       }
       setErro(null)
       setAutosalvo(false)
-      setSeguirAbaixo(false)
       setI(i + 1)
     })
   }
@@ -279,14 +283,25 @@ export function Missao({
           </p>
         )}
 
-        {passo.tipo === "radar" && abaixoDaMeta && seguirAbaixo && (
-          <RecadoDoVolume
-            tem={radar.length}
-            meta={passo.meta}
-            audio={passo.audioAbaixoDaMeta}
-          />
-        )}
       </div>
+
+      {aviso && (
+        <AvisoDoQueFalta
+          pendencias={aviso}
+          passos={dia.passos}
+          concluindo={ultimo}
+          radar={radar.length}
+          onCompletar={(n) => {
+            setAviso(null)
+            setI(n)
+            paraOTopo()
+          }}
+          onSeguir={() => {
+            setAviso(null)
+            avancar(true)
+          }}
+        />
+      )}
 
       {/* O rodapé: para trás à esquerda, para a frente à direita — a direção
           que cada botão oferece é a mesma em que ele aponta.
@@ -307,7 +322,6 @@ export function Missao({
               onClick={() => {
                 setI(i - 1)
                 setErro(null)
-                setSeguirAbaixo(false)
               }}
               className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-primary sm:px-0 sm:py-0"
             >
@@ -328,15 +342,11 @@ export function Missao({
 
           <button
             type="button"
-            onClick={avancar}
+            onClick={() => avancar()}
             disabled={salvando}
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md disabled:pointer-events-none disabled:opacity-60 sm:ml-auto sm:w-auto sm:min-w-[180px] sm:py-3"
           >
-            {salvando
-              ? "Salvando…"
-              : abaixoDaMeta && seguirAbaixo
-                ? "Seguir mesmo assim"
-                : (rotuloDoPasso ?? rotuloDoBotao(passo, ultimo))}
+            {salvando ? "Salvando…" : (rotuloDoPasso ?? rotuloDoBotao(passo, ultimo))}
           </button>
         </div>
         {autosalvo && !erro && (
@@ -372,13 +382,27 @@ function vazio(valor: Respostas[string] | undefined): boolean {
   return false
 }
 
+/** Um passo que ficou incompleto, e o que falta nele — escrito para a aluna. */
+type Pendencia = { passo: number; falta: string }
+
 /**
- * A mensagem do que falta — ou null se pode avançar.
+ * O que ficou por fazer no dia, passo a passo.
  *
- * O texto é escrito para a aluna, não para o programador: "Responde essa
- * última para eu poder guardar" em vez de "campo obrigatório".
+ * Não trava nada: a aluna avança mesmo assim, se quiser. Serve ao aviso que
+ * aparece antes de ela seguir — a Nati pediu que nenhuma passe sem ver,
+ * especificamente, o que deixou para trás. O texto diz o que falta, e não
+ * "campo obrigatório".
  */
-function oQueFalta(passo: Passo, respostas: Respostas): string | null {
+function pendenciasDoDia(dia: Dia, respostas: Respostas, empresasNoRadar: number): Pendencia[] {
+  const lista: Pendencia[] = []
+  dia.passos.forEach((passo, n) => {
+    const falta = oQueFalta(passo, respostas, empresasNoRadar)
+    if (falta) lista.push({ passo: n, falta })
+  })
+  return lista
+}
+
+function oQueFalta(passo: Passo, respostas: Respostas, empresasNoRadar: number): string | null {
   switch (passo.tipo) {
     case "video":
     case "audio":
@@ -391,53 +415,139 @@ function oQueFalta(passo: Passo, respostas: Respostas): string | null {
       return typeof respostas[passo.chave] === "string" &&
         respostas[passo.chave] !== ""
         ? null
-        : "Escolha onde você sente que está travando."
+        : "Você ainda não escolheu onde sente que está travando."
 
     case "formulario": {
-      const falta = passo.campos.some(
+      const faltam = passo.campos.filter(
         (c) =>
           c.obrigatorio !== false && visivel(c, respostas) && vazio(respostas[c.chave])
-      )
-      return falta ? "Faltou responder alguma coisa aqui em cima." : null
+      ).length
+      if (faltam === 0) return null
+      return faltam === 1
+        ? "Falta 1 resposta."
+        : `Faltam ${faltam} respostas.`
     }
 
     case "confirma":
       return respostas[passo.chave] === true
         ? null
-        : "Marque aí embaixo para a gente seguir."
+        : "Você ainda não marcou que fez."
 
     case "copiar":
       return respostas[passo.chave] === true
         ? null
-        : "Marque quando tiver enviado — é isso que está na sua mão."
+        : "Você ainda não marcou que enviou a mensagem."
 
-    // A meta do Radar não trava: abaixo dela, o `avancar` mostra o recado do
-    // volume antes de seguir (ver `RecadoDoVolume`).
-    case "radar":
-      return null
+    case "radar": {
+      if (empresasNoRadar >= passo.meta) return null
+      const falta = passo.meta - empresasNoRadar
+      return `Seu Radar tem ${empresasNoRadar} de ${passo.meta} empresas — ${
+        falta === 1 ? "falta 1" : `faltam ${falta}`
+      } para a meta de hoje.`
+    }
 
     case "empresa": {
-      // `livre` nunca trava: quantas respostas chegaram não está sob o
+      // `livre` não tem meta: quantas respostas chegaram não está sob o
       // controle da aluna.
       if (passo.quantidade === "livre") return null
       const feitas = respostas[`${passo.chave}:empresas`]
       const quantas = Array.isArray(feitas) ? feitas.length : 0
       const meta = passo.quantidade ?? 1
       if (quantas >= meta) return null
-      const falta = meta - quantas
       if (meta === 1) {
         return passo.cadastro
-          ? "Guarde a empresa para a gente seguir."
-          : "Escolha uma empresa e responda sobre ela."
+          ? "Você ainda não guardou a empresa."
+          : "Você ainda não escolheu uma empresa e respondeu sobre ela."
       }
       // As empresas daqui são escolhidas na lista do Radar, não cadastradas.
       // "Faltam 5 empresas" sozinho mandava a aluna cadastrar mais no Radar —
       // e o número não mexia, porque o que conta é tocar numa e responder.
-      return `Toque em uma das empresas da lista e responda sobre ela. ${
-        falta === 1 ? "Falta só uma" : `Faltam ${falta}`
-      } para fechar.`
+      return `Você trabalhou ${quantas} de ${meta} empresas da lista — toque em cada uma e responda sobre ela.`
     }
   }
+}
+
+/**
+ * O aviso antes de seguir com a missão incompleta.
+ *
+ * Obrigatório (sem X, sem Esc, sem clique fora): ela escolhe entre completar e
+ * seguir, e não fica dúvida de que viu. Completar leva ao passo pendente; ao
+ * concluir o dia, a lista é do dia inteiro e cada item leva ao seu passo.
+ */
+function AvisoDoQueFalta({
+  pendencias,
+  passos,
+  concluindo,
+  radar,
+  onCompletar,
+  onSeguir,
+}: {
+  pendencias: Pendencia[]
+  passos: readonly Passo[]
+  concluindo: boolean
+  radar: number
+  onCompletar: (passo: number) => void
+  onSeguir: () => void
+}) {
+  const passoDoRadar = pendencias
+    .map((p) => passos[p.passo])
+    .find((p): p is Extract<Passo, { tipo: "radar" }> => p.tipo === "radar")
+
+  return (
+    <Modal title={concluindo ? "Sua missão de hoje ainda não está completa" : "Esse passo ainda não está completo"} size="sm">
+      <div className="flex flex-col gap-4">
+        <p className="text-sm leading-relaxed text-foreground">
+          Cumprir cada etapa, do jeito que ela pede, é <b>parte fundamental</b> do seu
+          resultado no Desafio. Você pode seguir, mas olhe o que está faltando:
+        </p>
+
+        <ul className="flex flex-col gap-2">
+          {pendencias.map((p) => (
+            <li key={p.passo}>
+              <button
+                type="button"
+                onClick={() => onCompletar(p.passo)}
+                className="flex w-full flex-col gap-1 rounded-xl border border-secondary/40 bg-secondary-subtle/40 px-3.5 py-3 text-left transition-colors hover:border-primary/40"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-secondary">
+                  Passo {p.passo + 1} de {passos.length}
+                </span>
+                <span className="text-[13px] font-semibold leading-snug text-foreground">
+                  {passos[p.passo].ask}
+                </span>
+                <span className="text-[13px] leading-snug text-muted-foreground">{p.falta}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        {passoDoRadar && (
+          <RecadoDoVolume
+            tem={radar}
+            meta={passoDoRadar.meta}
+            audio={passoDoRadar.audioAbaixoDaMeta}
+          />
+        )}
+
+        <div className="flex flex-col gap-2.5 pt-1">
+          <button
+            type="button"
+            onClick={() => onCompletar(pendencias[0].passo)}
+            className="inline-flex w-full items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:shadow-md"
+          >
+            Voltar e completar
+          </button>
+          <button
+            type="button"
+            onClick={onSeguir}
+            className="inline-flex w-full items-center justify-center rounded-full px-6 py-2.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-primary"
+          >
+            {concluindo ? "Concluir o dia mesmo assim" : "Seguir mesmo assim"}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  )
 }
 
 /** Volta a página para o começo do passo, sem animação no celular lento. */
@@ -1934,7 +2044,10 @@ function EmpresaDoPasso({
       }
 
       // Cadastro (Dia 1): cria a empresa e grava as respostas de uma vez só.
-      if (passo.cadastro && !completo) {
+      // Sem nada preenchido, não há o que gravar: segue para o aviso do que
+      // falta, em vez de travar em "escreva o nome".
+      const comecou = nome.trim() !== "" || segmento.trim() !== "" || Object.values(rodada).some((v) => !vazio(v))
+      if (passo.cadastro && !completo && comecou) {
         if (nome.trim() === "") return { ok: false, erro: "Escreva o nome da empresa." }
         if (faltaCampo) return { ok: false, erro: "Faltou responder alguma coisa aqui em cima." }
         const criada = await addEmpresaAction({
