@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
-import { listarVendas, listarProdutos, pareceComunidadeVip } from "@/lib/hotmart-api"
+import {
+  listarVendas,
+  listarProdutos,
+  listarTelefones,
+  pareceComunidadeVip,
+} from "@/lib/hotmart-api"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
@@ -63,8 +68,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: true, aviso: "Nenhum produto da VIP cadastrado" })
   }
 
+  // O telefone é buscado para os produtos da VIP E do Desafio: quem só comprou
+  // o Desafio também precisa de WhatsApp no admin, e esse id não está em
+  // vip_products.
+  const { data: produtosDoDesafio } = await db
+    .from("desafio_products")
+    .select("hotmart_product_id")
+
+  const idsComTelefone = [
+    ...new Set([
+      ...ids,
+      ...(produtosDoDesafio ?? [])
+        .map((p) => p.hotmart_product_id)
+        .filter((id): id is string => Boolean(id)),
+    ]),
+  ]
+
   let lidas = 0
   let criadas = 0
+  let telefonesGravados = 0
   let desconhecidos: Array<{ id: string; nome: string }> = []
 
   /** Guarda o resultado da rodada — inclusive quando ela falha. */
@@ -172,6 +194,54 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // ── Telefones ──
+  //
+  // Preenche `phone` de quem está sem. Só de quem está sem, de propósito: o
+  // número que a aluna confirmou (postback ou digitado por ela) vale mais que o
+  // do cadastro antigo da Hotmart, e sobrescrever desfaria uma correção.
+  //
+  // Tem try próprio porque é um ENFEITE do sync: se a Hotmart recusar
+  // sales/users, o acesso das alunas — que é a razão desta rota existir — não
+  // pode cair junto.
+  try {
+    const telefonePor = new Map<string, string>()
+    for (const id of idsComTelefone) {
+      for (const t of await listarTelefones(id)) {
+        if (!telefonePor.has(t.email)) telefonePor.set(t.email, t.telefone)
+      }
+    }
+
+    const emails = [...telefonePor.keys()]
+    // Em lotes: um `in(...)` com a base inteira estoura o tamanho da URL.
+    for (let i = 0; i < emails.length; i += 200) {
+      const lote = emails.slice(i, i + 200)
+      const { data: semTelefone, error } = await db
+        .from("authorized_emails")
+        .select("email")
+        .in("email", lote)
+        .is("phone", null)
+      if (error) throw new Error(error.message)
+
+      for (const linha of semTelefone ?? []) {
+        const telefone = telefonePor.get(linha.email.toLowerCase())
+        if (!telefone) continue
+        const { error: erroUpdate } = await db
+          .from("authorized_emails")
+          .update({ phone: telefone })
+          .eq("email", linha.email)
+          .is("phone", null)
+        if (erroUpdate) throw new Error(erroUpdate.message)
+        telefonesGravados++
+      }
+    }
+
+    if (telefonesGravados > 0) {
+      console.log(`[sync-vip] ${telefonesGravados} telefone(s) preenchido(s)`)
+    }
+  } catch (e) {
+    console.error("[sync-vip] telefones:", e instanceof Error ? e.message : String(e))
+  }
+
   const { data: alteradas, error: erroRefresh } = await db.rpc("refresh_vip_entitlement", {})
   if (erroRefresh) {
     console.error("[sync-vip] derivação:", erroRefresh.message)
@@ -182,7 +252,7 @@ export async function GET(req: NextRequest) {
   await registraRodada({ ok: true, acessos: alteradas ?? 0 })
 
   console.log(
-    `[sync-vip] ${ids.length} produto(s) · ${lidas} venda(s) · ${alteradas} acesso(s) alterado(s) · ${criadas} aluna(s) criada(s)`
+    `[sync-vip] ${ids.length} produto(s) · ${lidas} venda(s) · ${alteradas} acesso(s) alterado(s) · ${criadas} aluna(s) criada(s) · ${telefonesGravados} telefone(s)`
   )
   return NextResponse.json({
     ok: true,
@@ -190,6 +260,7 @@ export async function GET(req: NextRequest) {
     vendasLidas: lidas,
     acessosAlterados: alteradas,
     alunasCriadas: criadas,
+    telefonesGravados,
     produtosDesconhecidos: desconhecidos,
   })
 }

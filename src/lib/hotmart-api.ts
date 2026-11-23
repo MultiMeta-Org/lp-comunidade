@@ -162,6 +162,105 @@ export async function listarVendas(productId: string): Promise<VendaHotmart[]> {
   return vendas
 }
 
+export type TelefoneDaCompradora = { email: string; telefone: string }
+
+type SalesUsersResponse = {
+  items?: Array<{
+    buyer?: { email?: string; phone?: string; cellphone?: string }
+    users?: Array<{
+      role?: string
+      user?: {
+        email?: string
+        phone?: string
+        cellphone?: string
+        checkout_phone?: string
+      }
+    }>
+  }>
+  page_info?: { next_page_token?: string }
+}
+
+/** O primeiro campo de telefone preenchido, em texto. */
+function primeiroTelefone(
+  u: { phone?: string; cellphone?: string; checkout_phone?: string } | undefined
+): string | null {
+  for (const v of [u?.cellphone, u?.phone, u?.checkout_phone]) {
+    if (typeof v === "string" && v.trim()) return v.trim()
+  }
+  return null
+}
+
+/**
+ * O telefone de quem comprou um produto, pela API.
+ *
+ * Existe porque o postback só traz telefone desde que o portal passou a gravar
+ * `checkout_phone` — a base que comprou antes disso ficou sem número nenhum, e
+ * `authorized_emails.phone` vazio é uma coluna de WhatsApp que não serve para
+ * nada no admin nem na automação do reembolso.
+ *
+ * O endpoint é `sales/users`, não `sales/history`: o histórico devolve só
+ * e-mail do comprador, enquanto `users` devolve os participantes da venda — e
+ * o telefone mora no participante de `role: "BUYER"`. A leitura é defensiva de
+ * propósito (`cellphone`, `phone`, `checkout_phone`, e o `buyer` solto do
+ * item): a Hotmart varia o campo entre produtos, e um telefone perdido por
+ * palpite de nome de campo é silencioso.
+ */
+export async function listarTelefones(
+  productId: string
+): Promise<TelefoneDaCompradora[]> {
+  const token = await getToken()
+  const telefones: TelefoneDaCompradora[] = []
+  let pageToken: string | undefined
+  let primeiroItemSemTelefone: string | null = null
+
+  do {
+    const url = new URL(`${API_BASE}/sales/users`)
+    url.searchParams.set("product_id", productId)
+    url.searchParams.set("max_results", "500")
+    // Mesma armadilha do sales/history: sem start_date a Hotmart devolve
+    // calada só o último mês. Ver janelaDias().
+    url.searchParams.set("start_date", String(inicioDaJanela()))
+    if (pageToken) url.searchParams.set("page_token", pageToken)
+
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    })
+    if (!res.ok) {
+      throw new Error(`sales/users falhou (${res.status}): ${await res.text()}`)
+    }
+
+    const json = (await res.json()) as SalesUsersResponse
+    for (const item of json.items ?? []) {
+      const comprador = (item.users ?? []).find((u) => u.role === "BUYER")
+      const email = (comprador?.user?.email ?? item.buyer?.email)?.toLowerCase().trim()
+      const telefone =
+        primeiroTelefone(comprador?.user) ?? primeiroTelefone(item.buyer)
+
+      if (!email) continue
+      if (!telefone) {
+        // Diagnóstico de UM item, não de todos: se a Hotmart mudar o nome do
+        // campo, o log diz quais chaves vieram em vez de deixar o resultado
+        // vazio sem explicação.
+        primeiroItemSemTelefone ??= JSON.stringify(
+          Object.keys(comprador?.user ?? item.buyer ?? {}).sort()
+        )
+        continue
+      }
+      telefones.push({ email, telefone })
+    }
+
+    pageToken = json.page_info?.next_page_token
+  } while (pageToken)
+
+  if (telefones.length === 0 && primeiroItemSemTelefone) {
+    console.warn(
+      `[hotmart] sales/users do produto ${productId} não trouxe telefone · campos do comprador: ${primeiroItemSemTelefone}`
+    )
+  }
+
+  return telefones
+}
+
 /**
  * Catálogo de produtos da conta. Serve para desconfiar de produto novo: uma
  * oferta "Laboratório de Vendas 2027" criada amanhã e não cadastrada em
