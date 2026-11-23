@@ -175,7 +175,11 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
               <th className="px-4 py-3 font-semibold">E-mail</th>
-              <th className="px-4 py-3 font-semibold">WhatsApp</th>
+              {/*
+                No celular a tabela rola na horizontal, e uma coluna a mais
+                nasce fora da tela — o telefone aparece junto do e-mail, abaixo.
+              */}
+              <th className="hidden px-4 py-3 font-semibold md:table-cell">WhatsApp</th>
               <th className="px-4 py-3 font-semibold">Origem</th>
               <th className="px-4 py-3 font-semibold">Status</th>
               <th className="px-4 py-3 font-semibold">{LAB_NAME}</th>
@@ -198,8 +202,11 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
                   {r.buyerName && (
                     <div className="text-xs text-muted-foreground">{r.buyerName}</div>
                   )}
+                  <div className="mt-0.5 text-xs md:hidden">
+                    <TelefoneWhatsApp telefone={r.phone} />
+                  </div>
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap">
+                <td className="hidden whitespace-nowrap px-4 py-3 md:table-cell">
                   <TelefoneWhatsApp telefone={r.phone} />
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">{r.source ?? "—"}</td>

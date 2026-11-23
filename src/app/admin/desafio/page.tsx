@@ -263,7 +263,9 @@ export default async function AdminDesafioPage({
               terminou. O telefone abre a conversa no WhatsApp.
             </p>
           </div>
-          <nav className="flex items-center gap-1 rounded-full border border-border/70 bg-muted/60 p-1">
+          {/* flex-wrap: três pílulas lado a lado não cabem numa tela de 360px,
+              e sem quebrar elas empurram a página inteira para o lado. */}
+          <nav className="flex flex-wrap items-center gap-1 rounded-full border border-border/70 bg-muted/60 p-1">
             {ORDENS.map((o) => (
               <Link
                 key={o.chave}
@@ -503,7 +505,11 @@ function TabelaDeAlunas({ alunas }: { alunas: Aluna[] }) {
         <thead>
           <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
             <th className="px-4 py-3 font-semibold">Aluna</th>
-            <th className="px-4 py-3 font-semibold">WhatsApp</th>
+            {/*
+              No celular a tabela rola na horizontal, e uma coluna a mais nasce
+              fora da tela — o telefone aparece junto do nome, abaixo.
+            */}
+            <th className="hidden px-4 py-3 font-semibold md:table-cell">WhatsApp</th>
             <th className="px-4 py-3 font-semibold">Progresso</th>
             <th className="px-4 py-3 font-semibold">Parou em</th>
             <th className="px-4 py-3 font-semibold">Radar</th>
@@ -526,8 +532,11 @@ function TabelaDeAlunas({ alunas }: { alunas: Aluna[] }) {
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground">{a.email}</div>
+                <div className="mt-0.5 text-xs md:hidden">
+                  <TelefoneWhatsApp telefone={a.telefone} vazio="sem telefone" />
+                </div>
               </td>
-              <td className="px-4 py-2.5 whitespace-nowrap text-sm">
+              <td className="hidden whitespace-nowrap px-4 py-2.5 text-sm md:table-cell">
                 <TelefoneWhatsApp telefone={a.telefone} vazio="sem telefone" />
               </td>
               <td className="px-4 py-2.5">
