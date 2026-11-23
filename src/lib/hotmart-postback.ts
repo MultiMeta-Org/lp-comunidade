@@ -106,6 +106,15 @@ export async function lerPostback(
       ? new Date(orderDateMs).toISOString()
       : new Date().toISOString()
 
+  // Diagnóstico do telefone: as fichas seguem sem telefone mesmo lendo
+  // checkout_phone. Mostra o que veio (mascarado) e os campos do comprador.
+  const buyer = (body.data?.buyer ?? {}) as Record<string, unknown>
+  const mascara = (v: unknown) =>
+    typeof v === "string" && v.replace(/\D/g, "") ? `…${v.replace(/\D/g, "").slice(-4)}` : "—"
+  console.log(
+    `[${origem}] telefone · ${body.event} · ${buyerEmail} · checkout_phone=${mascara(buyer.checkout_phone)} phone=${mascara(buyer.phone)} · campos: ${Object.keys(buyer).sort().join(",")}`
+  )
+
   const eventMs = body.creation_date
   const eventTimestamp =
     typeof eventMs === "number" && eventMs > 0
