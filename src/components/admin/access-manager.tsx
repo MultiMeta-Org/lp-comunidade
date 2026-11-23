@@ -5,6 +5,7 @@ import { Check, Minus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { TelefoneWhatsApp } from "@/components/telefone-whatsapp"
 import { LAB_NAME } from "@/lib/produto"
 import {
   addAuthorizedEmail,
@@ -17,6 +18,8 @@ import {
 export type AuthorizedRow = {
   email: string
   buyerName: string | null
+  /** Telefone da compra na Hotmart — vira link do WhatsApp na tabela. */
+  phone: string | null
   source: string | null
   state: "released" | "waiting" | "revoked"
   availableAt: string
@@ -172,6 +175,7 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
               <th className="px-4 py-3 font-semibold">E-mail</th>
+              <th className="px-4 py-3 font-semibold">WhatsApp</th>
               <th className="px-4 py-3 font-semibold">Origem</th>
               <th className="px-4 py-3 font-semibold">Status</th>
               <th className="px-4 py-3 font-semibold">{LAB_NAME}</th>
@@ -182,7 +186,7 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">
                   Nenhum acesso encontrado com esses filtros.
                 </td>
               </tr>
@@ -194,6 +198,9 @@ export function AccessManager({ rows }: { rows: AuthorizedRow[] }) {
                   {r.buyerName && (
                     <div className="text-xs text-muted-foreground">{r.buyerName}</div>
                   )}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <TelefoneWhatsApp telefone={r.phone} />
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">{r.source ?? "—"}</td>
                 <td className="px-4 py-3">

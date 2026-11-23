@@ -35,7 +35,8 @@ import type { Empresa, Operacao } from "@/lib/desafio-server"
 import { Celebracao } from "@/components/desafio/celebracao"
 import { Modal } from "@/components/ui/modal"
 import { isDirectVideoFile, toVideoEmbedUrl } from "@/lib/lessons"
-import { formatarTelefone, problemaNoTelefone, telefoneParaWhatsApp } from "@/lib/telefone"
+import { formatarTelefone, problemaNoTelefone } from "@/lib/telefone"
+import { TelefoneWhatsApp } from "@/components/telefone-whatsapp"
 
 /**
  * O motor da missão: um passo por tela.
@@ -2704,7 +2705,11 @@ function DadosDaEmpresa({ empresa }: { empresa: Empresa }) {
     linhas.push({ rotulo: "O que faz", valor: <span className="block truncate">{empresa.segmento}</span> })
   }
   if (empresa.contato) linhas.push({ rotulo: "Contato", valor: <Contato contato={empresa.contato} /> })
-  if (empresa.telefone) linhas.push({ rotulo: "Telefone", valor: <Telefone telefone={empresa.telefone} /> })
+  if (empresa.telefone)
+    linhas.push({
+      rotulo: "Telefone",
+      valor: <TelefoneWhatsApp telefone={empresa.telefone} className="block truncate" />,
+    })
   if (empresa.primeiroContatoEm) {
     linhas.push({ rotulo: "1º contato", valor: formataData(empresa.primeiroContatoEm) })
   }
@@ -2751,26 +2756,6 @@ function Contato({ contato }: { contato: string }) {
     </a>
   ) : (
     <span className={classe}>{contato}</span>
-  )
-}
-
-/**
- * Telefone como link do WhatsApp — é por onde a abordagem acontece. Número
- * que não passa na validação (cadastrado antes dela existir) fica só texto.
- */
-function Telefone({ telefone }: { telefone: string }) {
-  const whatsapp = telefoneParaWhatsApp(telefone)
-  const classe = "block truncate"
-  if (!whatsapp) return <span className={classe}>{telefone}</span>
-  return (
-    <a
-      href={`https://wa.me/${whatsapp}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`${classe} text-primary underline-offset-2 hover:underline`}
-    >
-      {formatarTelefone(telefone)}
-    </a>
   )
 }
 

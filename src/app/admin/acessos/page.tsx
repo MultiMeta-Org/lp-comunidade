@@ -2,23 +2,12 @@ import { createComunidadeServiceClient } from "@/lib/supabase/comunidade"
 import { waitingPeriodDays } from "@/lib/access"
 import { LAB_NAME } from "@/lib/produto"
 import { AccessManager, type AuthorizedRow } from "@/components/admin/access-manager"
-import { ListToolbar, hrefCom, type Chip } from "@/components/admin/list-toolbar"
+import { ListToolbar, hrefCom, termoBusca, type Chip } from "@/components/admin/list-toolbar"
 import { Pager } from "@/components/admin/pager"
 
 export const metadata = { title: "Acessos · Admin" }
 
 const PAGE_SIZE = 25
-
-/**
- * Busca segura dentro de um filtro `or` do PostgREST.
- *
- * O `or=(a.ilike.*q*,b.ilike.*q*)` é uma MINILINGUAGEM: vírgula separa termos e
- * parêntese fecha o grupo, então um e-mail colado com vírgula viraria filtro
- * novo, não texto buscado. Sobra o que compõe nome e e-mail.
- */
-function termoBusca(q: string): string {
-  return q.replace(/[^\p{L}\p{N}@.\-_+ ]/gu, "").trim().slice(0, 80)
-}
 
 type Filtro = "todos" | "ativos" | "revogados"
 
@@ -28,6 +17,7 @@ type EmailRow = {
   source: string | null
   authorized_at: string
   buyer_name: string | null
+  phone: string | null
   has_comunidade_vip: boolean
   has_desafio: boolean
 }
@@ -45,6 +35,7 @@ function toRows(emails: EmailRow[], waitDays: number): AuthorizedRow[] {
     return {
       email: e.email,
       buyerName: e.buyer_name,
+      phone: e.phone,
       source: e.source,
       state:
         e.status === "revoked" ? "revoked" : now < availableAtMs ? "waiting" : "released",
@@ -79,11 +70,13 @@ export default async function AcessosPage({
   let query = db
     .from("authorized_emails")
     .select(
-      "email, status, source, authorized_at, revoked_at, buyer_name, has_comunidade_vip, has_desafio",
+      "email, status, source, authorized_at, revoked_at, buyer_name, phone, has_comunidade_vip, has_desafio",
       { count: "exact" }
     )
 
-  if (q) query = query.or(`email.ilike.%${q}%,buyer_name.ilike.%${q}%`)
+  // O telefone entra na busca por trecho: o número é guardado formatado, então
+  // digitar "98765" acha "(11) 98765-4321" sem precisar acertar a pontuação.
+  if (q) query = query.or(`email.ilike.%${q}%,buyer_name.ilike.%${q}%,phone.ilike.%${q}%`)
   if (status === "ativos") query = query.eq("status", "active")
   if (status === "revogados") query = query.eq("status", "revoked")
   if (lab) query = query.eq("has_comunidade_vip", lab === "sim")
@@ -153,7 +146,7 @@ export default async function AcessosPage({
       <ListToolbar
         basePath="/admin/acessos"
         q={q}
-        placeholder="Buscar por e-mail ou nome…"
+        placeholder="Buscar por e-mail, nome ou telefone…"
         hidden={{ status: status === "todos" ? undefined : status, lab, desafio }}
         limparHref={hrefCom("/admin/acessos", {
           status: status === "todos" ? undefined : status,
@@ -167,7 +160,7 @@ export default async function AcessosPage({
 
       <Pager
         basePath="/admin/acessos"
-        params={{ q: sp.q, status: status === "todos" ? undefined : status, lab }}
+        params={{ q, status: status === "todos" ? undefined : status, lab, desafio }}
         page={Math.min(page, totalPages)}
         totalPages={totalPages}
         total={total}

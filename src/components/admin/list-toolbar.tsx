@@ -6,6 +6,17 @@ import { Input } from "@/components/ui/input"
 export type Chip = { label: string; href: string; active: boolean }
 
 /**
+ * Busca segura dentro de um filtro `or` do PostgREST.
+ *
+ * O `or=(a.ilike.*q*,b.ilike.*q*)` é uma MINILINGUAGEM: vírgula separa termos e
+ * parêntese fecha o grupo, então um e-mail colado com vírgula viraria filtro
+ * novo, não texto buscado. Sobra o que compõe nome e e-mail.
+ */
+export function termoBusca(q: string): string {
+  return q.replace(/[^\p{L}\p{N}@.\-_+ ]/gu, "").trim().slice(0, 80)
+}
+
+/**
  * `/admin/x?...` com os parâmetros dados — vazios e nulos somem, e `page` nunca
  * é preservado: trocar de busca ou de filtro é um recorte novo, e manter a
  * página 7 do recorte anterior é cair num vazio.
@@ -34,6 +45,7 @@ export function ListToolbar({
   hidden = {},
   chipGroups = [],
   limparHref,
+  scroll = true,
 }: {
   basePath: string
   q: string
@@ -44,10 +56,15 @@ export function ListToolbar({
   chipGroups?: Chip[][]
   /** Para onde "Limpar" leva (sem busca, filtros preservados). */
   limparHref: string
+  /**
+   * `false` quando a lista não é a página inteira: num painel, buscar não deve
+   * jogar a tela para o topo e tirar da vista a lista que está sendo filtrada.
+   */
+  scroll?: boolean
 }) {
   return (
     <div className="space-y-3">
-      <Form action={basePath} className="flex flex-wrap items-center gap-2">
+      <Form action={basePath} scroll={scroll} className="flex flex-wrap items-center gap-2">
         {Object.entries(hidden).map(([name, value]) =>
           value ? <input key={name} type="hidden" name={name} value={value} /> : null
         )}

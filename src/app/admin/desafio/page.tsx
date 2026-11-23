@@ -7,6 +7,9 @@ import {
   type OrdemDasAlunas,
   type Ranking,
 } from "@/lib/desafio-admin"
+import { ListToolbar, hrefCom, termoBusca } from "@/components/admin/list-toolbar"
+import { Pager } from "@/components/admin/pager"
+import { TelefoneWhatsApp } from "@/components/telefone-whatsapp"
 
 export const metadata = { title: "Desafio Empreendedora Anônima · Admin" }
 
@@ -15,6 +18,8 @@ const ORDENS: { chave: OrdemDasAlunas; label: string }[] = [
   { chave: "recentes", label: "Mexeram agora" },
   { chave: "avancadas", label: "Mais avançadas" },
 ]
+
+const ALUNAS_POR_PAGINA = 25
 
 /**
  * O painel do Desafio Empreendedora Anônima.
@@ -28,17 +33,21 @@ const ORDENS: { chave: OrdemDasAlunas; label: string }[] = [
 export default async function AdminDesafioPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ordem?: string }>
+  searchParams: Promise<{ ordem?: string; q?: string; page?: string }>
 }) {
-  const { ordem: ordemRaw } = await searchParams
-  const ordem: OrdemDasAlunas = ORDENS.some((o) => o.chave === ordemRaw)
-    ? (ordemRaw as OrdemDasAlunas)
+  const sp = await searchParams
+  const ordem: OrdemDasAlunas = ORDENS.some((o) => o.chave === sp.ordem)
+    ? (sp.ordem as OrdemDasAlunas)
     : "paradas"
+  const q = termoBusca(sp.q ?? "")
+  const pagina = Math.max(1, Number(sp.page) || 1)
 
-  const [painel, alunas] = await Promise.all([
+  const [painel, lista] = await Promise.all([
     getPainelDoDesafio(),
-    getAlunas(ordem),
+    getAlunas({ ordem, busca: q, pagina, porPagina: ALUNAS_POR_PAGINA }),
   ])
+  const { alunas, total: totalDeAlunas } = lista
+  const totalDePaginas = Math.max(1, Math.ceil(totalDeAlunas / ALUNAS_POR_PAGINA))
   const { visaoGeral: g, funil, comercial } = painel
 
   if (g.comAcesso === 0) {
@@ -251,14 +260,20 @@ export default async function AdminDesafioPage({
             <h3 className="font-display text-xl font-bold text-foreground">Alunas</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               Abre em &ldquo;quem parou&rdquo;: quem mexeu há mais tempo e ainda não
-              terminou.
+              terminou. O telefone abre a conversa no WhatsApp.
             </p>
           </div>
           <nav className="flex items-center gap-1 rounded-full border border-border/70 bg-muted/60 p-1">
             {ORDENS.map((o) => (
               <Link
                 key={o.chave}
-                href={`/admin/desafio?ordem=${o.chave}`}
+                // A busca viaja com a ordem — trocar de aba não deve descartar
+                // o recorte que a pessoa acabou de digitar. A página, sim: é
+                // uma fila nova, e a página 7 da anterior cairia num vazio.
+                href={hrefCom("/admin/desafio", {
+                  ordem: o.chave === "paradas" ? undefined : o.chave,
+                  q,
+                })}
                 // Sem isto o Next rola para o topo a cada troca de aba, e a
                 // lista que a pessoa estava lendo sai da tela. Trocar a ordem
                 // de uma lista não é navegar para outro lugar.
@@ -275,7 +290,30 @@ export default async function AdminDesafioPage({
             ))}
           </nav>
         </div>
+
+        <ListToolbar
+          basePath="/admin/desafio"
+          q={q}
+          placeholder="Buscar aluna por e-mail ou nome…"
+          hidden={{ ordem: ordem === "paradas" ? undefined : ordem }}
+          limparHref={hrefCom("/admin/desafio", {
+            ordem: ordem === "paradas" ? undefined : ordem,
+          })}
+          // A lista de alunas fica no meio do painel: rolar para o topo a cada
+          // busca esconderia justamente o resultado.
+          scroll={false}
+        />
+
         <TabelaDeAlunas alunas={alunas} />
+
+        <Pager
+          basePath="/admin/desafio"
+          params={{ q, ordem: ordem === "paradas" ? undefined : ordem }}
+          page={Math.min(pagina, totalDePaginas)}
+          totalPages={totalDePaginas}
+          total={totalDeAlunas}
+          unidade={["aluna", "alunas"]}
+        />
       </section>
 
       {/* ── Interesses ── */}
@@ -313,7 +351,8 @@ export default async function AdminDesafioPage({
                         <b className="block font-semibold text-foreground">{p.nome ?? p.email}</b>
                         <span className="block text-muted-foreground">
                           {p.email}
-                          {p.whatsapp ? ` · ${p.whatsapp}` : " · sem WhatsApp"}
+                          {" · "}
+                          <TelefoneWhatsApp telefone={p.whatsapp} vazio="sem WhatsApp" />
                           {p.regiao ? ` · ${p.regiao}` : ""}
                         </span>
                         {p.resposta && (
@@ -464,6 +503,7 @@ function TabelaDeAlunas({ alunas }: { alunas: Aluna[] }) {
         <thead>
           <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
             <th className="px-4 py-3 font-semibold">Aluna</th>
+            <th className="px-4 py-3 font-semibold">WhatsApp</th>
             <th className="px-4 py-3 font-semibold">Progresso</th>
             <th className="px-4 py-3 font-semibold">Parou em</th>
             <th className="px-4 py-3 font-semibold">Radar</th>
@@ -486,6 +526,9 @@ function TabelaDeAlunas({ alunas }: { alunas: Aluna[] }) {
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground">{a.email}</div>
+              </td>
+              <td className="px-4 py-2.5 whitespace-nowrap text-sm">
+                <TelefoneWhatsApp telefone={a.telefone} vazio="sem telefone" />
               </td>
               <td className="px-4 py-2.5">
                 <div className="flex items-center gap-2">

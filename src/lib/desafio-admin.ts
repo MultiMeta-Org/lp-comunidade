@@ -48,6 +48,8 @@ export type Transformacao = {
 export type Aluna = {
   email: string
   nome: string | null
+  /** WhatsApp da matrícula ou, na falta dele, o telefone da compra. */
+  telefone: string | null
   uf: string | null
   matriculaConcluida: boolean
   diasConcluidos: number
@@ -95,6 +97,64 @@ export type PainelDoDesafio = {
     propostas: number
     fechados: number
   }
+}
+
+type Db = ReturnType<typeof createComunidadeServiceClient>
+
+/** Como a equipe alcança a aluna, fora do portal. */
+type Contato = {
+  nome: string | null
+  telefone: string | null
+  /** "Cidade/UF", da matrícula. */
+  regiao: string | null
+}
+
+const texto = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null)
+
+/**
+ * Nome, telefone e região de um punhado de alunas.
+ *
+ * A MATRÍCULA manda: o WhatsApp que ela mesma escreveu no Dia 0 é o número que
+ * ela usa. O cadastro da compra na Hotmart é a reserva — serve para quem comprou
+ * e ainda não preencheu, ou preencheu sem deixar telefone.
+ *
+ * Recebe os e-mails já recortados (uma página da lista, as interessadas de uma
+ * missão) de propósito: são duas consultas com `in(...)`, não duas consultas na
+ * base inteira. A view `desafio_alunas` não carrega telefone, então o cruzamento
+ * acontece aqui em vez de virar migration no CRM.
+ */
+async function getContatos(db: Db, emails: string[]): Promise<Map<string, Contato>> {
+  if (emails.length === 0) return new Map()
+
+  const [matriculas, compras] = await Promise.all([
+    db.from("desafio_progresso").select("email, respostas").eq("dia", 0).in("email", emails),
+    db.from("authorized_emails").select("email, phone, buyer_name").in("email", emails),
+  ])
+  for (const r of [matriculas, compras]) {
+    if (r.error) console.error("[desafio-admin] contatos:", r.error.message)
+  }
+
+  const matriculaDe = new Map(
+    (matriculas.data ?? []).map((m) => [m.email, (m.respostas ?? {}) as Record<string, unknown>])
+  )
+  const compraDe = new Map((compras.data ?? []).map((c) => [c.email, c]))
+
+  return new Map(
+    emails.map((email) => {
+      const m = matriculaDe.get(email) ?? {}
+      const c = compraDe.get(email)
+      const cidade = texto(m.cidade)
+      const uf = texto(m.uf)?.toUpperCase() ?? null
+      return [
+        email,
+        {
+          nome: texto(m.nome_completo) ?? c?.buyer_name ?? null,
+          telefone: texto(m.whatsapp) ?? c?.phone ?? null,
+          regiao: [cidade, uf].filter(Boolean).join("/") || null,
+        },
+      ]
+    })
+  )
 }
 
 /** Rótulos dos interesses. O banco guarda o slug; a tela mostra o nome. */
@@ -157,33 +217,22 @@ export async function getPainelDoDesafio(): Promise<PainelDoDesafio> {
   // Os interesses vêm como linhas cruas (uma por aluna) porque a resposta é
   // texto livre vindo das opções do dia — agrupar aqui é mais barato que uma
   // view por interesse.
-  // Nome, cidade e WhatsApp saem da matrícula (Dia 0); o telefone da compra
-  // na Hotmart é a reserva para quem entrou na lista sem deixar o WhatsApp.
-  const emails = [...new Set((interesses.data ?? []).map((i) => i.email))]
-  const [matriculas, compras] = emails.length
-    ? await Promise.all([
-        db.from("desafio_progresso").select("email, respostas").eq("dia", 0).in("email", emails),
-        db.from("authorized_emails").select("email, phone, buyer_name").in("email", emails),
-      ])
-    : [{ data: [] }, { data: [] }]
-  const matriculaDe = new Map(
-    (matriculas.data ?? []).map((m) => [m.email, (m.respostas ?? {}) as Record<string, unknown>])
+  // Nome, cidade e WhatsApp de quem levantou a mão — é o que a equipe precisa
+  // para chamar sem sair da tela.
+  const contatos = await getContatos(
+    db,
+    [...new Set((interesses.data ?? []).map((i) => i.email))]
   )
-  const compraDe = new Map((compras.data ?? []).map((c) => [c.email, c]))
-  const texto = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null)
 
   const pessoasPorInteresse = new Map<string, Interessada[]>()
   for (const i of interesses.data ?? []) {
-    const m = matriculaDe.get(i.email) ?? {}
-    const c = compraDe.get(i.email)
-    const cidade = texto(m.cidade)
-    const uf = texto(m.uf)?.toUpperCase() ?? null
+    const c = contatos.get(i.email)
     const lista = pessoasPorInteresse.get(i.interesse) ?? []
     lista.push({
       email: i.email,
-      nome: texto(m.nome_completo) ?? c?.buyer_name ?? null,
-      whatsapp: texto(m.whatsapp) ?? c?.phone ?? null,
-      regiao: [cidade, uf].filter(Boolean).join("/") || null,
+      nome: c?.nome ?? null,
+      whatsapp: c?.telefone ?? null,
+      regiao: c?.regiao ?? null,
       resposta: i.resposta,
     })
     pessoasPorInteresse.set(i.interesse, lista)
@@ -247,24 +296,45 @@ export async function getPainelDoDesafio(): Promise<PainelDoDesafio> {
 
 export type OrdemDasAlunas = "paradas" | "avancadas" | "recentes"
 
+/** Uma página da lista de alunas, com o total do recorte para a paginação. */
+export type PaginaDeAlunas = { alunas: Aluna[]; total: number }
+
 /**
- * A lista de alunas.
+ * A lista de alunas, paginada no banco.
  *
  * `paradas` é a ordem padrão de propósito: quem abriu um dia e não concluiu é
  * quem o suporte precisa alcançar hoje. Ordenar por "mais avançada" faria o
  * painel abrir mostrando quem menos precisa de ajuda.
+ *
+ * A busca e o corte de página rodam no PostgREST, não na tela: com a base
+ * crescendo, filtrar no navegador obrigaria a baixar todas as alunas a cada
+ * visita — foi o que já se corrigiu em /admin/acessos.
  */
-export async function getAlunas(
-  ordem: OrdemDasAlunas = "paradas",
-  limite = 50
-): Promise<Aluna[]> {
+export async function getAlunas({
+  ordem = "paradas",
+  busca = "",
+  pagina = 1,
+  porPagina = 25,
+}: {
+  ordem?: OrdemDasAlunas
+  /** Trecho de e-mail ou nome, já higienizado (ver `termoBusca`). */
+  busca?: string
+  pagina?: number
+  porPagina?: number
+} = {}): Promise<PaginaDeAlunas> {
   const db = createComunidadeServiceClient()
   let q = db
     .from("desafio_alunas")
     .select(
-      "email, buyer_name, apelido, uf, matricula_concluida, dias_concluidos, ultimo_dia_aberto, atualizado_em, no_radar, abordadas, em_conversa, reunioes, propostas, fechados"
+      "email, buyer_name, apelido, uf, matricula_concluida, dias_concluidos, ultimo_dia_aberto, atualizado_em, no_radar, abordadas, em_conversa, reunioes, propostas, fechados",
+      { count: "exact" }
     )
-    .limit(limite)
+
+  // O telefone fica fora da busca: ele não está na view, vem do cruzamento
+  // depois de recortar a página. Buscar por ele exigiria a coluna na view.
+  if (busca) {
+    q = q.or(`email.ilike.%${busca}%,buyer_name.ilike.%${busca}%,apelido.ilike.%${busca}%`)
+  }
 
   if (ordem === "avancadas") {
     q = q.order("dias_concluidos", { ascending: false, nullsFirst: false })
@@ -278,25 +348,37 @@ export async function getAlunas(
       .order("atualizado_em", { ascending: true, nullsFirst: false })
   }
 
-  const { data, error } = await q
+  // O e-mail entra como desempate: sem uma ordem total, duas alunas com o mesmo
+  // `atualizado_em` podem trocar de lugar entre páginas e uma delas desaparecer.
+  q = q.order("email", { ascending: true })
+
+  const desde = (Math.max(1, pagina) - 1) * porPagina
+  const { data, count, error } = await q.range(desde, desde + porPagina - 1)
   if (error) {
     console.error("[desafio-admin] getAlunas:", error.message)
-    return []
+    return { alunas: [], total: 0 }
   }
 
-  return (data ?? []).map((a) => ({
-    email: a.email,
-    nome: a.apelido || a.buyer_name,
-    uf: a.uf,
-    matriculaConcluida: a.matricula_concluida,
-    diasConcluidos: a.dias_concluidos,
-    ultimoDiaAberto: a.ultimo_dia_aberto,
-    atualizadoEm: a.atualizado_em,
-    noRadar: a.no_radar,
-    abordadas: a.abordadas,
-    emConversa: a.em_conversa,
-    reunioes: a.reunioes,
-    propostas: a.propostas,
-    fechados: a.fechados,
-  }))
+  const linhas = data ?? []
+  const contatos = await getContatos(db, linhas.map((a) => a.email))
+
+  return {
+    total: count ?? 0,
+    alunas: linhas.map((a) => ({
+      email: a.email,
+      nome: a.apelido || a.buyer_name,
+      telefone: contatos.get(a.email)?.telefone ?? null,
+      uf: a.uf,
+      matriculaConcluida: a.matricula_concluida,
+      diasConcluidos: a.dias_concluidos,
+      ultimoDiaAberto: a.ultimo_dia_aberto,
+      atualizadoEm: a.atualizado_em,
+      noRadar: a.no_radar,
+      abordadas: a.abordadas,
+      emConversa: a.em_conversa,
+      reunioes: a.reunioes,
+      propostas: a.propostas,
+      fechados: a.fechados,
+    })),
+  }
 }
