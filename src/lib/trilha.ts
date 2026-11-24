@@ -1,6 +1,7 @@
 // A trilha (breadcrumbs) do portal — client-safe.
 
 import { LAB_NAME, MATERIAL_NAME, PLANTAO_NAME } from "@/lib/produto"
+import { getItemDaTeoria } from "@/lib/desafio/teoria"
 
 /** Um passo da trilha. Sem `href`, é só rótulo (o atual, ou uma área sem página). */
 export type Passo = { label: string; href?: string }
@@ -26,6 +27,14 @@ export function trilhaDaRota(pathname: string): Passo[] {
     if (partes[1] === "dia" && partes[2] !== undefined) {
       const n = Number(partes[2])
       trilha.push({ label: n === 0 ? "Matrícula" : `Dia ${n}` })
+    } else if (partes[1] === "teoria") {
+      // A aula leva o título dela; a parte teórica vira link para a lista.
+      const item = partes[2] ? getItemDaTeoria(partes[2]) : undefined
+      if (item) {
+        trilha.push({ label: "Parte teórica", href: "/desafio/teoria" }, { label: item.titulo })
+      } else {
+        trilha.push({ label: "Parte teórica" })
+      }
     } else if (partes[1] === "biblioteca") {
       trilha.push({ label: "Biblioteca" })
     } else if (partes[1] === "radar") {
