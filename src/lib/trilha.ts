@@ -28,12 +28,12 @@ export function trilhaDaRota(pathname: string): Passo[] {
       const n = Number(partes[2])
       trilha.push({ label: n === 0 ? "Matrícula" : `Dia ${n}` })
     } else if (partes[1] === "teoria") {
-      // A aula leva o título dela; a parte teórica vira link para a lista.
+      // A aula leva o título dela; "Aulas teóricas" vira link para a lista.
       const item = partes[2] ? getItemDaTeoria(partes[2]) : undefined
       if (item) {
-        trilha.push({ label: "Parte teórica", href: "/desafio/teoria" }, { label: item.titulo })
+        trilha.push({ label: "Aulas teóricas", href: "/desafio/teoria" }, { label: item.titulo })
       } else {
-        trilha.push({ label: "Parte teórica" })
+        trilha.push({ label: "Aulas teóricas" })
       }
     } else if (partes[1] === "biblioteca") {
       trilha.push({ label: "Biblioteca" })

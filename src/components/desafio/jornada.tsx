@@ -108,7 +108,7 @@ export function ConteudoDaJornada({
                         <GraduationCap className="h-3.5 w-3.5" />
                       </span>
                       <span className="min-w-0 flex-1 truncate text-[13px] font-medium leading-snug text-foreground sm:text-[12.5px]">
-                        Parte teórica
+                        Aulas teóricas
                       </span>
                       <span className="flex-none text-[10px] font-bold uppercase tracking-[0.1em] text-primary opacity-0 transition-opacity group-hover:opacity-100 max-sm:opacity-60">
                         abrir

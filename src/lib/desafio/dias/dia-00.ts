@@ -79,7 +79,7 @@ export const dia00: Dia = {
           audioUrl: BOAS_VINDAS_AUDIO,
           ask: "Seja bem-vinda!",
           support:
-            "O Desafio tem dois momentos: primeiro a parte teórica, depois a parte prática. Gravei este áudio para te explicar como cada um funciona.",
+            "O Desafio tem dois momentos: primeiro as aulas teóricas, depois a parte prática. Gravei este áudio para te explicar como cada um funciona.",
           avisos: AVISOS_DAS_BOAS_VINDAS,
           nota: "Logo depois vem a sua matrícula.",
           cta: "Já ouvi, quero fazer minha matrícula",
@@ -476,6 +476,6 @@ export const dia00: Dia = {
       "Assumiu seu compromisso",
     ],
     amanha:
-      "Agora vem a parte teórica: as aulas que mostram como o mercado de vendas funciona e qual é o seu lugar nele. Depois dela começa a parte prática, a sua Missão Primeiro Sim, no Dia 1. E no Dia 8 você ganha de bônus o acesso ao Marketplace da MultiMeta.",
+      "Agora vêm as aulas teóricas: elas mostram como o mercado de vendas funciona e qual é o seu lugar nele. Depois delas começa a parte prática, a sua Missão Primeiro Sim, no Dia 1. E no Dia 8 você ganha de bônus o acesso ao Marketplace da MultiMeta.",
   },
 }
