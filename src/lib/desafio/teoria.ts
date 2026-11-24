@@ -182,7 +182,7 @@ export const ITENS_DA_TEORIA: readonly ItemDaTeoria[] = [
         icone: "whatsapp",
         titulo: "E o planner físico?",
         texto:
-          "Está sem estoque no momento. Quando voltar, ele entra aqui no portal — e a gente avisa no canal do WhatsApp, junto com o lançamento do aplicativo.",
+          "Está sem estoque no momento. Quando voltar, ele entra aqui no portal — e a gente avisa no grupo do WhatsApp, junto com o lançamento do aplicativo.",
       },
     ],
   },

@@ -68,7 +68,7 @@ export type Campo =
 
 /**
  * Um recado em cartão, embaixo do vídeo ou do áudio — o "anota aí" das
- * boas-vindas: o e-mail do suporte, quem é a B.IA, o canal no WhatsApp. Cada
+ * boas-vindas: o e-mail do suporte, quem é a B.IA, o grupo no WhatsApp. Cada
  * um com no máximo um botão, para fora (`href` com http/mailto) ou para dentro
  * do portal.
  */

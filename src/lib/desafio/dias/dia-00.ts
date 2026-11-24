@@ -25,10 +25,10 @@ const AVISOS_DAS_BOAS_VINDAS: readonly Aviso[] = [
   },
   {
     icone: "whatsapp",
-    titulo: "Nosso canal no WhatsApp",
+    titulo: "Nosso grupo no WhatsApp",
     texto:
       "É lá que sai a devocional diária e o aviso da aula ao vivo de sexta-feira. Entre para não perder.",
-    ...(CANAL_WHATSAPP_URL ? { link: { rotulo: "Entrar no canal", href: CANAL_WHATSAPP_URL } } : {}),
+    ...(CANAL_WHATSAPP_URL ? { link: { rotulo: "Entrar no grupo", href: CANAL_WHATSAPP_URL } } : {}),
   },
   {
     icone: "livro",

@@ -87,11 +87,10 @@ export const INSTAGRAM_NATI_URL = "https://www.instagram.com/natiferraric"
 export const SUPORTE_EMAIL = "suporte@multimetaapp.com.br"
 
 /**
- * Canal da MultiMeta no WhatsApp: a devocional diária e o aviso da aula ao vivo
- * de sexta. `null` enquanto o link não chega — o aviso da matrícula aparece sem
- * botão, em vez de mandar para o grupo errado.
+ * Onde sai a devocional diária e o aviso da aula ao vivo de sexta: o grupo
+ * gratuito "Todas as Alunas" (confirmado pela equipe).
  */
-export const CANAL_WHATSAPP_URL: string | null = null
+export const CANAL_WHATSAPP_URL: string | null = WHATSAPP_FREE_URL
 
 /**
  * Calculadora de ganhos da Nati. Este checkout é o preço de aluna (R$ 13,00 —
