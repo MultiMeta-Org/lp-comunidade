@@ -3,10 +3,11 @@ import { CANAL_WHATSAPP_URL, SUPORTE_EMAIL } from "@/lib/links"
 
 /**
  * O áudio novo de boas-vindas (os dois momentos: parte teórica, depois a
- * prática). Enquanto ele não sobe para o bucket, o passo segue com o vídeo
- * antigo — com os mesmos avisos embaixo.
+ * prática), 2min45, no bucket a 64 kbps como os dos dias. Original no Drive:
+ * "Audio boas vindas desafio - novo.MP3". Voltando para `null`, o passo
+ * retoma o vídeo antigo — com os mesmos avisos embaixo.
  */
-const BOAS_VINDAS_AUDIO: string | null = null
+const BOAS_VINDAS_AUDIO: string | null = "storage://audios/desafio/dia-00-boas-vindas.mp3"
 
 /** O "anota aí" embaixo das boas-vindas: a quem recorrer e onde mais estar. */
 const AVISOS_DAS_BOAS_VINDAS: readonly Aviso[] = [
