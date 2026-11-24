@@ -32,6 +32,7 @@ import {
   salvarWhatsappAction,
 } from "@/app/desafio/actions"
 import type { Empresa, Operacao } from "@/lib/desafio-server"
+import { Avisos } from "@/components/desafio/avisos"
 import { Celebracao } from "@/components/desafio/celebracao"
 import { Modal } from "@/components/ui/modal"
 import { isDirectVideoFile, toVideoEmbedUrl } from "@/lib/lessons"
@@ -627,11 +628,17 @@ function CorpoDoPasso(props: CorpoProps) {
         <div className="flex flex-col gap-3">
           <Video label={passo.label} src={passo.videoUrl} formato={passo.formato} />
           <LinksDoPasso links={passo.links} />
+          <Avisos avisos={passo.avisos} />
         </div>
       )
 
     case "audio":
-      return <Audio label={passo.label} src={passo.audioUrl} />
+      return (
+        <div className="flex flex-col gap-3">
+          <Audio label={passo.label} src={passo.audioUrl} />
+          <Avisos avisos={passo.avisos} />
+        </div>
+      )
 
     case "leitura":
       return (

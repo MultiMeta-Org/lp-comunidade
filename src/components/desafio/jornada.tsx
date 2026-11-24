@@ -1,5 +1,6 @@
+import { Fragment } from "react"
 import Link from "next/link"
-import { Check, Lock } from "lucide-react"
+import { Check, GraduationCap, Lock } from "lucide-react"
 import {
   SEMANAS,
   TOTAL_DIAS,
@@ -90,13 +91,31 @@ export function ConteudoDaJornada({
                 )}
               </header>
               {dias.map((n) => (
-                <LinhaDoDia
-                  key={n}
-                  n={n}
-                  concluido={concluidos.has(n)}
-                  atual={n === atual}
-                  aberto={podeAbrir(n, concluidos, liberacao)}
-                />
+                <Fragment key={n}>
+                  <LinhaDoDia
+                    n={n}
+                    concluido={concluidos.has(n)}
+                    atual={n === atual}
+                    aberto={podeAbrir(n, concluidos, liberacao)}
+                  />
+                  {/* Entre a matrícula e o Dia 1 vem a parte teórica. */}
+                  {n === 0 && concluidos.has(0) && (
+                    <Link
+                      href="/desafio/teoria"
+                      className="group flex items-center gap-2.5 rounded-xl border border-transparent px-2.5 py-2.5 transition-all duration-200 hover:border-primary/35 hover:bg-primary-subtle sm:py-2"
+                    >
+                      <span className="grid h-[26px] w-[26px] flex-none place-items-center rounded-full bg-muted text-muted-foreground sm:h-[25px] sm:w-[25px]">
+                        <GraduationCap className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-[13px] font-medium leading-snug text-foreground sm:text-[12.5px]">
+                        Parte teórica
+                      </span>
+                      <span className="flex-none text-[10px] font-bold uppercase tracking-[0.1em] text-primary opacity-0 transition-opacity group-hover:opacity-100 max-sm:opacity-60">
+                        abrir
+                      </span>
+                    </Link>
+                  )}
+                </Fragment>
               ))}
             </section>
           )

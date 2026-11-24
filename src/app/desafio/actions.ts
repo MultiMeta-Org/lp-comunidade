@@ -23,6 +23,12 @@ import {
   salvarPasso,
   type Empresa,
 } from "@/lib/desafio-server"
+import {
+  PERFIS_COMERCIAIS,
+  chaveDoProgresso,
+  getItemDaTeoria,
+  itemDisponivel,
+} from "@/lib/desafio/teoria"
 
 /**
  * Gravações da missão.
@@ -310,5 +316,49 @@ export async function salvarWhatsappAction(telefone: string): Promise<ActionResu
 
   const error = await salvarPasso(email, 0, 0, { whatsapp: formatarTelefone(limpo) })
   if (error) return { ok: false, error: "Não consegui salvar agora. Tenta de novo?" }
+  return { ok: true }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Parte teórica
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * A teoria grava nas respostas do Dia Zero (ver src/lib/desafio/teoria.ts),
+ * mas NÃO passa por `abrirDia(0)` nem por `filtrarRespostas`: as chaves dela
+ * não são perguntas da matrícula. A porta é fechada aqui mesmo — só entra
+ * aula que existe e já chegou, e só o perfil da lista.
+ */
+export async function marcarItemDaTeoriaAction(chave: string, feito: boolean): Promise<ActionResult> {
+  const { email } = await requireDesafio()
+  const item = getItemDaTeoria(chave)
+  if (!item || !itemDisponivel(item)) return { ok: false, error: "Essa aula não existe." }
+
+  const error = await salvarPasso(email, 0, 0, { [chaveDoProgresso(chave)]: feito === true })
+  if (error) return { ok: false, error: "Não consegui salvar agora. Tenta de novo?" }
+  refresh()
+  return { ok: true }
+}
+
+export async function salvarPerfilComercialAction(perfil: string): Promise<ActionResult> {
+  const { email } = await requireDesafio()
+  if (!(PERFIS_COMERCIAIS as readonly string[]).includes(perfil)) {
+    return { ok: false, error: "Escolha SDR, Closer ou CS." }
+  }
+  const error = await salvarPasso(email, 0, 0, { perfil_comercial: perfil })
+  if (error) return { ok: false, error: "Não consegui salvar agora. Tenta de novo?" }
+  return { ok: true }
+}
+
+/** "Tenho interesse" num produto que ainda vai lançar (o app financeiro). */
+export async function interesseDaTeoriaAction(chave: string): Promise<ActionResult> {
+  const { email } = await requireDesafio()
+  const interesse = getItemDaTeoria(chave)?.interesse
+  if (!interesse) return { ok: false, error: "Esse interesse não existe." }
+
+  // Sem pergunta: a resposta é o próprio botão — assim o painel conta
+  // "Quero ser avisada", e não "Não respondeu".
+  const error = await registrarInteresse(email, interesse.chave, "Quero ser avisada do lançamento")
+  if (error) return { ok: false, error: "Não consegui registrar agora. Tenta de novo?" }
   return { ok: true }
 }

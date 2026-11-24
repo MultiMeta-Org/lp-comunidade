@@ -231,6 +231,8 @@ export type ProximoDia = {
   aberto: boolean
   /** Não abre porque a semana dele ainda está fechada: quando abre (ISO). */
   semanaAbreEm: string | null
+  /** Saindo da matrícula com a parte teórica por fazer: o botão vai para ela, não para o Dia 1. */
+  teoriaAntes?: boolean
 }
 
 /** `2026-10-29T…` → `29/10`, no fuso da aluna (Brasília). */

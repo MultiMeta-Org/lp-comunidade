@@ -1,4 +1,42 @@
-import type { Dia } from "../tipos"
+import type { Aviso, Dia } from "../tipos"
+import { CANAL_WHATSAPP_URL, SUPORTE_EMAIL } from "@/lib/links"
+
+/**
+ * O áudio novo de boas-vindas (os dois momentos: parte teórica, depois a
+ * prática), 2min45, no bucket a 64 kbps como os dos dias. Original no Drive:
+ * "Audio boas vindas desafio - novo.MP3". Voltando para `null`, o passo
+ * retoma o vídeo antigo — com os mesmos avisos embaixo.
+ */
+const BOAS_VINDAS_AUDIO: string | null = "storage://audios/desafio/dia-00-boas-vindas.mp3"
+
+/** O "anota aí" embaixo das boas-vindas: a quem recorrer e onde mais estar. */
+const AVISOS_DAS_BOAS_VINDAS: readonly Aviso[] = [
+  {
+    icone: "email",
+    titulo: "Suporte",
+    texto: `Problema de acesso, pagamento ou na plataforma? Escreva para ${SUPORTE_EMAIL}.`,
+    link: { rotulo: "Escrever para o suporte", href: `mailto:${SUPORTE_EMAIL}` },
+  },
+  {
+    icone: "bia",
+    titulo: "A B.IA, sua assistente",
+    texto:
+      "Ela mora no botão redondo no canto da tela, em todas as páginas do Desafio. Conhece as aulas, a missão de cada dia e as empresas do seu Radar. Travou em algum passo? Pergunte para ela.",
+  },
+  {
+    icone: "whatsapp",
+    titulo: "Nosso grupo no WhatsApp",
+    texto:
+      "É lá que sai a devocional diária e o aviso da aula ao vivo de sexta-feira. Entre para não perder.",
+    ...(CANAL_WHATSAPP_URL ? { link: { rotulo: "Entrar no grupo", href: CANAL_WHATSAPP_URL } } : {}),
+  },
+  {
+    icone: "livro",
+    titulo: "A Biblioteca",
+    texto:
+      "Além das missões, a Biblioteca tem aulas extras e documentos para baixar. Em cada dia do Desafio, embaixo da missão, aparece o material da Biblioteca sobre aquele assunto.",
+  },
+]
 
 /**
  * DIA ZERO — Bem-vinda, Empreendedora Anônima.
@@ -33,20 +71,34 @@ export const dia00: Dia = {
     // portal funciona e por que a matrícula precisa estar completa. Já esteve
     // depois ("quem clica em matrícula espera a matrícula"), mas assim a aluna
     // preenchia sem saber para que servia.
-    {
-      tipo: "video",
-      chave: "video-boas-vindas",
-      label: "Bem-vinda ao Desafio Empreendedora Anônima",
-      // H.264 720p no bucket privado (o original do iPhone é HEVC e só tocava
-      // pelo player do Drive, com tarja preta e sem duração). Original no Drive:
-      // https://drive.google.com/file/d/1FC8J9iPn1YD-909M40BF6I3-T9q5aL-T/view
-      videoUrl: "storage://videos/desafio/dia-00-boas-vindas.mp4",
-      formato: "vertical",
-      ask: "Seja bem-vinda!",
-      support: "Gravei alguns recadinhos importantes para você:",
-      nota: "Não precisa anotar nada agora. Logo depois do vídeo vem a sua matrícula.",
-      cta: "Já assisti, quero fazer minha matrícula",
-    },
+    BOAS_VINDAS_AUDIO
+      ? {
+          tipo: "audio",
+          chave: "video-boas-vindas",
+          label: "Bem-vinda ao Desafio Empreendedora Anônima",
+          audioUrl: BOAS_VINDAS_AUDIO,
+          ask: "Seja bem-vinda!",
+          support:
+            "O Desafio tem dois momentos: primeiro a parte teórica, depois a parte prática. Gravei este áudio para te explicar como cada um funciona.",
+          avisos: AVISOS_DAS_BOAS_VINDAS,
+          nota: "Logo depois vem a sua matrícula.",
+          cta: "Já ouvi, quero fazer minha matrícula",
+        }
+      : {
+          tipo: "video",
+          chave: "video-boas-vindas",
+          label: "Bem-vinda ao Desafio Empreendedora Anônima",
+          // H.264 720p no bucket privado (o original do iPhone é HEVC e só tocava
+          // pelo player do Drive, com tarja preta e sem duração). Original no Drive:
+          // https://drive.google.com/file/d/1FC8J9iPn1YD-909M40BF6I3-T9q5aL-T/view
+          videoUrl: "storage://videos/desafio/dia-00-boas-vindas.mp4",
+          formato: "vertical",
+          ask: "Seja bem-vinda!",
+          support: "Gravei alguns recadinhos importantes para você:",
+          avisos: AVISOS_DAS_BOAS_VINDAS,
+          nota: "Logo depois do vídeo vem a sua matrícula.",
+          cta: "Já assisti, quero fazer minha matrícula",
+        },
 
     // ── 1. Sobre você ──
     {
@@ -424,6 +476,6 @@ export const dia00: Dia = {
       "Assumiu seu compromisso",
     ],
     amanha:
-      "Amanhã começa a sua Missão Primeiro Sim. No Dia 1 a gente entende juntas a carreira que você acabou de começar.",
+      "Agora vem a parte teórica: as aulas que mostram como o mercado de vendas funciona e qual é o seu lugar nele. Depois dela começa a parte prática, a sua Missão Primeiro Sim, no Dia 1. E no Dia 8 você ganha de bônus o acesso ao Marketplace da MultiMeta.",
   },
 }

@@ -27,11 +27,13 @@ function separar(ref: string): { bucket: string; caminho: string } | null {
  * `campos` escolhe o que assinar: a vitrine só precisa da capa; o vídeo só
  * desce assinado na página dele. Falhou a assinatura, o campo fica vazio e o
  * card mostra o estado sem arquivo — melhor que uma imagem quebrada.
+ *
+ * Serve também às aulas da parte teórica, que têm o mesmo `arquivo` e `capa`.
  */
-export async function assinarMateriais(
-  materiais: readonly MaterialDaBiblioteca[],
+export async function assinarMateriais<M extends { arquivo?: string; capa?: string }>(
+  materiais: readonly M[],
   campos: readonly ("arquivo" | "capa")[] = ["capa"]
-): Promise<MaterialAssinado[]> {
+): Promise<(M & { disponivel: boolean })[]> {
   const porBucket = new Map<string, Set<string>>()
   for (const m of materiais) {
     for (const campo of campos) {

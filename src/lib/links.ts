@@ -82,3 +82,33 @@ export const LOUVORES_URL =
 
 /** Instagram da Nati Ferraric. */
 export const INSTAGRAM_NATI_URL = "https://www.instagram.com/natiferraric"
+
+/** E-mail do suporte, para quem prefere escrever a chamar no WhatsApp. */
+export const SUPORTE_EMAIL = "suporte@multimetaapp.com.br"
+
+/**
+ * Onde sai a devocional diária e o aviso da aula ao vivo de sexta: o grupo
+ * gratuito "Todas as Alunas" (confirmado pela equipe).
+ */
+export const CANAL_WHATSAPP_URL: string | null = WHATSAPP_FREE_URL
+
+/**
+ * Calculadora de ganhos da Nati. Este checkout é o preço de aluna (R$ 13,00 —
+ * fora daqui, R$ 47,00); o acesso ao que ela comprou é o app no Lovable, que a
+ * Hotmart também entrega por e-mail.
+ */
+export const CALCULADORA_HOTMART_URL = "https://pay.hotmart.com/W108307325X"
+export const CALCULADORA_ACESSO_URL = "https://real-brisa-calculadora.lovable.app"
+
+/**
+ * Checkout do MultiQuiz com o preço de aluna (R$ 89,90/mês). `null` até a
+ * equipe mandar o link: sem ele, a aula mostra o preço e manda para o site.
+ */
+export const MULTIQUIZ_ALUNA_URL: string | null = null
+
+/**
+ * O teste de perfil comercial (SDR, Closer ou CS). `null` enquanto o teste não
+ * estiver pronto: a aula do teste não aparece na parte teórica nem conta no
+ * progresso.
+ */
+export const TESTE_PERFIL_URL: string | null = null

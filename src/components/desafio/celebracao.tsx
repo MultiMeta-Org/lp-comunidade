@@ -90,7 +90,7 @@ export function Celebracao({
 
       <section className="mt-4 flex w-full flex-col gap-1.5 rounded-[20px] border border-dashed border-border bg-card px-5 py-5 text-left sm:px-6">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
-          {proximo.aberto ? "Próximo dia" : temProximo ? "Amanhã" : "Em breve"}
+          {proximo.teoriaAntes ? "Agora" : proximo.aberto ? "Próximo dia" : temProximo ? "Amanhã" : "Em breve"}
         </p>
         <p className="text-sm leading-relaxed text-muted-foreground">{fim.amanha}</p>
         {proximo.semanaAbreEm && (
@@ -105,10 +105,12 @@ export function Celebracao({
           do Desafio vem da liberação por semana, não deste botão. Quando o
           seguinte não abre (semana fechada, ou não existe), volta à jornada. */}
       <Link
-        href={proximo.aberto ? `/desafio/dia/${proximo.n}` : "/desafio"}
+        href={proximo.teoriaAntes ? "/desafio/teoria" : proximo.aberto ? `/desafio/dia/${proximo.n}` : "/desafio"}
         className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-auto sm:py-3"
       >
-        {proximo.aberto
+        {proximo.teoriaAntes
+          ? "Ir para a parte teórica"
+          : proximo.aberto
           ? proximo.n === 1
             ? "Começar o Dia 1"
             : `Ir para o Dia ${proximo.n}`
