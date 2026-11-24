@@ -475,6 +475,6 @@ export const dia00: Dia = {
       "Assumiu seu compromisso",
     ],
     amanha:
-      "Agora vem a parte teórica: as aulas que mostram como o mercado de vendas funciona e qual é o seu lugar nele. Depois dela começa a parte prática, a sua Missão Primeiro Sim, no Dia 1.",
+      "Agora vem a parte teórica: as aulas que mostram como o mercado de vendas funciona e qual é o seu lugar nele. Depois dela começa a parte prática, a sua Missão Primeiro Sim, no Dia 1. E no Dia 8 você ganha de bônus o acesso ao Marketplace da MultiMeta.",
   },
 }
