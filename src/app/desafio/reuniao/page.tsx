@@ -58,6 +58,11 @@ export default async function ReuniaoPage() {
           fora: true,
         },
         {
+          titulo: "Aprenda o script da call",
+          texto: "A aula da estrutura da reunião: quebra de gelo, perguntas, dores e objetivos, e recapitular antes da oferta.",
+          href: "/desafio/biblioteca/script-call",
+        },
+        {
           titulo: "Tenha o roteiro e os scripts à mão",
           texto: "Central de Scripts: gavetas “Antes da reunião”, “Na reunião” e “Depois da reunião”. Deixe aberta durante a conversa.",
           href: "/desafio/scripts",

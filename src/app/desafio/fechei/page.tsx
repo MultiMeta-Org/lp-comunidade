@@ -1,6 +1,6 @@
 import { requireDesafio } from "@/lib/guard"
 import { linkDoCaderno } from "@/lib/desafio/caderno"
-import { ROTINA_COMERCIAL_NOTION_URL, SUPPORT_URL } from "@/lib/links"
+import { CRM_SIGNUP_URL, ROTINA_COMERCIAL_NOTION_URL, SUPPORT_URL } from "@/lib/links"
 import { Central } from "@/components/desafio/central"
 
 /**
@@ -31,6 +31,38 @@ export default async function FecheiPage() {
           titulo: "Como começar",
           texto: "Caderno de Campo, capítulo “Fechei meu contrato: como começar” (p. 53).",
           href: linkDoCaderno(53),
+          fora: true,
+        },
+        {
+          titulo: "O mapa da especialista comercial",
+          texto: "O passo a passo de quando você fecha: organizar a rotina, controlar as pendências e fazer o onboarding com o empresário. Comece por esta aula.",
+          href: "/desafio/biblioteca/mapa-especialista",
+        },
+        {
+          titulo: "A rotina comercial do Método",
+          texto: "O que olhar de manhã, quando prospectar, fazer follow-up e marcar reunião, alimentar o CRM e mandar o relatório.",
+          href: "/desafio/biblioteca/rotina-comercial-evp",
+        },
+        {
+          titulo: "As métricas da rotina",
+          texto: "O relatório diário, taxa de resposta e de conversão, e como mostrar os números para o empresário.",
+          href: "/desafio/biblioteca/metricas-rotina",
+        },
+        {
+          titulo: "Scripts de vendas",
+          texto: "A aula dos scripts de captação e follow-up. Os modelos para copiar estão na Central de Scripts.",
+          href: "/desafio/biblioteca/scripts-de-vendas",
+        },
+        {
+          titulo: "O CRM da MultiMeta",
+          texto: "Os leads, as etapas e os follow-ups da empresa num lugar só. Para alunas, R$ 89,90 por mês — o valor normal é R$ 149,90.",
+          href: CRM_SIGNUP_URL,
+          fora: true,
+        },
+        {
+          titulo: "O Playbook da Especialista Comercial",
+          texto: "O documento da rotina comercial, para baixar e consultar no dia a dia.",
+          href: "/desafio/biblioteca/playbook-especialista/arquivo",
           fora: true,
         },
         {

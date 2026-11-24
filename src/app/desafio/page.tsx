@@ -5,6 +5,7 @@ import {
   CalendarCheck,
   Check,
   ClipboardList,
+  GraduationCap,
   ListOrdered,
   PartyPopper,
   Target,
@@ -13,6 +14,7 @@ import { requireDesafio } from "@/lib/guard"
 import { getJornada, getOperacao } from "@/lib/desafio-server"
 import { TOTAL_DIAS, dataCurta, diaAtual, diasFeitos, getDia, podeAbrir, semanaDoDia } from "@/lib/desafio"
 import { getMemberFirstName } from "@/lib/access"
+import { progressoDaTeoria, type ProgressoDaTeoria } from "@/lib/desafio/teoria"
 import { Atmosphere } from "@/components/atmosphere"
 import { Jornada } from "@/components/desafio/jornada"
 import { OperacaoDeHoje } from "@/components/desafio/operacao"
@@ -42,6 +44,12 @@ export default async function DesafioPage() {
   const feitoHoje = jornada.concluidos.has(atual)
   const feitos = diasFeitos(jornada.concluidos)
   const emMatricula = !jornada.concluidos.has(0)
+  const teoria = progressoDaTeoria(jornada.dias.get(0)?.respostas)
+  // Depois da matrícula vem a parte teórica, e só então o Dia 1. Ela não
+  // trava o Dia 1 (ver src/lib/desafio/teoria.ts): quem já começou o Dia 1,
+  // ou escolheu pular, segue com o cartão do dia — e a teoria fica nos acessos.
+  const naTeoria =
+    !emMatricula && !teoria.concluida && atual === 1 && (jornada.dias.get(1)?.passo ?? 0) === 0
   // O dia de hoje existe, mas a semana dele ainda não abriu (liberação por
   // semana, contando da compra): o cartão diz quando, em vez de um botão.
   const semanaAbreEm =
@@ -82,7 +90,9 @@ export default async function DesafioPage() {
           className="flex min-w-0 flex-col gap-4 animate-rise sm:gap-5"
           style={{ "--d": "90ms" } as React.CSSProperties}
         >
-          {dia ? (
+          {naTeoria ? (
+            <CartaoDaTeoria teoria={teoria} />
+          ) : dia ? (
             feitoHoje ? (
               <TudoFeito
                 titulo={dia.fim.titulo}
@@ -118,7 +128,7 @@ export default async function DesafioPage() {
                   hoje é o destino do dia; a operação é o que já está em campo. */}
               <OperacaoDeHoje operacao={operacao} />
 
-              <AcessosPermanentes empresas={jornada.empresasNoRadar} />
+              <AcessosPermanentes empresas={jornada.empresasNoRadar} teoria={teoria} />
             </>
           )}
 
@@ -234,6 +244,45 @@ function CartaoDoDia({
 }
 
 /**
+ * A parte teórica, no lugar do cartão do Dia 1 enquanto ela não termina. Tem
+ * a saída "ir direto para o Dia 1" porque a teoria não trava a prática.
+ */
+function CartaoDaTeoria({ teoria }: { teoria: ProgressoDaTeoria }) {
+  const comecou = teoria.feitos.size > 0
+  return (
+    <section className="relative flex flex-col items-start gap-3 overflow-hidden rounded-[22px] border border-border bg-card px-5 py-7 shadow-sm sm:rounded-[26px] sm:px-10 sm:py-9">
+      <div aria-hidden className="card-sheen pointer-events-none absolute inset-0" />
+      <p className="relative text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+        Parte teórica
+      </p>
+      <h1 className="relative max-w-[17ch] font-display text-[clamp(27px,3.6vw,38px)] font-bold leading-[1.08] text-foreground">
+        Antes da prática, o mapa.
+      </h1>
+      <p className="relative max-w-[44ch] text-base leading-relaxed text-muted-foreground">
+        As aulas que mostram como o mercado de vendas funciona e qual é o seu lugar nele.
+        Depois delas, a parte prática começa no Dia 1.
+      </p>
+      <p className="relative mt-1 text-xs text-muted-foreground">
+        {teoria.feitos.size} de {teoria.total} aulas feitas
+      </p>
+      <Link
+        href={teoria.proximo ? `/desafio/teoria/${teoria.proximo.chave}` : "/desafio/teoria"}
+        className="relative mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-auto sm:py-3"
+      >
+        {comecou ? "Continuar de onde parei" : "Começar a parte teórica"}
+        <ArrowRight className="h-4 w-4" />
+      </Link>
+      <Link
+        href="/desafio/dia/1"
+        className="relative text-[13px] font-semibold text-muted-foreground underline decoration-1 underline-offset-[3px] hover:text-primary"
+      >
+        Prefiro ir direto para o Dia 1
+      </Link>
+    </section>
+  )
+}
+
+/**
  * "Você fez tudo hoje."
  *
  * Este estado existe porque sem ele a aluna que concluiu a missão voltaria à
@@ -317,7 +366,7 @@ function SemConteudo() {
  * que os outros, como o documento pede. Cada um leva a uma página com o que
  * ela precisa naquele momento (/desafio/reuniao e /desafio/fechei).
  */
-function AcessosPermanentes({ empresas }: { empresas: number }) {
+function AcessosPermanentes({ empresas, teoria }: { empresas: number; teoria: ProgressoDaTeoria }) {
   return (
     <section aria-label="Seus acessos" className="flex flex-col gap-2.5">
       {/* Dois momentos, dois botões (pedido da Nati): primeiro ela se reúne
@@ -356,7 +405,7 @@ function AcessosPermanentes({ empresas }: { empresas: number }) {
         </Link>
       </div>
 
-      <div className="grid gap-2.5 sm:grid-cols-2">
+      <div className="grid gap-2.5 sm:grid-cols-3">
         <Link
           href="/desafio/radar"
           className="group flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5 transition-all duration-300 hover:border-primary/45 hover:shadow-md"
@@ -381,6 +430,20 @@ function AcessosPermanentes({ empresas }: { empresas: number }) {
           <span className="min-w-0 flex-1">
             <b className="block text-[13px] font-semibold text-foreground">Biblioteca</b>
             <small className="block text-[11.5px] text-muted-foreground">Caderno de Campo e materiais de apoio</small>
+          </span>
+          <ArrowRight className="h-3.5 w-3.5 flex-none text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+        </Link>
+
+        <Link
+          href="/desafio/teoria"
+          className="group flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5 transition-all duration-300 hover:border-primary/45 hover:shadow-md"
+        >
+          <GraduationCap className="h-4.5 w-4.5 flex-none text-primary" />
+          <span className="min-w-0 flex-1">
+            <b className="block text-[13px] font-semibold text-foreground">Parte teórica</b>
+            <small className="block text-[11.5px] text-muted-foreground">
+              {teoria.concluida ? "Concluída · reveja as aulas" : `${teoria.feitos.size} de ${teoria.total} aulas`}
+            </small>
           </span>
           <ArrowRight className="h-3.5 w-3.5 flex-none text-muted-foreground transition-transform group-hover:translate-x-0.5" />
         </Link>

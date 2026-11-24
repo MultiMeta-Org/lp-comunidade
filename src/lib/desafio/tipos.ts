@@ -66,6 +66,20 @@ export type Campo =
 // Passos
 // ─────────────────────────────────────────────────────────────
 
+/**
+ * Um recado em cartão, embaixo do vídeo ou do áudio — o "anota aí" das
+ * boas-vindas: o e-mail do suporte, quem é a B.IA, o canal no WhatsApp. Cada
+ * um com no máximo um botão, para fora (`href` com http/mailto) ou para dentro
+ * do portal.
+ */
+export type Aviso = {
+  titulo: string
+  texto: string
+  link?: { rotulo: string; href: string }
+  /** Ícone à esquerda. Um nome, e não o componente: o conteúdo não importa React. */
+  icone?: "email" | "bia" | "whatsapp" | "livro"
+}
+
 /** O que todo passo tem: a pergunta grande, o apoio da Nati, o botão. */
 type Base = {
   chave: string
@@ -96,10 +110,11 @@ export type Passo =
       formato?: "horizontal" | "vertical"
       /** Botões embaixo do vídeo (ex.: o capítulo do Caderno de que ele fala). */
       links?: readonly { rotulo: string; href: string }[]
+      avisos?: readonly Aviso[]
     })
   /** Ouvir. Do Dia 8 em diante o conteúdo do dia é áudio, não vídeo. `audioUrl`
    *  ausente mostra a mesma cartela do vídeo não gravado. */
-  | (Base & { tipo: "audio"; label: string; audioUrl?: string })
+  | (Base & { tipo: "audio"; label: string; audioUrl?: string; avisos?: readonly Aviso[] })
   /** Uma ou mais perguntas numa tela. */
   | (Base & { tipo: "formulario"; campos: readonly Campo[] })
   /** Só ler: resumo do dia, princípio, "guarde isso". Nada a responder. */

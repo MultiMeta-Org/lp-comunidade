@@ -10,6 +10,7 @@ import {
 } from "@/lib/desafio-server"
 import { DIA_DO_MARKETPLACE, diaAtual, diaDisponivel, getDia, podeAbrir, semanaAberta, type ProximoDia } from "@/lib/desafio"
 import { materiaisDoDia } from "@/lib/desafio/biblioteca"
+import { progressoDaTeoria } from "@/lib/desafio/teoria"
 import { assinarMateriais } from "@/lib/desafio/biblioteca-server"
 import { Atmosphere } from "@/components/atmosphere"
 import { MaterialDoDia } from "@/components/desafio/biblioteca"
@@ -70,6 +71,7 @@ export default async function DiaPage({
       !abreJa && diaDisponivel(seguinte) && !semanaAberta(seguinte, jornada.liberacao)
         ? jornada.liberacao.proximaSemanaEm
         : null,
+    teoriaAntes: numero === 0 && !progressoDaTeoria(jornada.dias.get(0)?.respostas).concluida,
   }
 
   const progresso = jornada.dias.get(numero)

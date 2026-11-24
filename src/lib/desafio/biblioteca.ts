@@ -49,6 +49,8 @@ export const TRILHAS: Record<Trilha, { titulo: string; descricao: string }> = {
 }
 
 const pasta = (nome: string) => `storage://videos/desafio/biblioteca/${nome}`
+/** As aulas do Método EVP que subiram junto com a parte teórica (desafio/teoria/). */
+const metodo = (nome: string) => `storage://videos/desafio/teoria/${nome}`
 
 /**
  * A reunião ao vivo da Monique (fechamento de R$ 6.500). A Nati pediu que ela
@@ -273,6 +275,92 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     capa: pasta("rotina-comercial.jpg"),
     duracao: "29 min",
     // Mora no "Fechei meu contrato", que é para onde ela vai depois do sim.
+  },
+
+  // A fase da rotina comercial do Método EVP: o dia a dia de quem já fechou.
+  // Não entra na parte teórica (é trabalho, não preparação) — mora no
+  // "Fechei meu contrato" e aqui. A aula "Rotina comercial" da fase é a
+  // `rotina-comercial-evp`, lá em cima.
+  {
+    chave: "mapa-especialista",
+    titulo: "O mapa da especialista comercial",
+    resumo: "O passo a passo de quando você fecha com uma empresa: organizar a rotina, controlar as pendências, registrar tudo sobre o negócio e conduzir o onboarding com o empresário.",
+    trilha: "rotina",
+    tipo: "video",
+    arquivo: metodo("r-mapa-especialista.mp4"),
+    capa: metodo("r-mapa-especialista.jpg"),
+    duracao: "44 min",
+  },
+  {
+    chave: "metricas-rotina",
+    titulo: "Métricas da rotina comercial",
+    resumo: "O relatório diário de atividades, taxa de resposta e de conversão, e como mostrar os números para o empresário.",
+    trilha: "rotina",
+    tipo: "video",
+    arquivo: metodo("r-metricas-rotina.mp4"),
+    capa: metodo("r-metricas-rotina.jpg"),
+    duracao: "20 min",
+  },
+  {
+    chave: "scripts-de-vendas",
+    titulo: "Scripts de vendas",
+    resumo: "Os scripts de captação ativa e passiva, de follow-up, e como usar um script sem soar robotizada. Os modelos estão na Central de Scripts.",
+    trilha: "rotina",
+    tipo: "video",
+    arquivo: metodo("r-scripts.mp4"),
+    capa: metodo("r-scripts.jpg"),
+    duracao: "15 min",
+  },
+  {
+    chave: "script-call",
+    titulo: "Script para a call de vendas",
+    resumo: "A estrutura da reunião de fechamento: quebra de gelo, perguntas estratégicas, dores e objetivos, recapitular antes da oferta.",
+    trilha: "closer",
+    tipo: "video",
+    arquivo: metodo("r-script-call.mp4"),
+    capa: metodo("r-script-call.jpg"),
+    duracao: "11 min",
+  },
+  {
+    chave: "crm-no-comercial",
+    titulo: "O CRM no processo comercial",
+    resumo: "Centralizar a origem dos leads, acompanhar as etapas da venda, ter previsão de faturamento e agendar follow-ups.",
+    trilha: "crm",
+    tipo: "video",
+    arquivo: metodo("r-crm.mp4"),
+    capa: metodo("r-crm.jpg"),
+    duracao: "9 min",
+  },
+  {
+    chave: "marketplace",
+    titulo: "Como funciona o Marketplace",
+    resumo: "A curadoria das empresas, como ver as oportunidades, os modelos de remuneração e como demonstrar interesse numa vaga.",
+    trilha: "rotina",
+    tipo: "video",
+    arquivo: metodo("r-marketplace.mp4"),
+    capa: metodo("r-marketplace.jpg"),
+    duracao: "4 min",
+    dia: 8,
+  },
+  {
+    chave: "playbook-especialista",
+    titulo: "O Playbook da Especialista Comercial",
+    resumo: "O guia para estruturar, executar e escalar a operação de vendas de uma empresa no digital. O documento da fase da rotina comercial.",
+    trilha: "rotina",
+    tipo: "modelo",
+    arquivo: "storage://pdfs/desafio/teoria/playbook-especialista-comercial.pdf",
+    capa: "storage://pdfs/desafio/teoria/playbook-especialista-comercial.jpg",
+    duracao: "17 páginas",
+  },
+  {
+    chave: "fase-4-expansao",
+    titulo: "Expansão: de especialista a líder estratégica",
+    resumo: "O documento da Fase 4 do Método EVP: o próximo passo depois de dominar a rotina comercial.",
+    trilha: "rotina",
+    tipo: "modelo",
+    arquivo: "storage://pdfs/desafio/teoria/fase-4-expansao.pdf",
+    capa: "storage://pdfs/desafio/teoria/fase-4-expansao.jpg",
+    duracao: "17 páginas",
   },
 ]
 

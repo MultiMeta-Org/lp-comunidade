@@ -52,6 +52,9 @@ export const dia01: Dia = {
       ask: "Assista ao vídeo de hoje.",
       support:
         "Ele explica o que acontece antes, durante e depois de uma venda. Depois eu te mostro sua missão.",
+      // Pedido da Nati: no começo da parte prática, lembrar que a Biblioteca
+      // tem o assunto de cada dia.
+      nota: "Em cada dia, embaixo da missão, aparece o material da Biblioteca sobre aquele assunto. Use para aprofundar quando quiser.",
       cta: "Já assisti",
     },
 
