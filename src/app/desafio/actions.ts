@@ -356,7 +356,9 @@ export async function interesseDaTeoriaAction(chave: string): Promise<ActionResu
   const interesse = getItemDaTeoria(chave)?.interesse
   if (!interesse) return { ok: false, error: "Esse interesse não existe." }
 
-  const error = await registrarInteresse(email, interesse.chave, null)
+  // Sem pergunta: a resposta é o próprio botão — assim o painel conta
+  // "Quero ser avisada", e não "Não respondeu".
+  const error = await registrarInteresse(email, interesse.chave, "Quero ser avisada do lançamento")
   if (error) return { ok: false, error: "Não consegui registrar agora. Tenta de novo?" }
   return { ok: true }
 }

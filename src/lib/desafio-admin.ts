@@ -103,6 +103,7 @@ const NOME_DO_INTERESSE: Record<string, string> = {
   "rotina-lar-trabalho": "Rotina do lar + trabalho",
   "crm-quiz": "CRM + Quiz",
   "socias-de-projeto": "Sócias de Projeto",
+  "app-financeiro": "Aplicativo financeiro (lançamento)",
 }
 
 export async function getPainelDoDesafio(): Promise<PainelDoDesafio> {

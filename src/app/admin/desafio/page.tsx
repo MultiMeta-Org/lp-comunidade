@@ -286,7 +286,7 @@ export default async function AdminDesafioPage({
               Quem levantou a mão
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Interesses declarados dentro das missões. É a lista para falar com
+              Interesses declarados nas missões e na parte teórica (o app financeiro). É a lista para falar com
               quem pediu, em vez de anunciar para a base inteira.
             </p>
           </div>
