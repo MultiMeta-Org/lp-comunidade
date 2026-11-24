@@ -45,7 +45,7 @@ export default async function ItemDaTeoriaPage({ params }: { params: Promise<{ c
   // página da teoria — que diz "concluída" e aponta para a prática.
   const proximo = seguinte
     ? { href: `/desafio/teoria/${seguinte.chave}`, rotulo: "Próxima aula" }
-    : { href: "/desafio/teoria", rotulo: "Ver a parte teórica" }
+    : { href: "/desafio/teoria", rotulo: "Ver as aulas teóricas" }
 
   return (
     <main className="grain relative min-h-[calc(100vh-6.5rem)] overflow-hidden px-4 pb-20 pt-6 sm:px-5 sm:pt-8">
@@ -57,7 +57,7 @@ export default async function ItemDaTeoriaPage({ params }: { params: Promise<{ c
           className="inline-flex w-fit items-center gap-1.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-primary"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Parte teórica · {progresso.feitos.size} de {progresso.total}
+          Aulas teóricas · {progresso.feitos.size} de {progresso.total}
         </Link>
 
         <header className="flex flex-col gap-2">

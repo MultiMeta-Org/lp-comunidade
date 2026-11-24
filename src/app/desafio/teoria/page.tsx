@@ -35,7 +35,7 @@ export default async function TeoriaPage() {
       <div className="relative z-10 mx-auto w-full max-w-3xl">
         <header className="mb-8 flex flex-col gap-3">
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">
-            Parte teórica
+            Aulas teóricas
           </p>
           <h1 className="font-display text-3xl font-bold leading-[1.1] text-foreground sm:text-4xl">
             {progresso.concluida ? "Você já tem o mapa." : "Antes da prática, o mapa."}

@@ -253,7 +253,7 @@ function CartaoDaTeoria({ teoria }: { teoria: ProgressoDaTeoria }) {
     <section className="relative flex flex-col items-start gap-3 overflow-hidden rounded-[22px] border border-border bg-card px-5 py-7 shadow-sm sm:rounded-[26px] sm:px-10 sm:py-9">
       <div aria-hidden className="card-sheen pointer-events-none absolute inset-0" />
       <p className="relative text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-        Parte teórica
+        Aulas teóricas
       </p>
       <h1 className="relative max-w-[17ch] font-display text-[clamp(27px,3.6vw,38px)] font-bold leading-[1.08] text-foreground">
         Antes da prática, o mapa.
@@ -269,7 +269,7 @@ function CartaoDaTeoria({ teoria }: { teoria: ProgressoDaTeoria }) {
         href={teoria.proximo ? `/desafio/teoria/${teoria.proximo.chave}` : "/desafio/teoria"}
         className="relative mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-auto sm:py-3"
       >
-        {comecou ? "Continuar de onde parei" : "Começar a parte teórica"}
+        {comecou ? "Continuar de onde parei" : "Começar as aulas teóricas"}
         <ArrowRight className="h-4 w-4" />
       </Link>
       <Link
@@ -440,7 +440,7 @@ function AcessosPermanentes({ empresas, teoria }: { empresas: number; teoria: Pr
         >
           <GraduationCap className="h-4.5 w-4.5 flex-none text-primary" />
           <span className="min-w-0 flex-1">
-            <b className="block text-[13px] font-semibold text-foreground">Parte teórica</b>
+            <b className="block text-[13px] font-semibold text-foreground">Aulas teóricas</b>
             <small className="block text-[11.5px] text-muted-foreground">
               {teoria.concluida ? "Concluída · reveja as aulas" : `${teoria.feitos.size} de ${teoria.total} aulas`}
             </small>

@@ -109,7 +109,7 @@ export function Celebracao({
         className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-auto sm:py-3"
       >
         {proximo.teoriaAntes
-          ? "Ir para a parte teórica"
+          ? "Ir para as aulas teóricas"
           : proximo.aberto
           ? proximo.n === 1
             ? "Começar o Dia 1"
