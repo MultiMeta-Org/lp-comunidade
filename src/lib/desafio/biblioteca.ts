@@ -352,16 +352,6 @@ export const MATERIAIS_DA_BIBLIOTECA: readonly MaterialDaBiblioteca[] = [
     capa: "storage://pdfs/desafio/teoria/playbook-especialista-comercial.jpg",
     duracao: "17 páginas",
   },
-  {
-    chave: "fase-4-expansao",
-    titulo: "Expansão: de especialista a líder estratégica",
-    resumo: "O documento da Fase 4 do Método EVP: o próximo passo depois de dominar a rotina comercial.",
-    trilha: "rotina",
-    tipo: "modelo",
-    arquivo: "storage://pdfs/desafio/teoria/fase-4-expansao.pdf",
-    capa: "storage://pdfs/desafio/teoria/fase-4-expansao.jpg",
-    duracao: "17 páginas",
-  },
 ]
 
 export function getMaterial(chave: string): MaterialDaBiblioteca | undefined {
