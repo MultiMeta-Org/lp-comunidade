@@ -406,6 +406,8 @@ export const ITENS_DA_TEORIA: readonly ItemDaTeoria[] = [
     fase: 3,
     titulo: "Social Seller",
     tipo: "video",
+    ...video("f3-social-seller"),
+    duracao: "3 min",
   },
   {
     chave: "f3-metricas-sdr",
