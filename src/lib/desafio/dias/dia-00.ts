@@ -415,6 +415,8 @@ export const dia00: Dia = {
       ask: "Agora entenda a carreira que você está começando.",
       support:
         "Antes do Dia 1, conheça os caminhos que essa área abre para você — e onde o Desafio te coloca neles.",
+      // Pedido da Nati: no vídeo ela fala de ser sócia, e a lista vem logo depois.
+      nota: "Quer ser sócia da MultiMeta, como eu conto no vídeo? A inscrição na lista aparece na próxima página.",
       cta: "Já assisti",
     },
 
