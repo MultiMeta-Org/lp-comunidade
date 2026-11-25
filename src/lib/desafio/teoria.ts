@@ -135,13 +135,20 @@ export const ITENS_DA_TEORIA: readonly ItemDaTeoria[] = [
     ],
   },
   {
-    // O Drive mandou o mesmo vídeo para "Seu papel" e "Papel do empresário".
     chave: "f1-seu-papel",
     fase: 1,
-    titulo: "Seu papel e o papel do empresário",
+    titulo: "Seu papel",
     tipo: "video",
     ...video("f1-seu-papel"),
     duracao: "5 min",
+  },
+  {
+    chave: "f1-papel-empresario",
+    fase: 1,
+    titulo: "Papel do empresário",
+    tipo: "video",
+    ...video("f1-papel-empresario"),
+    duracao: "3 min",
   },
   {
     chave: "f1-mercado-diferente",
@@ -250,14 +257,20 @@ export const ITENS_DA_TEORIA: readonly ItemDaTeoria[] = [
 
   // ── Fase 2 ──
   {
-    // O Drive mandou o mesmo vídeo para "O tamanho do mercado brasileiro" e
-    // "O que é o mercado de vendas hoje".
     chave: "f2-tamanho-mercado",
     fase: 2,
-    titulo: "O tamanho do mercado brasileiro e o mercado de vendas hoje",
+    titulo: "O tamanho do mercado brasileiro",
     tipo: "video",
     ...video("f2-tamanho-mercado"),
     duracao: "13 min",
+  },
+  {
+    chave: "f2-mercado-de-vendas",
+    fase: 2,
+    titulo: "O que é o mercado de vendas hoje",
+    tipo: "video",
+    ...video("f2-mercado-de-vendas"),
+    duracao: "9 min",
   },
   {
     chave: "f2-visao-empresario",
