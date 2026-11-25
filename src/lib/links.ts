@@ -107,8 +107,8 @@ export const CALCULADORA_ACESSO_URL = "https://real-brisa-calculadora.lovable.ap
 export const MULTIQUIZ_ALUNA_URL: string | null = null
 
 /**
- * O teste de perfil comercial (SDR, Closer ou CS). `null` enquanto o teste não
- * estiver pronto: a aula do teste não aparece na parte teórica nem conta no
- * progresso.
+ * O teste de perfil comercial (SDR, Closer ou CS), no MultiQuiz. `null` esconde
+ * a aula do teste das aulas teóricas e do progresso.
  */
-export const TESTE_PERFIL_URL: string | null = null
+export const TESTE_PERFIL_URL: string | null =
+  "https://multi-quiz.com/pt-BR/quiz/a61809f4-053e-4672-b751-6ea82a34974a"

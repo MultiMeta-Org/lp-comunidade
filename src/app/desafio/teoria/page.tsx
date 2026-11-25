@@ -89,6 +89,21 @@ export default async function TeoriaPage() {
             </section>
           ))}
         </div>
+
+        {/* Depois da lista inteira, o caminho para a prática — pedido da Nati.
+            Sempre visível: as aulas não travam o Dia 1. */}
+        <footer className="mt-10 flex flex-col items-start gap-3 border-t border-border pt-8">
+          <p className="max-w-[52ch] text-sm leading-relaxed text-muted-foreground">
+            Terminou as aulas? Agora é a parte prática: um dia por vez, até o seu primeiro sim.
+          </p>
+          <Link
+            href="/desafio/dia/1"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-fit sm:py-3"
+          >
+            Ir para o Dia 1 do desafio prático
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </footer>
       </div>
     </main>
   )
